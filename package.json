@@ -1,0 +1,23 @@
+{
+  "name": "coursemind",
+  "private": true,
+  "version": "0.1.0",
+  "description": "CourseMind — Don't just get the answer. Actually learn it. A responsible-AI study platform.",
+  "workspaces": [
+    "apps/web",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace apps/web",
+    "build": "npm run build --workspace apps/web",
+    "db:generate": "npm run generate --workspace packages/db",
+    "db:migrate": "npm run migrate --workspace packages/db",
+    "db:seed": "npm run seed --workspace packages/db",
+    "db:studio": "npm run studio --workspace packages/db",
+    "db:setup": "npm run db:generate && npm run db:migrate && npm run db:seed",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  }
+}

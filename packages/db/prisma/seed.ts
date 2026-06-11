@@ -180,6 +180,9 @@ const SEED_QUIZ_QUESTIONS = [
 async function main() {
   console.log("Seeding CourseMind database...");
   const passwordHash = await bcrypt.hash("coursemind", 10);
+  // lastActiveAt = yesterday → demo users' streaks CONTINUE (+1) on their
+  // first activity instead of resetting to 1.
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
   const uni = await prisma.university.upsert({
     where: { emailDomain: "demo.edu" },
@@ -198,6 +201,7 @@ async function main() {
       universityId: uni.id,
       xp: 120,
       streakCount: 3,
+      lastActiveAt: yesterday,
     },
   });
   const maya = await prisma.user.upsert({
@@ -211,6 +215,7 @@ async function main() {
       universityId: uni.id,
       xp: 340,
       streakCount: 11,
+      lastActiveAt: yesterday,
     },
   });
   const sam = await prisma.user.upsert({
@@ -224,6 +229,7 @@ async function main() {
       universityId: uni.id,
       xp: 90,
       streakCount: 1,
+      lastActiveAt: yesterday,
     },
   });
 

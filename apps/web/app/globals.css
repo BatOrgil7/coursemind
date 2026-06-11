@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-paper text-ink antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-brand-400 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white p-6 shadow-card;
+  }
+  .input {
+    @apply w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700;
+  }
+}
+
+/* Markdown rendering inside tutor chat bubbles */
+.prose-chat {
+  @apply text-[15px] leading-relaxed;
+}
+.prose-chat p {
+  @apply my-2;
+}
+.prose-chat h1,
+.prose-chat h2,
+.prose-chat h3 {
+  @apply mb-2 mt-4 font-display font-semibold;
+}
+.prose-chat ul {
+  @apply my-2 list-disc pl-5;
+}
+.prose-chat ol {
+  @apply my-2 list-decimal pl-5;
+}
+.prose-chat li {
+  @apply my-1;
+}
+.prose-chat code {
+  @apply rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[13px] text-brand-800;
+}
+.prose-chat pre {
+  @apply my-3 overflow-x-auto rounded-xl bg-ink p-4;
+}
+.prose-chat pre code {
+  @apply bg-transparent p-0 text-slate-100;
+}
+.prose-chat blockquote {
+  @apply my-2 border-l-4 border-brand-200 pl-3 italic text-slate-600;
+}
+.prose-chat strong {
+  @apply font-semibold;
+}

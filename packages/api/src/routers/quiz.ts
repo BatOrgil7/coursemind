@@ -6,6 +6,7 @@ import {
   extractJson,
   parseJsonColumn,
   QuizQuestionsSchema,
+  AttemptAnswersSchema,
   type QuizQuestion,
   type AttemptAnswer,
 } from "@coursemind/core";
@@ -201,11 +202,7 @@ export const quizRouter = router({
         QuizQuestionsSchema,
         []
       );
-      const answers = parseJsonColumn<AttemptAnswer[]>(
-        attempt.answers,
-        z.array(z.any()) as unknown as z.ZodType<AttemptAnswer[]>,
-        []
-      );
+      const answers = parseJsonColumn<AttemptAnswer[]>(attempt.answers, AttemptAnswersSchema, []);
       const answerByQuestion = new Map(answers.map((a) => [a.questionId, a]));
       return {
         id: attempt.id,

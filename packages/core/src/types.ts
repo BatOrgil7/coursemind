@@ -70,7 +70,13 @@ export const StudyPlanScheduleSchema = z.array(StudyPlanDaySchema);
 // ---------- Safe JSON helpers ----------
 
 /** Parse a JSON column with a schema; returns fallback instead of throwing. */
-export function parseJsonColumn<T>(raw: string, schema: z.ZodType<T>, fallback: T): T {
+// The third ZodType parameter is `unknown` so schemas with .default() fields
+// (whose input type differs from their output type) are accepted.
+export function parseJsonColumn<T>(
+  raw: string,
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  fallback: T
+): T {
   try {
     return schema.parse(JSON.parse(raw));
   } catch {

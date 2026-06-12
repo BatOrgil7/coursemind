@@ -29,6 +29,21 @@ function getSecretKey(): Uint8Array {
   return new TextEncoder().encode(secret);
 }
 
+export function schoolDomainFromEmail(email: string): string | null {
+  const normalized = email.toLowerCase().trim();
+  const domain = normalized.split("@")[1]?.trim();
+  return domain && domain.includes(".") ? domain : null;
+}
+
+export function isPersonalEmailDomain(domain: string): boolean {
+  return FREE_MAIL_DOMAINS.has(domain.toLowerCase().trim());
+}
+
+export function prettifyDomain(domain: string): string {
+  const base = domain.split(".")[0];
+  return `${base.charAt(0).toUpperCase()}${base.slice(1)} (${domain})`;
+}
+
 export async function verifyCredentials(email: string, password: string) {
   const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
   if (!user) return null;
@@ -44,14 +59,14 @@ export interface SignupInput {
 
 export async function signupUser({ email, name, password }: SignupInput) {
   const normalized = email.toLowerCase().trim();
-  const domain = normalized.split("@")[1];
+  const domain = schoolDomainFromEmail(normalized);
   if (!domain) throw new Error("Please enter a valid email address.");
 
   // University-email verification: personal-mail domains are rejected.
   // First student from an unknown .edu-style domain auto-creates their
   // university's space (self-serve growth - the space is named after the
   // domain and can be renamed later by an instructor).
-  if (FREE_MAIL_DOMAINS.has(domain)) {
+  if (isPersonalEmailDomain(domain)) {
     throw new Error(
       "Hyntor uses your university email to connect you with your classmates. Please sign up with your school email address (for the demo, use any name @demo.edu)."
     );
@@ -71,11 +86,6 @@ export async function signupUser({ email, name, password }: SignupInput) {
   return prisma.user.create({
     data: { email: normalized, name: name.trim(), passwordHash, universityId: university.id },
   });
-}
-
-function prettifyDomain(domain: string): string {
-  const base = domain.split(".")[0];
-  return `${base.charAt(0).toUpperCase()}${base.slice(1)} (${domain})`;
 }
 
 // ---------- Mobile JWT ----------

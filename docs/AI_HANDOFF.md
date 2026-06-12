@@ -327,3 +327,39 @@ Notes:
 Next steps:
 - Add native mobile syllabus import and timeline display.
 - Consider calendar export or notification reminders for syllabus deadlines.
+
+### 2026-06-12 - Codex - School Email Recognition
+
+Summary:
+- Added reusable school-domain helpers in `packages/api/src/auth.ts` for parsing school email domains, rejecting personal mail domains, and deriving school names.
+- Added public `user.schoolPreview` so signup can preview whether a school is recognized, how many related courses/resources exist, or whether a new school space will be created.
+- Added protected `user.schoolHub` with the current user's university, school graph stats, related courses, and top shared resources.
+- Updated `course.browse` to mark school-matched courses so the UI can separate campus courses from global/open courses.
+- Updated signup to show automatic school recognition beneath the email field.
+- Updated dashboard with a School Graph section that surfaces school courses and top resources immediately after login.
+- Updated `/courses` to prioritize school-matched courses and show open cross-university courses separately.
+
+Files touched:
+- `packages/api/src/auth.ts`
+- `packages/api/src/routers/user.ts`
+- `packages/api/src/routers/course.ts`
+- `apps/web/app/(auth)/signup/page.tsx`
+- `apps/web/app/(app)/dashboard/page.tsx`
+- `apps/web/app/(app)/courses/page.tsx`
+- `docs/AI_HANDOFF.md`
+
+Checks run so far:
+- `npm run typecheck`
+- `npx tsc --noEmit` from `apps/mobile`
+- `git diff --check`
+- `npm run build`
+- In-process API QA for `user.schoolPreview`, `user.schoolHub`, and `course.browse.schoolMatched`.
+- In-app browser QA on `/dashboard`, `/courses`, and `/signup` at `1440x900`, plus `/courses` at `390x844`: school graph/grouping visible, no horizontal overflow, no console errors.
+
+Notes:
+- No schema migration was needed. The existing `University`, `User.universityId`, and enrollment graph already support school matching.
+- Signup still creates a new `University` row for unknown school domains.
+
+Next steps:
+- Add the same school preview during native mobile signup if mobile signup is added.
+- Consider allowing verified school admins to rename the auto-created school display name.

@@ -1,8 +1,76 @@
 import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
-import { signupUser, verifyCredentials, signMobileToken } from "../auth";
+import {
+  isPersonalEmailDomain,
+  prettifyDomain,
+  schoolDomainFromEmail,
+  signupUser,
+  verifyCredentials,
+  signMobileToken,
+} from "../auth";
 
 export const userRouter = router({
+  schoolPreview: publicProcedure
+    .input(z.object({ email: z.string().max(200) }))
+    .query(async ({ ctx, input }) => {
+      const domain = schoolDomainFromEmail(input.email);
+      if (!domain) {
+        return {
+          status: "invalid" as const,
+          domain: null,
+          schoolName: null,
+          known: false,
+          courseCount: 0,
+          resourceCount: 0,
+          message: "Enter your school email to unlock your campus course graph.",
+        };
+      }
+
+      if (isPersonalEmailDomain(domain)) {
+        return {
+          status: "personal_email" as const,
+          domain,
+          schoolName: null,
+          known: false,
+          courseCount: 0,
+          resourceCount: 0,
+          message: "Use your school email so Hyntor can match classmates, courses, and shared materials.",
+        };
+      }
+
+      const university = await ctx.prisma.university.findUnique({
+        where: { emailDomain: domain },
+        select: { id: true, name: true },
+      });
+
+      if (!university) {
+        return {
+          status: "new_school" as const,
+          domain,
+          schoolName: prettifyDomain(domain),
+          known: false,
+          courseCount: 0,
+          resourceCount: 0,
+          message: "New school space detected. Hyntor will create it when you sign up.",
+        };
+      }
+
+      const courses = await ctx.prisma.course.findMany({
+        where: { enrollments: { some: { user: { universityId: university.id } } } },
+        select: { id: true, _count: { select: { materials: true } } },
+      });
+
+      return {
+        status: "recognized" as const,
+        domain,
+        schoolName: university.name,
+        known: true,
+        courseCount: courses.length,
+        resourceCount: courses.reduce((sum, course) => sum + course._count.materials, 0),
+        message: "School recognized. We will show related courses and materials after signup.",
+      };
+    }),
+
   signup: publicProcedure
     .input(
       z.object({
@@ -11,9 +79,13 @@ export const userRouter = router({
         password: z.string().min(8, "Password must be at least 8 characters."),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const user = await signupUser(input);
-      return { id: user.id, email: user.email, name: user.name };
+      const university = await ctx.prisma.university.findUniqueOrThrow({
+        where: { id: user.universityId },
+        select: { id: true, name: true, emailDomain: true },
+      });
+      return { id: user.id, email: user.email, name: user.name, university };
     }),
 
   // Mobile login: returns a long-lived JWT the Expo app stores securely.
@@ -40,7 +112,75 @@ export const userRouter = router({
       role: user.role,
       xp: user.xp,
       streakCount: user.streakCount,
-      university: { id: user.university.id, name: user.university.name },
+      university: { id: user.university.id, name: user.university.name, emailDomain: user.university.emailDomain },
+    };
+  }),
+
+  schoolHub: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.prisma.user.findUniqueOrThrow({
+      where: { id: ctx.userId },
+      include: { university: true },
+    });
+
+    const myEnrollments = await ctx.prisma.enrollment.findMany({
+      where: { userId: ctx.userId },
+      select: { courseId: true },
+    });
+    const joined = new Set(myEnrollments.map((enrollment) => enrollment.courseId));
+
+    const [schoolCourses, topResources, peerCount, resourceCount] = await Promise.all([
+      ctx.prisma.course.findMany({
+        where: { enrollments: { some: { user: { universityId: user.universityId } } } },
+        include: { _count: { select: { enrollments: true, materials: true, quizzes: true } } },
+        orderBy: { createdAt: "desc" },
+        take: 8,
+      }),
+      ctx.prisma.material.findMany({
+        where: { course: { enrollments: { some: { user: { universityId: user.universityId } } } } },
+        include: {
+          course: { select: { id: true, code: true, title: true } },
+          uploader: { select: { name: true } },
+        },
+        orderBy: [{ upvoteCount: "desc" }, { createdAt: "desc" }],
+        take: 8,
+      }),
+      ctx.prisma.user.count({ where: { universityId: user.universityId } }),
+      ctx.prisma.material.count({
+        where: { course: { enrollments: { some: { user: { universityId: user.universityId } } } } },
+      }),
+    ]);
+
+    return {
+      university: {
+        id: user.university.id,
+        name: user.university.name,
+        emailDomain: user.university.emailDomain,
+      },
+      stats: {
+        peerCount,
+        courseCount: schoolCourses.length,
+        resourceCount,
+      },
+      courses: schoolCourses.map((course) => ({
+        id: course.id,
+        code: course.code,
+        title: course.title,
+        subject: course.subject,
+        description: course.description,
+        joined: joined.has(course.id),
+        memberCount: course._count.enrollments,
+        materialCount: course._count.materials,
+        quizCount: course._count.quizzes,
+      })),
+      resources: topResources.map((material) => ({
+        id: material.id,
+        title: material.title,
+        type: material.type,
+        upvoteCount: material.upvoteCount,
+        uploaderName: material.uploader.name,
+        createdAt: material.createdAt,
+        course: material.course,
+      })),
     };
   }),
 });

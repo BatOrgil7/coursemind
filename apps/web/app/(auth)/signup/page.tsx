@@ -1,18 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { api, errorMessage } from "@/lib/trpc";
+
+type SchoolPreview = Awaited<ReturnType<typeof api.user.schoolPreview.query>>;
 
 export default function SignupPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [schoolPreview, setSchoolPreview] = useState<SchoolPreview | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const trimmed = email.trim();
+    if (!trimmed.includes("@")) {
+      setSchoolPreview(null);
+      setPreviewLoading(false);
+      return;
+    }
+
+    let active = true;
+    setPreviewLoading(true);
+    const timer = window.setTimeout(async () => {
+      try {
+        const preview = await api.user.schoolPreview.query({ email: trimmed });
+        if (active) setSchoolPreview(preview);
+      } catch {
+        if (active) setSchoolPreview(null);
+      } finally {
+        if (active) setPreviewLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [email]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,6 +91,40 @@ export default function SignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+          {(previewLoading || schoolPreview) && (
+            <div
+              className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
+                schoolPreview?.status === "personal_email"
+                  ? "border-rose-200 bg-rose-50 text-rose-700"
+                  : "border-brand-100 bg-brand-50 text-brand-800"
+              }`}
+            >
+              {previewLoading ? (
+                <p className="font-semibold">Checking school domain...</p>
+              ) : schoolPreview ? (
+                <>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="font-semibold">
+                      {schoolPreview.schoolName ?? schoolPreview.message}
+                    </p>
+                    {schoolPreview.domain && (
+                      <span className="rounded-md bg-white/80 px-2 py-0.5 font-mono text-[11px] font-semibold">
+                        {schoolPreview.domain}
+                      </span>
+                    )}
+                  </div>
+                  {schoolPreview.status === "recognized" ? (
+                    <p className="mt-1 text-xs font-medium">
+                      {schoolPreview.courseCount} related course{schoolPreview.courseCount === 1 ? "" : "s"} and{" "}
+                      {schoolPreview.resourceCount} shared resource{schoolPreview.resourceCount === 1 ? "" : "s"} found.
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-xs font-medium">{schoolPreview.message}</p>
+                  )}
+                </>
+              ) : null}
+            </div>
+          )}
         </div>
         <div>
           <label className="label" htmlFor="password">Password (8+ characters)</label>

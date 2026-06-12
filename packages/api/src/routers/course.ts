@@ -57,7 +57,10 @@ export const courseRouter = router({
               ],
             }
           : visibility,
-        include: { _count: { select: { enrollments: true, materials: true } } },
+        include: {
+          _count: { select: { enrollments: true, materials: true } },
+          enrollments: { select: { user: { select: { universityId: true } } } },
+        },
         orderBy: { createdAt: "desc" },
         take: 50,
       });
@@ -73,6 +76,7 @@ export const courseRouter = router({
         subject: c.subject,
         description: c.description,
         isCrossUniversity: c.isCrossUniversity,
+        schoolMatched: c.enrollments.some((enrollment) => enrollment.user.universityId === me.universityId),
         memberCount: c._count.enrollments,
         materialCount: c._count.materials,
         joined: mine.has(c.id),

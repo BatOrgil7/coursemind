@@ -6,7 +6,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, errorMessage } from "@/lib/trpc";
-import { PageHeader } from "@/components/ui";
+import { CrossUniversityBadge, PageHeader } from "@/components/ui";
 
 type BrowseCourse = Awaited<ReturnType<typeof api.course.browse.query>>[number];
 
@@ -17,7 +17,13 @@ export default function CoursesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState({ code: "", title: "", subject: "", description: "" });
+  const [form, setForm] = useState({
+    code: "",
+    title: "",
+    subject: "",
+    description: "",
+    isCrossUniversity: false,
+  });
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async (q: string) => {
@@ -110,6 +116,18 @@ export default function CoursesPage() {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </div>
+          <label className="flex items-start gap-2.5 text-sm text-slate-600 sm:col-span-2">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 accent-brand-600"
+              checked={form.isCrossUniversity}
+              onChange={(e) => setForm({ ...form, isCrossUniversity: e.target.checked })}
+            />
+            <span>
+              🌍 <strong>Cross-university</strong> — students from any university can discover and
+              join this course. Leave unchecked to keep it visible to your university only.
+            </span>
+          </label>
           <button type="submit" disabled={busy} className="btn-primary sm:col-span-2">
             {busy ? "Creating…" : "Create & join"}
           </button>
@@ -142,8 +160,9 @@ export default function CoursesPage() {
           {courses.map((course) => (
             <div key={course.id} className="card flex flex-col">
               <div className="flex items-center justify-between">
-                <span className="font-mono text-xs font-bold uppercase tracking-wide text-brand-600">
+                <span className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-wide text-brand-600">
                   {course.code}
+                  {course.isCrossUniversity && <CrossUniversityBadge />}
                 </span>
                 <span className="text-xs text-slate-400">
                   {course.memberCount} enrolled · {course.materialCount} materials

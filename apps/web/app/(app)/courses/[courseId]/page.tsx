@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { serverApi } from "@/lib/server-api";
-import { EmptyState, MaterialTypeBadge, PageHeader } from "@/components/ui";
+import { CrossUniversityBadge, EmptyState, MaterialTypeBadge, PageHeader } from "@/components/ui";
 import { GenerateQuizButton } from "@/components/GenerateQuizButton";
 
 export default async function CoursePage({ params }: { params: Promise<{ courseId: string }> }) {
@@ -12,9 +12,19 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     <div>
       <PageHeader
         title={`${course.code} — ${course.title}`}
-        subtitle={`${course.subject} · ${course.memberCount} enrolled`}
+        subtitle={`${course.subject} · ${course.memberCount} enrolled${
+          course.isCrossUniversity && course.universityCount > 1
+            ? ` from ${course.universityCount} universities`
+            : ""
+        }`}
         action={
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
+            <Link href={`/courses/${course.id}/workspaces`} className="btn-secondary">
+              👥 Workspaces
+            </Link>
+            <Link href={`/courses/${course.id}/discussions`} className="btn-secondary">
+              💬 Discussions
+            </Link>
             <Link href={`/tutor?courseId=${course.id}`} className="btn-secondary">
               🧠 Ask the tutor
             </Link>
@@ -24,6 +34,11 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
           </div>
         }
       />
+      {course.isCrossUniversity && (
+        <div className="-mt-2 mb-4">
+          <CrossUniversityBadge />
+        </div>
+      )}
       {course.description && <p className="mb-8 max-w-3xl text-sm text-slate-600">{course.description}</p>}
 
       <div className="grid gap-8 lg:grid-cols-5">

@@ -63,6 +63,50 @@ export function ModeBadge({ mode }: { mode: string }) {
   );
 }
 
+export const WORKSPACE_TYPE_META: Record<string, { label: string; emoji: string }> = {
+  STUDY_GROUP: { label: "Study group", emoji: "👥" },
+  PROJECT: { label: "Project", emoji: "🛠️" },
+};
+
+export function WorkspaceTypeBadge({ type }: { type: string }) {
+  const meta = WORKSPACE_TYPE_META[type] ?? { label: type, emoji: "👥" };
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700">
+      {meta.emoji} {meta.label}
+    </span>
+  );
+}
+
+export const CONTEXT_TYPE_META: Record<string, { label: string; emoji: string }> = {
+  COURSE: { label: "Course", emoji: "📚" },
+  QUIZ: { label: "Quiz", emoji: "🧪" },
+  MATERIAL: { label: "Material", emoji: "📄" },
+  EXAM: { label: "Exam", emoji: "📝" },
+};
+
+/** Which part of the course a discussion thread is about (EXAM threads get amber). */
+export function ContextTypeBadge({ type }: { type: string }) {
+  const meta = CONTEXT_TYPE_META[type] ?? { label: type, emoji: "💬" };
+  const style = type === "EXAM" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600";
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${style}`}>
+      {meta.emoji} {meta.label}
+    </span>
+  );
+}
+
+/** Marks a course shared beyond a single university (Phase 2). */
+export function CrossUniversityBadge() {
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-semibold text-sky-800"
+      title="Open to students from every university"
+    >
+      🌍 Cross-university
+    </span>
+  );
+}
+
 export function MaterialTypeBadge({ type }: { type: string }) {
   return (
     <span className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-slate-600">

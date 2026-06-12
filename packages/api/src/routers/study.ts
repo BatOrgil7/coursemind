@@ -31,6 +31,77 @@ async function weakTopicCounts(prisma: Parameters<Parameters<typeof protectedPro
 }
 
 export const studyRouter = router({
+  overview: protectedProcedure.query(async ({ ctx }) => {
+    const now = new Date();
+    const enrollments = await ctx.prisma.enrollment.findMany({
+      where: { userId: ctx.userId },
+      include: {
+        course: {
+          include: { _count: { select: { materials: true, quizzes: true } } },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const courses = await Promise.all(
+      enrollments.map(async (enrollment) => {
+        const course = enrollment.course;
+        const [plans, totalFlashcards, dueFlashcards, weakTopics] = await Promise.all([
+          ctx.prisma.studyPlan.findMany({
+            where: { userId: ctx.userId, courseId: course.id },
+            orderBy: { createdAt: "desc" },
+            take: 3,
+          }),
+          ctx.prisma.flashcard.count({
+            where: { userId: ctx.userId, courseId: course.id },
+          }),
+          ctx.prisma.flashcard.count({
+            where: { userId: ctx.userId, courseId: course.id, nextReviewAt: { lte: now } },
+          }),
+          weakTopicCounts(ctx.prisma, ctx.userId, course.id),
+        ]);
+
+        const activePlan = plans
+          .map((plan) => {
+            const schedule = parseJsonColumn<StudyPlanDay[]>(plan.schedule, StudyPlanScheduleSchema, []);
+            const completedDays = schedule.filter((day) => day.done).length;
+            const nextDay =
+              schedule
+                .filter((day) => !day.done)
+                .sort((a, b) => a.date.localeCompare(b.date))[0] ?? null;
+            return {
+              id: plan.id,
+              examDate: plan.examDate,
+              nextDay,
+              completedDays,
+              totalDays: schedule.length,
+            };
+          })
+          .find((plan) => plan.nextDay || plan.totalDays > 0);
+
+        return {
+          id: course.id,
+          code: course.code,
+          title: course.title,
+          materialCount: course._count.materials,
+          quizCount: course._count.quizzes,
+          flashcards: { total: totalFlashcards, due: dueFlashcards },
+          weakTopics: weakTopics.slice(0, 3),
+          activePlan: activePlan ?? null,
+        };
+      })
+    );
+
+    return {
+      courses,
+      totals: {
+        dueFlashcards: courses.reduce((sum, course) => sum + course.flashcards.due, 0),
+        weakTopics: courses.reduce((sum, course) => sum + course.weakTopics.length, 0),
+        activePlans: courses.filter((course) => course.activePlan).length,
+      },
+    };
+  }),
+
   courseDashboard: protectedProcedure
     .input(z.object({ courseId: z.string() }))
     .query(async ({ ctx, input }) => {

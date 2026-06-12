@@ -196,3 +196,30 @@ Browser QA notes:
 
 Next steps:
 - If the package namespace ever needs to match the product name, migrate `@coursemind/*` imports in a dedicated change.
+
+### 2026-06-12 - Codex - Dashboard Smart Study Overview
+
+Summary:
+- Added a dashboard-level Smart Study overview API that summarizes each enrolled course's due flashcards, weak topics, active study plan progress, and next plan day.
+- Updated the dashboard to show a Smart Study priority section immediately after the daily hero.
+- Added course-level priority cards with review queue counts, material/quiz counts, next study-plan date, progress bar, weak-topic chips, and direct links into each course's Smart Study hub.
+
+Files touched:
+- `packages/api/src/routers/study.ts`
+- `apps/web/app/(app)/dashboard/page.tsx`
+- `docs/AI_HANDOFF.md`
+
+Checks run:
+- `npm run typecheck`
+- `git diff --check`
+- `npm run build`
+- In-app browser QA on `/dashboard` at default, `1440x900`, and `390x844` viewports.
+
+Browser QA notes:
+- Dashboard rendered the new Smart Study section for Alex.
+- Desktop and iPhone-width checks had no horizontal overflow.
+- No console errors were reported.
+
+Next steps:
+- Add a dedicated weak-topic visualization inside the course Smart Study page if richer analytics are needed.
+- Bring Smart Study surfaces into the native mobile app.

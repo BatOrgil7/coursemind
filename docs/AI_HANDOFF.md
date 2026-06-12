@@ -249,3 +249,43 @@ Browser QA notes:
 Next steps:
 - Bring Smart Study surfaces into the native mobile app.
 - Consider adding click-through weak-topic filters for quiz generation later.
+
+### 2026-06-12 - Codex - Native Mobile Smart Study
+
+Summary:
+- Added a native Expo Smart Study screen at `/study/[courseId]` backed by the existing `study.courseDashboard` API.
+- Added a Smart Study entry card on the native course detail screen.
+- Updated native mobile theme tokens to match the Hyntor/iOS-inspired web palette.
+- Cleaned corrupted mobile UI glyphs in course list, course detail, tutor hub, profile, quiz, and tutor chat screens.
+- Replaced mobile tab emoji icons with compact text marks for reliable rendering.
+
+Files touched:
+- `apps/mobile/src/app/study/[courseId].tsx`
+- `apps/mobile/src/app/course/[id].tsx`
+- `apps/mobile/src/app/(tabs)/_layout.tsx`
+- `apps/mobile/src/app/(tabs)/courses.tsx`
+- `apps/mobile/src/app/(tabs)/tutor.tsx`
+- `apps/mobile/src/app/(tabs)/profile.tsx`
+- `apps/mobile/src/app/_layout.tsx`
+- `apps/mobile/src/app/login.tsx`
+- `apps/mobile/src/app/session/[id].tsx`
+- `apps/mobile/src/app/quiz/[id].tsx`
+- `apps/mobile/src/lib/theme.ts`
+- `docs/PHASE3_SMART_STUDY.md`
+- `docs/AI_HANDOFF.md`
+
+Checks run:
+- `npm run typecheck`
+- `npx tsc --noEmit` from `apps/mobile`
+- `npm run build`
+- `git diff --check`
+- `npx expo config --type public`
+- Mobile source scan for non-ASCII/corrupted glyphs in `apps/mobile/src`, `apps/mobile/app.json`, and `apps/mobile/README.md`.
+
+Notes:
+- This native Smart Study screen is read-only for now: course pulse, weak-topic radar, latest schedule, and flashcard stats.
+- Web remains the place to create plans, generate flashcards, and run mock exams.
+
+Next steps:
+- Add native mobile actions for study-plan creation and flashcard review.
+- Consider click-through weak-topic filters for quiz generation later.

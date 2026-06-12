@@ -27,22 +27,31 @@ export default function CourseScreen() {
   );
 
   if (error) return <Text style={styles.error}>{error}</Text>;
-  if (!course) return <Text style={styles.loading}>Loading…</Text>;
+  if (!course) return <Text style={styles.loading}>Loading...</Text>;
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={{ padding: 16 }}>
+    <ScrollView style={styles.screen} contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
       <Text style={styles.title}>{course.title}</Text>
       <Text style={styles.meta}>
-        {course.subject} · {course.memberCount} enrolled
+        {course.subject} - {course.memberCount} enrolled
       </Text>
 
-      <Text style={styles.heading}>📚 Shared library</Text>
+      <Pressable style={styles.smartStudyCard} onPress={() => router.push(`/study/${course.id}`)}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.smartStudyEyebrow}>SMART STUDY</Text>
+          <Text style={styles.smartStudyTitle}>Plans, flashcards, and weak spots</Text>
+          <Text style={styles.smartStudyBody}>See what to review next before your exam.</Text>
+        </View>
+        <Text style={styles.smartStudyArrow}>Open</Text>
+      </Pressable>
+
+      <Text style={styles.heading}>Shared library</Text>
       {course.materials.map((m) => (
         <View key={m.id} style={styles.card}>
           <Text style={styles.cardTitle}>{m.title}</Text>
           <Text style={styles.cardMeta}>
-            {m.type} · by {m.uploaderName}
-            {!m.hasText ? " · ⚠ no extracted text" : ""}
+            {m.type} - by {m.uploaderName}
+            {!m.hasText ? " - no extracted text" : ""}
           </Text>
         </View>
       ))}
@@ -50,12 +59,12 @@ export default function CourseScreen() {
         <Text style={styles.emptyText}>No materials yet - upload from the web app.</Text>
       )}
 
-      <Text style={styles.heading}>🧪 Practice quizzes</Text>
+      <Text style={styles.heading}>Practice quizzes</Text>
       {course.quizzes.map((q) => (
         <Pressable key={q.id} style={styles.card} onPress={() => router.push(`/quiz/${q.id}`)}>
           <Text style={styles.cardTitle}>{q.title}</Text>
           <Text style={styles.cardMeta}>
-            {q.attemptCount} attempt{q.attemptCount === 1 ? "" : "s"} · tap to take ->
+            {q.attemptCount} attempt{q.attemptCount === 1 ? "" : "s"} - tap to take
           </Text>
         </Pressable>
       ))}
@@ -68,9 +77,25 @@ export default function CourseScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.paper },
-  title: { fontSize: 20, fontWeight: "800", color: colors.ink },
+  title: { fontSize: 22, fontWeight: "800", color: colors.ink },
   meta: { fontSize: 13, color: colors.slate400, marginTop: 4, marginBottom: 8 },
   heading: { fontWeight: "800", fontSize: 15, color: colors.ink, marginTop: 18, marginBottom: 8 },
+  smartStudyCard: {
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.brand100,
+    marginTop: 12,
+    marginBottom: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  smartStudyEyebrow: { color: colors.brand600, fontSize: 11, fontWeight: "800", letterSpacing: 1 },
+  smartStudyTitle: { color: colors.ink, fontSize: 15, fontWeight: "700", marginTop: 4 },
+  smartStudyBody: { color: colors.slate500, fontSize: 12, marginTop: 4, lineHeight: 17 },
+  smartStudyArrow: { color: colors.brand600, fontSize: 13, fontWeight: "800", marginLeft: 12 },
   card: {
     backgroundColor: colors.white,
     borderRadius: radius.lg,

@@ -48,7 +48,7 @@ export default function QuizScreen() {
   }
 
   if (error && !quiz) return <Text style={styles.error}>{error}</Text>;
-  if (!quiz) return <Text style={styles.loading}>Loading…</Text>;
+  if (!quiz) return <Text style={styles.loading}>Loading...</Text>;
 
   // ---------- Results view ----------
   if (result) {
@@ -78,8 +78,8 @@ export default function QuizScreen() {
             ]}
           >
             <Text style={styles.qMeta}>
-              Q{i + 1} ·{" "}
-              {answer?.correct === true ? "✓ correct" : answer?.correct === false ? "✗ incorrect" : "self-check"}
+              Q{i + 1} -{" "}
+              {answer?.correct === true ? "correct" : answer?.correct === false ? "incorrect" : "self-check"}
             </Text>
             <Text style={styles.qPrompt}>{question.prompt}</Text>
             {answer?.feedback ? <Text style={styles.feedback}>{answer.feedback}</Text> : null}
@@ -108,7 +108,7 @@ export default function QuizScreen() {
       {quiz.questions.map((q, i) => (
         <View key={q.id} style={styles.card}>
           <Text style={styles.qMeta}>
-            Question {i + 1} · {q.topic}
+            Question {i + 1} - {q.topic}
           </Text>
           <Text style={styles.qPrompt}>{q.prompt}</Text>
           {q.type === "mcq" && q.options ? (
@@ -135,7 +135,7 @@ export default function QuizScreen() {
             <TextInput
               style={styles.textArea}
               multiline
-              placeholder={q.type === "code" ? "Write your code…" : "Your answer…"}
+              placeholder={q.type === "code" ? "Write your code..." : "Your answer..."}
               placeholderTextColor={colors.slate400}
               value={answers[q.id] ?? ""}
               onChangeText={(text) => setAnswers((prev) => ({ ...prev, [q.id]: text }))}
@@ -145,7 +145,7 @@ export default function QuizScreen() {
       ))}
       {error && <Text style={styles.error}>{error}</Text>}
       <Pressable style={[styles.button, busy && { opacity: 0.6 }]} onPress={submit} disabled={busy}>
-        <Text style={styles.buttonText}>{busy ? "Grading…" : "Submit & grade"}</Text>
+        <Text style={styles.buttonText}>{busy ? "Grading..." : "Submit & grade"}</Text>
       </Pressable>
     </ScrollView>
   );

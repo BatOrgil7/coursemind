@@ -9,11 +9,11 @@ type Session = Awaited<ReturnType<typeof api.tutor.listSessions.query>>[number];
 type Course = Awaited<ReturnType<typeof api.course.listMine.query>>[number];
 type Mode = "CONCEPT" | "ASSIGNMENT_HELP" | "CODE_REVIEW" | "DEBUG";
 
-const MODES: { key: Mode; emoji: string; label: string }[] = [
-  { key: "CONCEPT", emoji: "💡", label: "Learn a concept" },
-  { key: "ASSIGNMENT_HELP", emoji: "🧭", label: "Assignment help" },
-  { key: "CODE_REVIEW", emoji: "🔍", label: "Code review" },
-  { key: "DEBUG", emoji: "🐛", label: "Debug with me" },
+const MODES: { key: Mode; mark: string; label: string }[] = [
+  { key: "CONCEPT", mark: "AI", label: "Learn a concept" },
+  { key: "ASSIGNMENT_HELP", mark: "HW", label: "Assignment help" },
+  { key: "CODE_REVIEW", mark: "CR", label: "Code review" },
+  { key: "DEBUG", mark: "DBG", label: "Debug with me" },
 ];
 
 export default function TutorScreen() {
@@ -57,7 +57,7 @@ export default function TutorScreen() {
   }
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={{ padding: 16 }}>
+    <ScrollView style={styles.screen} contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
       <Text style={styles.heading}>Start a session</Text>
       <View style={styles.modeGrid}>
         {MODES.map((m) => (
@@ -66,7 +66,7 @@ export default function TutorScreen() {
             onPress={() => setMode(m.key)}
             style={[styles.modeCard, mode === m.key && styles.modeCardActive]}
           >
-            <Text style={{ fontSize: 20 }}>{m.emoji}</Text>
+            <Text style={[styles.modeMark, mode === m.key && styles.modeMarkActive]}>{m.mark}</Text>
             <Text style={styles.modeLabel}>{m.label}</Text>
           </Pressable>
         ))}
@@ -86,16 +86,14 @@ export default function TutorScreen() {
             onPress={() => setCourseId(c.id)}
             style={[styles.chip, courseId === c.id && styles.chipActive]}
           >
-            <Text style={[styles.chipText, courseId === c.id && styles.chipTextActive]}>
-              {c.code}
-            </Text>
+            <Text style={[styles.chipText, courseId === c.id && styles.chipTextActive]}>{c.code}</Text>
           </Pressable>
         ))}
       </View>
 
       {error && <Text style={styles.error}>{error}</Text>}
       <Pressable style={[styles.button, busy && { opacity: 0.6 }]} onPress={start} disabled={busy}>
-        <Text style={styles.buttonText}>{busy ? "Starting…" : "Start session ->"}</Text>
+        <Text style={styles.buttonText}>{busy ? "Starting..." : "Start session"}</Text>
       </Pressable>
 
       <Text style={[styles.heading, { marginTop: 24 }]}>Past sessions</Text>
@@ -105,16 +103,14 @@ export default function TutorScreen() {
             {s.title}
           </Text>
           <Text style={styles.sessionMeta}>
-            {s.courseCode ?? "No course"} · {s.mode.replace("_", " ").toLowerCase()}
+            {s.courseCode ?? "No course"} - {s.mode.replace("_", " ").toLowerCase()}
             {s.mode === "ASSIGNMENT_HELP" && s.tierReached > 0
-              ? ` · reached: ${TIER_LABELS[s.tierReached]}`
+              ? ` - reached: ${TIER_LABELS[s.tierReached]}`
               : ""}
           </Text>
         </Pressable>
       ))}
-      {sessions.length === 0 && (
-        <Text style={{ color: colors.slate400, fontSize: 13 }}>No sessions yet.</Text>
-      )}
+      {sessions.length === 0 && <Text style={styles.emptyText}>No sessions yet.</Text>}
     </ScrollView>
   );
 }
@@ -132,7 +128,19 @@ const styles = StyleSheet.create({
     borderColor: colors.slate200,
   },
   modeCardActive: { borderColor: colors.brand600, backgroundColor: colors.brand50 },
-  modeLabel: { fontWeight: "700", fontSize: 13, color: colors.ink, marginTop: 6 },
+  modeMark: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.paper,
+    borderRadius: 7,
+    color: colors.brand600,
+    fontSize: 11,
+    fontWeight: "800",
+    overflow: "hidden",
+    paddingHorizontal: 7,
+    paddingVertical: 5,
+  },
+  modeMarkActive: { backgroundColor: colors.ink, color: colors.white },
+  modeLabel: { fontWeight: "700", fontSize: 13, color: colors.ink, marginTop: 8 },
   courseRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 16 },
   chip: {
     paddingHorizontal: 14,
@@ -170,4 +178,5 @@ const styles = StyleSheet.create({
   },
   sessionTitle: { fontWeight: "700", fontSize: 14, color: colors.ink },
   sessionMeta: { fontSize: 12, color: colors.slate400, marginTop: 4 },
+  emptyText: { color: colors.slate400, fontSize: 13 },
 });

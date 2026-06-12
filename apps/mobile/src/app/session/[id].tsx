@@ -71,7 +71,7 @@ export default function SessionScreen() {
     >
       <FlatList
         ref={listRef}
-        data={busy ? [...messages, { role: "assistant" as const, content: "Thinking…" }] : messages}
+        data={busy ? [...messages, { role: "assistant" as const, content: "Thinking..." }] : messages}
         keyExtractor={(_, i) => String(i)}
         contentContainerStyle={{ padding: 16, gap: 10 }}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
@@ -79,7 +79,7 @@ export default function SessionScreen() {
           <View style={[styles.bubble, item.role === "user" ? styles.userBubble : styles.aiBubble]}>
             {typeof item.tier === "number" && (
               <Text style={styles.tierBadge}>
-                Tier {item.tier} · {TIER_LABELS[item.tier]}
+                Tier {item.tier} - {TIER_LABELS[item.tier]}
               </Text>
             )}
             <Text style={item.role === "user" ? styles.userText : styles.aiText}>
@@ -90,7 +90,7 @@ export default function SessionScreen() {
         ListEmptyComponent={
           <Text style={styles.emptyText}>
             Ask anything about your course. Hints go deeper as you engage - the final answer is
-            always yours. 🧠
+            always yours.
           </Text>
         }
       />
@@ -98,7 +98,7 @@ export default function SessionScreen() {
       <View style={styles.composer}>
         <TextInput
           style={styles.input}
-          placeholder="Ask the tutor…"
+          placeholder="Ask the tutor..."
           placeholderTextColor={colors.slate400}
           value={input}
           onChangeText={setInput}
@@ -109,7 +109,7 @@ export default function SessionScreen() {
           onPress={send}
           disabled={busy || !input.trim()}
         >
-          <Text style={styles.sendText}>↑</Text>
+          <Text style={styles.sendText}>Send</Text>
         </Pressable>
       </View>
     </KeyboardAvoidingView>
@@ -163,13 +163,13 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     backgroundColor: colors.brand600,
-    width: 40,
+    width: 58,
     height: 40,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
-  sendText: { color: colors.white, fontSize: 18, fontWeight: "800" },
+  sendText: { color: colors.white, fontSize: 13, fontWeight: "800" },
   error: {
     backgroundColor: colors.rose50,
     color: colors.rose700,

@@ -33,11 +33,11 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>🔥 {me.streakCount}</Text>
+              <Text style={styles.statValue}>{me.streakCount}</Text>
               <Text style={styles.statLabel}>day streak</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>⚡ {me.xp}</Text>
+              <Text style={styles.statValue}>{me.xp}</Text>
               <Text style={styles.statLabel}>XP</Text>
             </View>
           </View>

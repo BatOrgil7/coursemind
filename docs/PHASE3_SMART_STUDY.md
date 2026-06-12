@@ -1,6 +1,7 @@
 # Phase 3 Smart Study
 
-Phase 3 is now live as a web/API vertical slice for course-level studying.
+Phase 3 is now live as a web/API vertical slice for course-level studying, with a native
+mobile read-only Smart Study surface consuming the same API.
 
 ## What Shipped
 
@@ -12,12 +13,15 @@ Phase 3 is now live as a web/API vertical slice for course-level studying.
 - SM-2 spaced repetition review through `flashcard.review`.
 - Mock exam generation through `quiz.generateMockExam`.
 - Responsive authenticated app shell in `apps/web/app/(app)/layout.tsx`.
+- Native mobile Smart Study route at `apps/mobile/src/app/study/[courseId].tsx`.
+- Native course detail entry point from `apps/mobile/src/app/course/[id].tsx`.
 
 ## Backend Shape
 
 API routers:
 
 - `packages/api/src/routers/study.ts`
+  - `overview`: dashboard-level Smart Study summary across enrolled courses.
   - `courseDashboard`: course materials, latest plans, flashcard counts, weak-topic counts.
   - `createPlan`: creates a `StudyPlan.schedule` JSON payload.
   - `toggleDay`: marks a study-plan day complete/incomplete.
@@ -58,6 +62,7 @@ No migration was required. The Phase 3 schema already existed:
 Verified on 2026-06-12:
 
 - `npm run typecheck`
+- `npx tsc --noEmit` from `apps/mobile`
 - `npm run build`
 - Browser QA on `http://localhost:3000/courses/cmq8qy9t00007oetsgyv8u3nh/study`
   - demo login works,
@@ -69,3 +74,10 @@ Verified on 2026-06-12:
   - flashcard reveal and SM-2 review update the queue,
   - mock exam button shows the no-key setup message,
   - desktop and mobile viewport checks have no console errors.
+
+Native mobile verification:
+
+- `apps/mobile/src/app/course/[id].tsx` links to `/study/[courseId]`.
+- `apps/mobile/src/app/study/[courseId].tsx` renders course pulse, weak-topic radar,
+  latest schedule, and flashcard-source stats.
+- Mobile source text was checked for non-ASCII/corrupted glyphs after the native update.

@@ -63,7 +63,7 @@ export default function CoursesScreen() {
             <Text style={styles.code}>{item.code}</Text>
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.meta}>
-              {item.materialCount} materials · {item.quizCount} quizzes · {item.memberCount} enrolled
+              {item.materialCount} materials - {item.quizCount} quizzes - {item.memberCount} enrolled
             </Text>
           </Pressable>
         )}

@@ -68,7 +68,7 @@ export default function LoginScreen() {
           onPress={handleLogin}
           disabled={busy}
         >
-          <Text style={styles.buttonText}>{busy ? "Logging in…" : "Log in"}</Text>
+          <Text style={styles.buttonText}>{busy ? "Logging in..." : "Log in"}</Text>
         </Pressable>
         <Text style={styles.hint}>
           New here? Create your account on the web app first.{"\n"}Demo: alex@demo.edu / coursemind

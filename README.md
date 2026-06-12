@@ -151,8 +151,10 @@ That's the only change — the schema was written to be portable.
 - ✅ **Phase 1 — Core learning loop** (live): signup with university email, courses,
   shared material library with PDF/DOCX/PPTX text extraction, grounded tiered tutor,
   quiz generation/taking/grading, pre-submit code review, XP + streaks (data layer)
-- 🔜 **Phase 2 — Collaboration**: workspaces, task boards, group chat, exam discussion
-  boards with AI participation, debug-with-me UI (schema + prompts already in place)
+- ✅ **Phase 2 — Collaboration** (live): study-group/project workspaces with task boards,
+  group chat (simple polling — no extra infra), exam discussion boards where the AI tutor
+  can be invoked (hint tiers only, capped at Tier 3 in public), cross-university courses,
+  debug-with-me mode in the tutor hub
 - 🔜 **Phase 3 — Smart studying**: syllabus import, mock exams, spaced repetition,
   weak-spot radar, flashcards, AI study plans (schema already in place)
 - 🔜 **Phase 4 — Engagement**: streak/XP UI, leaderboards, upvoting, annotations,

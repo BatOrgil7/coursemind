@@ -16,7 +16,8 @@ A guided tour of how the system fits together — written so you can find and fi
                        ▼       ▼                          ▼
                 ┌─────────────────────────────────────────────────────┐
                 │                  packages/api                       │
-                │   tRPC routers: user, course, material, tutor, quiz │
+                │   tRPC routers: user, course, material, tutor,      │
+                │     quiz, workspace, discussion                     │
                 │   + auth (passwords, JWT), file extraction,         │
                 │     XP/streak engine, Anthropic client              │
                 └────────────┬──────────────────────┬─────────────────┘
@@ -100,15 +101,32 @@ tables already migrated: `Workspace`/`WorkspaceMember`/`Project`, `DiscussionThr
 `DiscussionPost`, `ChatMessage`, `StudyPlan`, `Flashcard`, `MaterialUpvote`, `ActivityLog`.
 Full schema with comments: `packages/db/prisma/schema.prisma`.
 
-## Where Phase 2–4 features hook in
+## Phase 2 — how collaboration works (shipped)
+
+- **Workspaces** (`routers/workspace.ts`): study groups & project teams per course.
+  Every workspace gets a `Project` row at creation, so the task board always exists —
+  tasks are a JSON column (`ProjectTask[]`, zod-validated). Membership is enforced by
+  `requireWorkspaceMember` in `trpc.ts` (same pattern as `requireEnrollment`).
+- **Group chat**: simple POLLING on `ChatMessage` — the client refetches
+  `workspace.chatList` every `CHAT_POLL_INTERVAL_MS` (3s, in core constants). No
+  websockets, no paid realtime service; plenty for study-group-sized rooms. Upgrade
+  path: swap the poll for a subscription transport later, the API shape stays.
+- **Discussion boards** (`routers/discussion.ts`): threads per course with a
+  `contextType` (COURSE | QUIZ | MATERIAL | EXAM). The class can INVOKE the AI tutor
+  into a thread: `discussion.askTutor` feeds it the labeled transcript + course
+  grounding and it posts ONE reply (`authorId = null`). The reply keeps its `[TIER:n]`
+  marker in the stored body (stripped on read) so the tier badge survives reloads.
+  **Public-board tier policy**: the ceiling rises with student posts but caps at
+  Tier 3 (`DISCUSSION_MAX_TIER`) — a Tier 4 walkthrough of graded work, visible to the
+  whole class, would be answer-dumping by proxy. See `buildDiscussionTutorPrompt`.
+- **Cross-university courses**: a course "belongs to" the universities of its enrolled
+  members (the creator auto-enrolls, so a new course is instantly visible to their
+  peers). `course.browse` shows your university's courses plus anything flagged
+  `isCrossUniversity` — those are open to everyone (🌍 badge in the UI).
+
+## Where Phase 3–4 features hook in
 
 Search the repo for `TODO Phase`. Highlights:
-- **Workspaces/chat/discussions (P2)**: tables exist; add routers in
-  `packages/api/src/routers/` and register them in `root.ts`. The DEBUG tutor prompt
-  already exists for "Debug with me".
-- **Real-time chat (P2)**: start with polling on `ChatMessage` (simplest, no new infra);
-  upgrade to websockets later. (Spec says ask before adding any paid service — polling
-  avoids that entirely for v1.)
 - **Spaced repetition / weak spots (P3)**: `QuizAttempt.weakTopics` is already being
   recorded; `Flashcard` has SM-2 fields (`easeFactor`, `intervalDays`, `repetitions`).
 - **Upvotes/leaderboard (P4)**: `MaterialUpvote` table + `ActivityLog` are live and

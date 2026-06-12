@@ -25,6 +25,9 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
             <Link href={`/courses/${course.id}/discussions`} className="btn-secondary">
               💬 Discussions
             </Link>
+            <Link href={`/courses/${course.id}/study`} className="btn-secondary">
+              Smart study
+            </Link>
             <Link href={`/tutor?courseId=${course.id}`} className="btn-secondary">
               🧠 Ask the tutor
             </Link>

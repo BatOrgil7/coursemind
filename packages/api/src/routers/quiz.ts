@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import {
+  buildMockExamPrompt,
   buildQuizGenerationPrompt,
   buildGradingPrompt,
   extractJson,
@@ -13,6 +14,7 @@ import {
 import { router, protectedProcedure, requireEnrollment } from "../trpc";
 import { askClaude, isAiConfigured, AI_NOT_CONFIGURED_MESSAGE } from "../ai";
 import { recordActivity } from "../activity";
+import { gatherGrounding } from "../grounding";
 
 const SELF_CHECK_FEEDBACK =
   "AI grading isn't configured, so this answer wasn't auto-graded. Compare your answer with the sample answer below and grade yourself honestly.";
@@ -83,6 +85,72 @@ export const quizRouter = router({
     }),
 
   /** Quiz for TAKING — answers/explanations stripped so they can't leak. */
+  /** Generate a timed mock exam across the whole course library. */
+  generateMockExam: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+        questionCount: z.number().int().min(8).max(30).default(14),
+        timeLimit: z.number().int().min(20).max(240).default(75),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await requireEnrollment(ctx.userId, input.courseId);
+      if (!isAiConfigured()) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: AI_NOT_CONFIGURED_MESSAGE });
+      }
+
+      const course = await ctx.prisma.course.findUniqueOrThrow({
+        where: { id: input.courseId },
+        select: { code: true, title: true },
+      });
+      const materials = await gatherGrounding(ctx.prisma, input.courseId);
+      if (materials.length === 0) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message:
+            "This course has no readable materials yet. Upload notes, slides, homework prompts, tests, or a syllabus before generating a mock exam.",
+        });
+      }
+
+      const raw = await askClaude({
+        system:
+          "You are an expert university exam writer. You respond with ONLY valid JSON - no prose, no markdown fences.",
+        messages: [
+          {
+            role: "user",
+            content: buildMockExamPrompt({
+              courseTitle: `${course.code} - ${course.title}`,
+              materials,
+              questionCount: input.questionCount,
+            }),
+          },
+        ],
+        maxTokens: 8192,
+      });
+
+      const parsed = QuizQuestionsSchema.safeParse(extractJson(raw));
+      if (!parsed.success || parsed.data.length === 0) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "The AI returned an unexpected mock exam format. Please try again.",
+        });
+      }
+      const questions = parsed.data.map((q, i) => ({ ...q, id: `q${i + 1}` }));
+
+      const quiz = await ctx.prisma.quiz.create({
+        data: {
+          courseId: input.courseId,
+          creatorId: null,
+          title: `${course.code} Mock Exam - ${new Date().toLocaleDateString("en-US")}`,
+          questions: JSON.stringify(questions),
+          isMockExam: true,
+          timeLimit: input.timeLimit,
+        },
+      });
+      return { id: quiz.id, questionCount: questions.length };
+    }),
+
   get: protectedProcedure
     .input(z.object({ quizId: z.string() }))
     .query(async ({ ctx, input }) => {

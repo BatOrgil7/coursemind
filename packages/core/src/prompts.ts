@@ -215,6 +215,99 @@ Respond with ONLY a JSON array, no prose, matching exactly this shape:
 ]`;
 }
 
+// ------------------------------------------------------------
+// Phase 3: mock exams, flashcards, study plans
+// ------------------------------------------------------------
+
+/** Mock exam: breadth across ALL course materials, exam-day realism. */
+export function buildMockExamPrompt(opts: {
+  courseTitle: string;
+  materials: GroundingMaterial[];
+  questionCount: number;
+}): string {
+  return `You are writing a realistic MOCK EXAM for the university course "${opts.courseTitle}", using the class's own uploaded materials below. Behave like the professor: cover the breadth of the materials (don't cluster on one lecture), weight anything flagged as an exam hint or repeated for emphasis, and mix difficulty — roughly 30% warm-up, 50% solid understanding, 20% genuinely hard ("trace this", "what breaks if...", multi-step reasoning).
+
+${formatMaterials(opts.materials)}
+
+Produce EXACTLY ${opts.questionCount} questions: roughly 50% "mcq", 35% "short", 15% "code" (use "short" instead of "code" if the materials are non-technical). MCQ distractors must be plausible misconceptions. Order questions from easier to harder, like a real exam.
+
+Respond with ONLY a JSON array, no prose, matching exactly this shape:
+[
+  {
+    "id": "q1",
+    "type": "mcq" | "short" | "code",
+    "topic": "short topic tag",
+    "prompt": "the question",
+    "options": ["A", "B", "C", "D"],        // mcq only
+    "correctOption": 0,                       // mcq only, index into options
+    "sampleAnswer": "model answer",          // short/code only
+    "explanation": "why the answer is right, citing the material"
+  }
+]`;
+}
+
+/** Flashcards from one material: atomic, front = retrieval cue, back = answer. */
+export function buildFlashcardGenerationPrompt(opts: {
+  materialTitle: string;
+  materialText: string;
+  cardCount: number;
+}): string {
+  return `You are creating spaced-repetition flashcards for a university student from their own course material. Follow the golden rules of good cards: ONE atomic fact or idea per card; the front is a genuine retrieval cue (a question, a "what/why/when", or a term to define) — never a yes/no question; the back is the shortest complete answer, one to three sentences. Prefer understanding ("WHY does load factor matter?") over trivia, and match the professor's emphasis.
+
+MATERIAL: "${opts.materialTitle}"
+<material>
+${opts.materialText}
+</material>
+
+Produce EXACTLY ${opts.cardCount} cards.
+
+Respond with ONLY a JSON array, no prose, matching exactly this shape:
+[
+  { "front": "question or cue", "back": "concise answer" }
+]`;
+}
+
+/** AI study plan: schedule from today to the exam, grounded in the course. */
+export function buildStudyPlanPrompt(opts: {
+  courseTitle: string;
+  todayIso: string; // YYYY-MM-DD
+  examDateIso: string; // YYYY-MM-DD
+  materialTitles: string[];
+  syllabusText: string | null;
+  weakTopics: string[];
+}): string {
+  const materialsBlock =
+    opts.materialTitles.length > 0
+      ? `COURSE MATERIALS (use these to name real topics):\n${opts.materialTitles.map((t) => `- ${t}`).join("\n")}`
+      : `COURSE MATERIALS: none uploaded — plan around generic topics like "lecture notes" and "practice problems".`;
+  const syllabusBlock = opts.syllabusText
+    ? `SYLLABUS (the professor's own roadmap — prefer its topic names and ordering):\n<syllabus>\n${opts.syllabusText}\n</syllabus>`
+    : "";
+  const weakBlock =
+    opts.weakTopics.length > 0
+      ? `WEAK TOPICS (this student missed quiz questions on these — schedule them EARLY and revisit them at least twice):\n${opts.weakTopics.map((t) => `- ${t}`).join("\n")}`
+      : "";
+
+  return `You are building a realistic exam study plan for a university student in "${opts.courseTitle}". Today is ${opts.todayIso}; the exam is on ${opts.examDateIso}.
+
+${materialsBlock}
+
+${syllabusBlock}
+
+${weakBlock}
+
+Planning rules:
+- Schedule from tomorrow through the exam day. If the horizon is longer than ~3 weeks, include rest days (skip days) — relentless daily plans get abandoned.
+- 30–60 minutes per study day, 1–3 specific topics per day. Spread topics so each gets revisited at least once (spacing beats cramming).
+- Weak topics come early AND get a second pass later.
+- The exam day itself is light review only — never new material.
+
+Respond with ONLY a JSON array, no prose, one entry per STUDY day (skip rest days entirely), matching exactly this shape:
+[
+  { "date": "YYYY-MM-DD", "topics": ["topic 1", "topic 2"], "minutes": 45, "done": false }
+]`;
+}
+
 export function buildGradingPrompt(opts: {
   question: { prompt: string; sampleAnswer?: string; type: string };
   studentResponse: string;

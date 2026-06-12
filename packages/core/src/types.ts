@@ -77,6 +77,15 @@ export const StudyPlanDaySchema = z.object({
 export type StudyPlanDay = z.infer<typeof StudyPlanDaySchema>;
 export const StudyPlanScheduleSchema = z.array(StudyPlanDaySchema);
 
+// ---------- Flashcards (Phase 3) ----------
+
+export const FlashcardDraftSchema = z.object({
+  front: z.string().min(1),
+  back: z.string().min(1),
+});
+export type FlashcardDraft = z.infer<typeof FlashcardDraftSchema>;
+export const FlashcardDraftsSchema = z.array(FlashcardDraftSchema);
+
 // ---------- Safe JSON helpers ----------
 
 /** Parse a JSON column with a schema; returns fallback instead of throwing. */

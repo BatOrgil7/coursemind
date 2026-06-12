@@ -2,14 +2,22 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import {
   buildFallbackStudyPlan,
+  buildSyllabusAutopilotPlan,
+  buildSyllabusExtractionPrompt,
   buildStudyPlanPrompt,
+  extractSyllabusMilestonesFallback,
   extractJson,
+  latestMilestoneDate,
+  normalizeSyllabusMilestones,
   parseJsonColumn,
   StudyPlanScheduleSchema,
+  SyllabusMilestonesSchema,
   type StudyPlanDay,
+  type SyllabusMilestone,
 } from "@coursemind/core";
 import { router, protectedProcedure, requireEnrollment } from "../trpc";
 import { askClaude, isAiConfigured } from "../ai";
+import { recordActivity } from "../activity";
 
 function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -134,6 +142,25 @@ export const studyRouter = router({
         weakTopicCounts(ctx.prisma, ctx.userId, input.courseId),
       ]);
 
+      const parsedPlans = plans.map((plan) => ({
+        id: plan.id,
+        examDate: plan.examDate,
+        createdAt: plan.createdAt,
+        schedule: parseJsonColumn<StudyPlanDay[]>(plan.schedule, StudyPlanScheduleSchema, []),
+      }));
+      const deadlineMap = new Map<string, { date: string; title: string; type: string; done: boolean }>();
+      for (const day of parsedPlans.flatMap((plan) => plan.schedule)) {
+        if (day.kind !== "deadline") continue;
+        const title = day.topics[0] ?? "Syllabus deadline";
+        deadlineMap.set(`${day.date}:${title}`, {
+          date: day.date,
+          title,
+          type: day.milestoneType ?? "OTHER",
+          done: day.done,
+        });
+      }
+      const deadlines = [...deadlineMap.values()].sort((a, b) => a.date.localeCompare(b.date));
+
       return {
         course: { id: course.id, code: course.code, title: course.title },
         materials: course.materials.map((m) => ({
@@ -142,14 +169,88 @@ export const studyRouter = router({
           type: m.type,
           hasText: m.extractedText.trim().length > 0,
         })),
-        plans: plans.map((plan) => ({
-          id: plan.id,
-          examDate: plan.examDate,
-          createdAt: plan.createdAt,
-          schedule: parseJsonColumn<StudyPlanDay[]>(plan.schedule, StudyPlanScheduleSchema, []),
-        })),
+        plans: parsedPlans,
+        deadlines,
         flashcards: { total: totalFlashcards, due: dueFlashcards },
         weakTopics,
+      };
+    }),
+
+  importSyllabus: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+        title: z.string().min(1).max(200).default("Course syllabus"),
+        text: z.string().min(80).max(400_000),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await requireEnrollment(ctx.userId, input.courseId);
+      const course = await ctx.prisma.course.findUniqueOrThrow({
+        where: { id: input.courseId },
+        select: { id: true, code: true, title: true },
+      });
+
+      let milestones: SyllabusMilestone[] = extractSyllabusMilestonesFallback(input.text);
+
+      if (isAiConfigured()) {
+        try {
+          const raw = await askClaude({
+            system: "You extract course-calendar data from syllabi. Respond with ONLY valid JSON.",
+            messages: [
+              {
+                role: "user",
+                content: buildSyllabusExtractionPrompt({
+                  courseTitle: `${course.code} - ${course.title}`,
+                  todayIso: isoDate(new Date()),
+                  syllabusText: input.text.slice(0, 60_000),
+                }),
+              },
+            ],
+            maxTokens: 4096,
+          });
+          const parsed = SyllabusMilestonesSchema.safeParse(extractJson(raw));
+          if (parsed.success && parsed.data.length > 0) {
+            milestones = normalizeSyllabusMilestones(parsed.data);
+          }
+        } catch {
+          // Keep the feature useful in local/dev environments even if the model call fails.
+        }
+      }
+
+      const schedule = buildSyllabusAutopilotPlan({ milestones });
+      const examDate = new Date(`${latestMilestoneDate(milestones)}T12:00:00.000Z`);
+
+      const { material, plan } = await ctx.prisma.$transaction(async (tx) => {
+        const material = await tx.material.create({
+          data: {
+            courseId: input.courseId,
+            uploaderId: ctx.userId,
+            title: input.title,
+            type: "SYLLABUS",
+            extractedText: input.text,
+          },
+        });
+        const plan =
+          schedule.length > 0
+            ? await tx.studyPlan.create({
+                data: {
+                  userId: ctx.userId,
+                  courseId: input.courseId,
+                  examDate,
+                  schedule: JSON.stringify(schedule),
+                },
+              })
+            : null;
+        return { material, plan };
+      });
+      await recordActivity(ctx.userId, "MATERIAL_UPLOADED");
+
+      return {
+        materialId: material.id,
+        planId: plan?.id ?? null,
+        milestones,
+        schedule,
       };
     }),
 

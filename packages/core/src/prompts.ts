@@ -308,6 +308,42 @@ Respond with ONLY a JSON array, no prose, one entry per STUDY day (skip rest day
 ]`;
 }
 
+export function buildSyllabusExtractionPrompt(opts: {
+  courseTitle: string;
+  todayIso: string;
+  syllabusText: string;
+}): string {
+  return `Extract the dated academic milestones from this university course syllabus for "${opts.courseTitle}". Today is ${opts.todayIso}.
+
+<syllabus>
+${opts.syllabusText}
+</syllabus>
+
+Return ONLY a JSON array. Include exams, finals, midterms, quizzes, homework due dates, project milestones, labs, reading deadlines, presentations, and office-hour/review-session dates when they are explicitly dated.
+
+Rules:
+- Use ISO dates in YYYY-MM-DD format. If a date omits the year, infer the nearest upcoming academic year from today.
+- Do not invent dates. If a line has no usable date, skip it.
+- Keep titles short and student-facing.
+- topics should be the course topic, chapter, unit, or assignment theme when visible.
+- prepDays should reflect how much lead time a student needs: 14 for finals, 10 for midterms, 7 for major projects/exams, 3 for quizzes/homework/labs, 1 for readings.
+- sourceSnippet should quote or paraphrase the syllabus line that justified the milestone.
+
+Use exactly this object shape:
+[
+  {
+    "id": "m1",
+    "title": "Final exam",
+    "type": "FINAL" | "MIDTERM" | "EXAM" | "QUIZ" | "HOMEWORK" | "PROJECT" | "READING" | "LAB" | "OFFICE_HOURS" | "OTHER",
+    "date": "YYYY-MM-DD",
+    "topics": ["short topic"],
+    "weight": "30%",
+    "prepDays": 14,
+    "sourceSnippet": "Final exam: Dec 12, 30% of grade"
+  }
+]`;
+}
+
 export function buildGradingPrompt(opts: {
   question: { prompt: string; sampleAnswer?: string; type: string };
   studentResponse: string;

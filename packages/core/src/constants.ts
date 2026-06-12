@@ -17,6 +17,20 @@ export type WorkspaceType = (typeof WORKSPACE_TYPES)[number];
 export const THREAD_CONTEXT_TYPES = ["COURSE", "QUIZ", "MATERIAL", "EXAM"] as const;
 export type ThreadContextType = (typeof THREAD_CONTEXT_TYPES)[number];
 
+export const SYLLABUS_MILESTONE_TYPES = [
+  "FINAL",
+  "MIDTERM",
+  "EXAM",
+  "QUIZ",
+  "HOMEWORK",
+  "PROJECT",
+  "READING",
+  "LAB",
+  "OFFICE_HOURS",
+  "OTHER",
+] as const;
+export type SyllabusMilestoneType = (typeof SYLLABUS_MILESTONE_TYPES)[number];
+
 export const TASK_STATUSES = ["TODO", "IN_PROGRESS", "DONE"] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 

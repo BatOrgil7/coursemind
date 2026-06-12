@@ -9,6 +9,7 @@ import { EmptyState, PageHeader } from "@/components/ui";
 
 type Dashboard = Awaited<ReturnType<typeof api.study.courseDashboard.query>>;
 type DueCard = Awaited<ReturnType<typeof api.flashcard.due.query>>[number];
+type SyllabusImportResult = Awaited<ReturnType<typeof api.study.importSyllabus.mutate>>;
 
 const RATING_LABELS = {
   AGAIN: "Again",
@@ -24,6 +25,9 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
   const [dueCards, setDueCards] = useState<DueCard[]>([]);
   const [examDate, setExamDate] = useState("");
   const [selectedMaterialId, setSelectedMaterialId] = useState("");
+  const [syllabusTitle, setSyllabusTitle] = useState("Course syllabus");
+  const [syllabusText, setSyllabusText] = useState("");
+  const [autopilot, setAutopilot] = useState<SyllabusImportResult | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -76,6 +80,10 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
     () => data?.weakTopics.reduce((sum, topic) => sum + topic.count, 0) ?? 0,
     [data?.weakTopics]
   );
+  const upcomingDeadlines = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    return (data?.deadlines ?? []).filter((deadline) => deadline.date >= today).slice(0, 6);
+  }, [data?.deadlines]);
 
   async function createPlan(e: React.FormEvent) {
     e.preventDefault();
@@ -88,6 +96,33 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
     try {
       await api.study.createPlan.mutate({ courseId, examDate: selectedExamDate });
       setNotice("Study plan created.");
+      await load();
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function importSyllabus(e: React.FormEvent) {
+    e.preventDefault();
+    if (syllabusText.trim().length < 80) return;
+    setBusy("syllabus");
+    setError(null);
+    setNotice(null);
+    try {
+      const result = await api.study.importSyllabus.mutate({
+        courseId,
+        title: syllabusTitle.trim() || "Course syllabus",
+        text: syllabusText,
+      });
+      setAutopilot(result);
+      setSyllabusText("");
+      setNotice(
+        result.milestones.length > 0
+          ? `Syllabus autopilot added ${result.milestones.length} dates and ${result.schedule.length} study blocks.`
+          : "Syllabus saved. No dated milestones were found yet."
+      );
       await load();
     } catch (err) {
       setError(errorMessage(err));
@@ -180,6 +215,123 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
       {notice && <p className="mb-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">{notice}</p>}
 
       {data && (
+        <>
+        <section className="mb-6 overflow-hidden rounded-lg border border-slate-200/70 bg-white/90 shadow-card backdrop-blur-xl">
+          <div className="grid lg:grid-cols-[1fr_0.78fr]">
+            <form onSubmit={importSyllabus} className="space-y-4 p-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="eyebrow">Syllabus autopilot</p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold text-ink">Drop in the syllabus. Get the semester map.</h2>
+                </div>
+                <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-brand-100">
+                  Calendar-ready
+                </span>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-[0.7fr_1.3fr]">
+                <div>
+                  <label className="label">Title</label>
+                  <input
+                    className="input"
+                    value={syllabusTitle}
+                    onChange={(e) => setSyllabusTitle(e.target.value)}
+                    placeholder="CS201 Fall syllabus"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="label">Quick signal</label>
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs font-semibold text-slate-500">
+                    <div className="rounded-lg bg-slate-50 px-2 py-2">Deadlines</div>
+                    <div className="rounded-lg bg-slate-50 px-2 py-2">Workbacks</div>
+                    <div className="rounded-lg bg-slate-50 px-2 py-2">Review days</div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="label">Syllabus text</label>
+                <textarea
+                  className="input min-h-44 font-mono text-xs leading-relaxed"
+                  value={syllabusText}
+                  onChange={(e) => setSyllabusText(e.target.value)}
+                  minLength={80}
+                  required
+                  placeholder="Paste the course schedule, grading table, homework due dates, quiz dates, and exam dates..."
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={busy === "syllabus" || syllabusText.trim().length < 80}
+                >
+                  {busy === "syllabus" ? "Scanning syllabus..." : "Build semester map"}
+                </button>
+                <p className="text-xs font-medium text-slate-400">
+                  The syllabus is saved as a shared course material.
+                </p>
+              </div>
+            </form>
+
+            <div className="border-t border-slate-200 bg-ink p-6 text-white lg:border-l lg:border-t-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-300">Autopilot output</p>
+              {autopilot ? (
+                <div className="mt-5 space-y-5">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="rounded-lg bg-white/10 p-3">
+                      <p className="text-[11px] font-semibold text-slate-300">Dates</p>
+                      <p className="mt-1 font-display text-2xl font-semibold">{autopilot.milestones.length}</p>
+                    </div>
+                    <div className="rounded-lg bg-white/10 p-3">
+                      <p className="text-[11px] font-semibold text-slate-300">Blocks</p>
+                      <p className="mt-1 font-display text-2xl font-semibold">{autopilot.schedule.length}</p>
+                    </div>
+                    <div className="rounded-lg bg-white/10 p-3">
+                      <p className="text-[11px] font-semibold text-slate-300">Next</p>
+                      <p className="mt-1 text-sm font-semibold">
+                        {autopilot.milestones[0]?.date ?? "None"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {autopilot.milestones.slice(0, 4).map((milestone) => (
+                      <div key={milestone.id} className="rounded-lg bg-white/10 px-3 py-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-semibold">{milestone.title}</p>
+                          <span className="rounded bg-white/15 px-2 py-0.5 text-[10px] font-semibold">
+                            {milestone.type}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs font-medium text-slate-300">{milestone.date}</p>
+                      </div>
+                    ))}
+                    {autopilot.milestones.length === 0 && (
+                      <p className="rounded-lg bg-white/10 px-3 py-3 text-sm font-medium text-slate-300">
+                        Saved to the library. Add clearer dated schedule lines for automatic planning.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-5 space-y-3">
+                  <div className="rounded-lg bg-white/10 p-4">
+                    <p className="font-display text-xl font-semibold">Semester radar</p>
+                    <p className="mt-2 text-sm font-medium leading-relaxed text-slate-300">
+                      Exams, projects, quizzes, labs, readings, and homework dates become a live Smart Study plan.
+                    </p>
+                  </div>
+                  <div className="grid gap-2 text-xs font-semibold text-slate-300 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                    <span className="rounded-lg bg-white/10 px-3 py-2">Due-date timeline</span>
+                    <span className="rounded-lg bg-white/10 px-3 py-2">Exam workbacks</span>
+                    <span className="rounded-lg bg-white/10 px-3 py-2">Project checkpoints</span>
+                    <span className="rounded-lg bg-white/10 px-3 py-2">Review reminders</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
         <div className="grid gap-6 lg:grid-cols-3">
           <section className="space-y-6 lg:col-span-2">
             <div className="card">
@@ -211,12 +363,19 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
                   <p className="mb-3 text-sm font-medium text-slate-500">
                     Latest plan for {new Date(plan.examDate).toLocaleDateString()}.
                   </p>
-                  <div className="space-y-2">
-                    {plan.schedule.map((day) => (
+                  {plan.schedule.length > 0 ? (
+                    <div className="space-y-2">
+                    {plan.schedule.map((day, index) => {
+                      const isDeadline = day.kind === "deadline";
+                      return (
                       <label
-                        key={day.date}
+                        key={`${day.date}-${index}`}
                         className={`flex items-start gap-3 rounded-lg border px-4 py-3 text-sm ${
-                          day.done ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-white/75"
+                          isDeadline
+                            ? "border-amber-200 bg-amber-50"
+                            : day.done
+                              ? "border-emerald-200 bg-emerald-50"
+                              : "border-slate-200 bg-white/75"
                         }`}
                       >
                         <input
@@ -231,11 +390,19 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
                         </span>
                         <span className="flex-1">
                           <span className="font-semibold text-ink">{day.topics.join(", ")}</span>
-                          <span className="ml-2 text-xs font-medium text-slate-400">{day.minutes} min</span>
+                          <span className="ml-2 text-xs font-medium text-slate-400">
+                            {isDeadline ? "Deadline" : `${day.minutes} min`}
+                          </span>
                         </span>
                       </label>
-                    ))}
-                  </div>
+                      );
+                    })}
+                    </div>
+                  ) : (
+                    <p className="rounded-lg border border-dashed border-slate-300 px-4 py-8 text-center text-sm font-medium text-slate-500">
+                      This plan has no schedule rows yet.
+                    </p>
+                  )}
                 </div>
               ) : (
                 <EmptyState
@@ -323,6 +490,32 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
           </section>
 
           <aside className="space-y-6">
+            <div className="card">
+              <p className="eyebrow">Syllabus timeline</p>
+              <h2 className="mt-2 font-display text-xl font-semibold text-ink">Upcoming dates</h2>
+              {upcomingDeadlines.length > 0 ? (
+                <div className="mt-4 space-y-2">
+                  {upcomingDeadlines.map((deadline) => (
+                    <div key={`${deadline.date}-${deadline.title}`} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-ink">{deadline.title}</p>
+                        <span className="rounded bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500 ring-1 ring-slate-200">
+                          {deadline.type}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs font-semibold text-brand-700">
+                        {new Date(`${deadline.date}T12:00:00.000Z`).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
+                  Paste a syllabus to populate the course calendar.
+                </p>
+              )}
+            </div>
+
             <div className="card">
               <p className="eyebrow">Readiness</p>
               <h2 className="mt-2 font-display text-xl font-semibold text-ink">Course pulse</h2>
@@ -463,6 +656,7 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
             </div>
           </aside>
         </div>
+        </>
       )}
     </div>
   );

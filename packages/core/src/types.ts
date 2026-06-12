@@ -6,6 +6,7 @@
 import { z } from "zod";
 import {
   QUESTION_TYPES,
+  SYLLABUS_MILESTONE_TYPES,
   TASK_STATUSES,
   THREAD_CONTEXT_TYPES,
   TUTOR_MODES,
@@ -73,9 +74,25 @@ export const StudyPlanDaySchema = z.object({
   topics: z.array(z.string()),
   minutes: z.number().int(),
   done: z.boolean().default(false),
+  kind: z.enum(["study", "deadline"]).default("study"),
+  source: z.string().optional(),
+  milestoneType: z.enum(SYLLABUS_MILESTONE_TYPES).optional(),
 });
 export type StudyPlanDay = z.infer<typeof StudyPlanDaySchema>;
 export const StudyPlanScheduleSchema = z.array(StudyPlanDaySchema);
+
+export const SyllabusMilestoneSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1).max(180),
+  type: z.enum(SYLLABUS_MILESTONE_TYPES).default("OTHER"),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  topics: z.array(z.string().min(1).max(80)).default([]),
+  weight: z.string().max(80).optional(),
+  prepDays: z.number().int().min(0).max(30).default(3),
+  sourceSnippet: z.string().max(500).optional(),
+});
+export type SyllabusMilestone = z.infer<typeof SyllabusMilestoneSchema>;
+export const SyllabusMilestonesSchema = z.array(SyllabusMilestoneSchema);
 
 // ---------- Flashcards (Phase 3) ----------
 

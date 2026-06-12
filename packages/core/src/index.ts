@@ -3,3 +3,4 @@ export * from "./types";
 export * from "./prompts";
 export * from "./sm2";
 export * from "./studyplan";
+export * from "./syllabus";

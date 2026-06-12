@@ -49,13 +49,22 @@ export default function UploadPage({ params }: { params: Promise<{ courseId: str
     setBusy(true);
     setError(null);
     try {
-      await api.material.createFromText.mutate({
-        courseId,
-        title,
-        text,
-        type: type as "NOTES" | "SYLLABUS" | "TEXT",
-      });
-      router.push(`/courses/${courseId}`);
+      if (type === "SYLLABUS") {
+        await api.study.importSyllabus.mutate({
+          courseId,
+          title,
+          text,
+        });
+        router.push(`/courses/${courseId}/study`);
+      } else {
+        await api.material.createFromText.mutate({
+          courseId,
+          title,
+          text,
+          type: type as "NOTES" | "TEXT",
+        });
+        router.push(`/courses/${courseId}`);
+      }
       router.refresh();
     } catch (err) {
       setError(errorMessage(err));
@@ -174,7 +183,7 @@ export default function UploadPage({ params }: { params: Promise<{ courseId: str
               </div>
               {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{error}</p>}
               <button type="submit" disabled={busy} className="btn-primary">
-                {busy ? "Saving..." : "Add to shared library"}
+                {busy ? "Saving..." : type === "SYLLABUS" ? "Add syllabus and build plan" : "Add to shared library"}
               </button>
             </form>
           )}

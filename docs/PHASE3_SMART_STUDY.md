@@ -15,6 +15,9 @@ mobile read-only Smart Study surface consuming the same API.
 - Responsive authenticated app shell in `apps/web/app/(app)/layout.tsx`.
 - Native mobile Smart Study route at `apps/mobile/src/app/study/[courseId].tsx`.
 - Native course detail entry point from `apps/mobile/src/app/course/[id].tsx`.
+- Syllabus Autopilot on the web Smart Study page: paste a syllabus to save it as a
+  `SYLLABUS` material, extract dated milestones, and generate a deadline-aware
+  study plan.
 
 ## Backend Shape
 
@@ -23,6 +26,8 @@ API routers:
 - `packages/api/src/routers/study.ts`
   - `overview`: dashboard-level Smart Study summary across enrolled courses.
   - `courseDashboard`: course materials, latest plans, flashcard counts, weak-topic counts.
+  - `importSyllabus`: saves pasted syllabi, extracts dated course milestones, and creates
+    a workback schedule.
   - `createPlan`: creates a `StudyPlan.schedule` JSON payload.
   - `toggleDay`: marks a study-plan day complete/incomplete.
 - `packages/api/src/routers/flashcard.ts`
@@ -36,6 +41,8 @@ Core helpers:
 
 - `packages/core/src/sm2.ts`: deterministic SM-2 review scheduling.
 - `packages/core/src/studyplan.ts`: deterministic no-key fallback study plans.
+- `packages/core/src/syllabus.ts`: deterministic syllabus date extraction fallback and
+  deadline-aware schedule generation.
 - `packages/core/src/prompts.ts`: AI prompts for mock exams, flashcards, and study plans.
 
 ## AI-Key Behavior
@@ -43,16 +50,21 @@ Core helpers:
 Study plans and flashcards work without an Anthropic key:
 
 - Study plans use `buildFallbackStudyPlan`.
+- Syllabus Autopilot uses deterministic date extraction when AI is unavailable.
 - Flashcards fall back to deterministic sentence-based cards from extracted material text.
 
 Mock exams require `ANTHROPIC_API_KEY`, because whole-course exam generation needs the model.
 When the key is missing, the UI shows the standard friendly setup message instead of crashing.
+When the key is present, Syllabus Autopilot asks Claude for structured milestone extraction and
+falls back to deterministic parsing if that call fails.
 
 ## Data Model
 
 No migration was required. The Phase 3 schema already existed:
 
 - `StudyPlan.schedule`: JSON `StudyPlanDay[]`.
+  - Syllabus Autopilot adds optional `kind`, `source`, and `milestoneType` fields for
+    deadline-aware rows. Older schedules parse as normal study rows.
 - `Flashcard`: `front`, `back`, `nextReviewAt`, `easeFactor`, `intervalDays`, `repetitions`.
 - `Quiz.isMockExam` and `Quiz.timeLimit`.
 - `QuizAttempt.weakTopics`.

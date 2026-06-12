@@ -289,3 +289,41 @@ Notes:
 Next steps:
 - Add native mobile actions for study-plan creation and flashcard review.
 - Consider click-through weak-topic filters for quiz generation later.
+
+### 2026-06-12 - Codex - Syllabus Autopilot
+
+Summary:
+- Added `study.importSyllabus` to save pasted syllabi as `SYLLABUS` materials, extract dated milestones, and generate deadline-aware study plans.
+- Added deterministic syllabus parsing and workback schedule helpers in `packages/core/src/syllabus.ts`.
+- Added an AI prompt for structured syllabus milestone extraction; Anthropic is used when configured, with deterministic fallback otherwise.
+- Updated the course Smart Study page with a Syllabus Autopilot panel, post-scan summary, deadline rows in the study plan, and an upcoming syllabus timeline.
+- Connected the existing pasted-text upload flow so choosing type `SYLLABUS` builds the Smart Study plan and redirects to the course Smart Study page.
+
+Files touched:
+- `packages/core/src/constants.ts`
+- `packages/core/src/types.ts`
+- `packages/core/src/prompts.ts`
+- `packages/core/src/studyplan.ts`
+- `packages/core/src/syllabus.ts`
+- `packages/core/src/index.ts`
+- `packages/api/src/routers/study.ts`
+- `apps/web/app/(app)/courses/[courseId]/study/page.tsx`
+- `apps/web/app/(app)/courses/[courseId]/upload/page.tsx`
+- `docs/PHASE3_SMART_STUDY.md`
+- `docs/AI_HANDOFF.md`
+
+Checks run so far:
+- `npm run typecheck`
+- `npx tsc --noEmit` from `apps/mobile`
+- `git diff --check`
+- `npm run build`
+- In-process `study.importSyllabus` QA with `ANTHROPIC_API_KEY` blank: 6 milestones, 19 schedule rows, plan created.
+- In-app browser QA on `/courses/cmq8qy9t00007oetsgyv8u3nh/study` at `1440x900` and `390x844`: Syllabus Autopilot visible, timeline visible, no horizontal overflow, no console errors.
+
+Notes:
+- No database migration was needed. Syllabus deadlines are encoded in `StudyPlan.schedule` with optional `kind`, `source`, and `milestoneType` fields.
+- Existing schedules remain compatible because `StudyPlanDaySchema` defaults missing `kind` to `study`.
+
+Next steps:
+- Add native mobile syllabus import and timeline display.
+- Consider calendar export or notification reminders for syllabus deadlines.

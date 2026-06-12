@@ -1,5 +1,4 @@
-// Landing page — the brand pitch. "Use AI responsibly and actually learn"
-// is the headline FEATURE, marketed loudly (product spec, Section 1).
+// Landing page: public product pitch.
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -7,42 +6,42 @@ import { Logo } from "@/components/ui";
 
 const FEATURES = [
   {
-    emoji: "📚",
-    title: "Grounded in YOUR course",
-    body: "Upload slides, notes, and past assignments. Every AI answer is grounded in your professor's actual materials — and flags clearly when it goes beyond them.",
+    mark: "MT",
+    title: "Grounded in your course",
+    body: "Upload slides, notes, homework, and tests. Tutor answers are shaped by the materials your class shares.",
   },
   {
-    emoji: "🧭",
-    title: "Hints, not handouts",
-    body: "For graded work, the tutor escalates through four hint tiers as you engage — nudge, guiding question, worked analogy, structured walkthrough. The final answer is always yours.",
+    mark: "HW",
+    title: "Hints before handouts",
+    body: "For graded work, CourseMind moves through hint tiers as you engage instead of dropping a final answer.",
   },
   {
-    emoji: "🧪",
-    title: "Quizzes in your prof's style",
-    body: "Turn any lecture into a practice quiz in seconds — MCQ, short answer, and code questions that mirror what your professor emphasizes, with explanations for every miss.",
+    mark: "QZ",
+    title: "Practice from real lectures",
+    body: "Turn class material into quizzes, explanations, and review loops that follow what your professor emphasizes.",
   },
   {
-    emoji: "🔍",
+    mark: "RV",
     title: "Pre-submit code review",
-    body: "Paste your homework code before you turn it in. The AI points at bugs and edge cases with questions — \"what happens when the list is empty?\" — and never rewrites your code.",
+    body: "Paste homework code and get questions about bugs, edge cases, and style without a rewritten solution.",
   },
   {
-    emoji: "🤝",
-    title: "One class, one library",
-    body: "Materials are shared with everyone in your course. One classmate's upload makes the AI smarter for the whole class.",
+    mark: "CL",
+    title: "One shared library",
+    body: "One classmate's upload improves the tutor for everyone enrolled in the same course.",
   },
   {
-    emoji: "🔥",
-    title: "Built for the long game",
-    body: "Streaks, XP, weak-spot tracking, and spaced repetition keep you studying a little every day — the only way that actually works.",
+    mark: "XP",
+    title: "Built for follow-through",
+    body: "Streaks, XP, weak-spot tracking, and study sessions keep learning moving day after day.",
   },
 ];
 
 const TIERS = [
-  { n: 1, name: "Nudge", desc: "“This is a load-factor question — check Lecture 9, section 5.”" },
-  { n: 2, name: "Guiding question", desc: "“What happens to probe length as the table fills up?”" },
-  { n: 3, name: "Analogous example", desc: "Teaches the idea, works a similar-but-different problem." },
-  { n: 4, name: "Walkthrough", desc: "Outlines the steps. You still write your own answer." },
+  { n: 1, name: "Nudge", desc: "Points you to the relevant idea or course section." },
+  { n: 2, name: "Guiding question", desc: "Forces the next reasoning step instead of giving it away." },
+  { n: 3, name: "Analogous example", desc: "Works a similar problem so the graded answer remains yours." },
+  { n: 4, name: "Walkthrough", desc: "Outlines a path only after you have engaged with the work." },
 ];
 
 export default async function LandingPage() {
@@ -50,105 +49,120 @@ export default async function LandingPage() {
   if (session?.user) redirect("/dashboard");
 
   return (
-    <main>
-      {/* Hero */}
-      <section className="bg-brand-950 text-white">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+    <main className="overflow-hidden">
+      <section className="relative min-h-[86vh] bg-brand-950 text-white">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,rgba(6,182,212,0.22),transparent_35%),linear-gradient(25deg,rgba(163,230,53,0.16),transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-paper to-transparent" />
+        <div className="absolute inset-0 opacity-[0.18] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:56px_56px]" />
+
+        <nav className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <Logo dark />
           <div className="flex items-center gap-3">
-            <Link href="/login" className="rounded-xl px-4 py-2 text-sm font-semibold text-slate-200 hover:text-white">
+            <Link href="/login" className="rounded-lg px-4 py-2 text-sm font-bold text-slate-200 transition hover:text-white">
               Log in
             </Link>
-            <Link href="/signup" className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-brand-900 hover:bg-brand-50">
+            <Link href="/signup" className="btn-primary">
               Get started
             </Link>
           </div>
         </nav>
-        <div className="mx-auto max-w-6xl px-6 pb-24 pt-16 text-center">
-          <p className="mx-auto mb-6 inline-block rounded-full border border-brand-400/40 bg-brand-900/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-brand-200">
-            The responsible-AI study platform
-          </p>
-          <h1 className="mx-auto max-w-3xl font-display text-4xl font-bold leading-tight sm:text-6xl">
-            Don&apos;t just get the answer.{" "}
-            <span className="text-ember-400">Actually learn it.</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300">
-            CourseMind is an AI tutor grounded in your own course materials. It explains
-            generously, quizzes you relentlessly, and guides you to your own answers on graded
-            work — because the skill is the point.
-          </p>
-          <div className="mt-10 flex justify-center gap-4">
-            <Link href="/signup" className="rounded-xl bg-ember-500 px-6 py-3 font-semibold text-ink shadow-lift hover:bg-ember-400">
-              Start learning free
-            </Link>
-            <Link href="/login" className="rounded-xl border border-slate-600 px-6 py-3 font-semibold text-slate-200 hover:border-slate-400 hover:text-white">
-              I have an account
-            </Link>
+
+        <div className="relative z-10 mx-auto grid max-w-6xl gap-10 px-6 pb-20 pt-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:pt-20">
+          <div>
+            <p className="eyebrow text-aqua-300">Responsible AI study platform</p>
+            <h1 className="mt-4 font-display text-5xl font-black tracking-tight sm:text-6xl lg:text-7xl">
+              CourseMind
+            </h1>
+            <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-slate-200">
+              An AI tutor grounded in your class materials, built to help students understand the work without becoming dependent on answer dumps.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/signup" className="btn-primary">
+                Start learning free
+              </Link>
+              <Link href="/login" className="btn-secondary border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white">
+                Use demo account
+              </Link>
+            </div>
+            <p className="mt-5 text-sm font-medium text-slate-400">
+              Demo: <span className="font-mono text-slate-200">alex@demo.edu</span> /{" "}
+              <span className="font-mono text-slate-200">coursemind</span>
+            </p>
           </div>
-          <p className="mt-6 text-sm text-slate-400">
-            Try the demo: <span className="font-mono text-slate-300">alex@demo.edu</span> ·{" "}
-            <span className="font-mono text-slate-300">coursemind</span>
-          </p>
+
+          <div className="relative min-h-[420px] lg:min-h-[520px]" aria-hidden="true">
+            <div className="absolute left-0 top-4 w-[82%] rounded-lg border border-white/20 bg-white/[0.08] p-4 shadow-lift backdrop-blur">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="rounded-md bg-aqua-300 px-2 py-1 text-[10px] font-black text-ink">AI TUTOR</span>
+                <span className="text-xs font-bold text-slate-300">CS201</span>
+              </div>
+              <div className="space-y-3">
+                <div className="ml-auto h-12 w-3/4 rounded-lg bg-aqua-400/80" />
+                <div className="h-28 rounded-lg bg-white/90 p-4">
+                  <div className="mb-3 h-2 w-28 rounded bg-brand-300" />
+                  <div className="mb-2 h-2 w-full rounded bg-slate-200" />
+                  <div className="mb-2 h-2 w-5/6 rounded bg-slate-200" />
+                  <div className="h-2 w-2/3 rounded bg-slate-200" />
+                </div>
+                <div className="h-10 w-2/3 rounded-lg bg-white/20" />
+              </div>
+            </div>
+            <div className="absolute bottom-10 right-0 w-[72%] rounded-lg border border-white/20 bg-ink/80 p-4 shadow-lift backdrop-blur">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-xs font-black text-lime-300">PRACTICE QUEUE</span>
+                <span className="text-xs font-bold text-slate-400">12 questions</span>
+              </div>
+              {[72, 54, 86, 41].map((width, index) => (
+                <div key={index} className="mb-3 rounded-lg bg-white/10 p-3">
+                  <div className="mb-2 h-2 rounded bg-white/30" style={{ width: `${width}%` }} />
+                  <div className="h-2 w-1/3 rounded bg-aqua-300/70" />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* The tier ladder — the differentiator, shown proudly */}
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <h2 className="text-center font-display text-3xl font-bold">
-          An AI that refuses to do your homework —{" "}
-          <span className="text-brand-600">and that&apos;s the feature.</span>
-        </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-center text-slate-600">
-          Ask a concept question, get a full, generous explanation. Ask for help on a graded
-          assignment, and CourseMind walks UP this ladder only as you engage:
-        </p>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="mx-auto max-w-6xl px-6 py-16">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {TIERS.map((tier) => (
             <div key={tier.n} className="card">
-              <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 font-display font-bold text-white">
-                {tier.n}
-              </div>
-              <h3 className="font-display font-semibold">{tier.name}</h3>
-              <p className="mt-1 text-sm text-slate-600">{tier.desc}</p>
+              <div className="icon-mark bg-gradient-to-br from-brand-600 to-aqua-500">{tier.n}</div>
+              <h3 className="mt-4 font-display font-black text-ink">{tier.name}</h3>
+              <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">{tier.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Features */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <h2 className="text-center font-display text-3xl font-bold">
-            Everything you need to study smarter
-          </h2>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="bg-white/60">
+        <div className="mx-auto max-w-6xl px-6 py-16">
+          <div className="max-w-2xl">
+            <p className="eyebrow">Study system</p>
+            <h2 className="mt-2 font-display text-3xl font-black text-ink">Everything points back to learning.</h2>
+          </div>
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((feature) => (
-              <div key={feature.title} className="rounded-2xl border border-slate-100 bg-paper p-6">
-                <div className="text-3xl">{feature.emoji}</div>
-                <h3 className="mt-3 font-display text-lg font-semibold">{feature.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{feature.body}</p>
+              <div key={feature.title} className="card-interactive">
+                <span className="icon-mark bg-slate-100 text-brand-700">{feature.mark}</span>
+                <h3 className="mt-4 font-display text-lg font-black text-ink">{feature.title}</h3>
+                <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">{feature.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA + footer */}
       <section className="bg-brand-950 text-white">
-        <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <h2 className="font-display text-3xl font-bold">
-            Your degree is the receipt. <span className="text-ember-400">The skill is the product.</span>
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-slate-300">
-            Join with your university email — your whole class benefits from every upload.
-          </p>
-          <Link href="/signup" className="mt-8 inline-block rounded-xl bg-ember-500 px-8 py-3 font-semibold text-ink hover:bg-ember-400">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-14 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="eyebrow text-aqua-300">Ready</p>
+            <h2 className="mt-2 font-display text-3xl font-black">Make class materials useful.</h2>
+          </div>
+          <Link href="/signup" className="btn-primary w-full sm:w-auto">
             Create your account
           </Link>
         </div>
-        <footer className="border-t border-brand-900 py-8 text-center text-sm text-slate-400">
-          <Logo dark /> — built to make you better, not dependent.
-        </footer>
       </section>
     </main>
   );

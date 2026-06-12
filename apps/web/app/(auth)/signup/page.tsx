@@ -20,7 +20,6 @@ export default function SignupPage() {
     setError(null);
     try {
       await api.user.signup.mutate({ name, email, password });
-      // Account created — log straight in.
       const result = await signIn("credentials", { redirect: false, email, password });
       if (result?.error) throw new Error("Account created, but auto-login failed. Please log in.");
       router.push("/dashboard");
@@ -33,10 +32,10 @@ export default function SignupPage() {
 
   return (
     <div>
-      <h1 className="font-display text-xl font-bold">Create your account</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        Use your university email — it connects you with your classmates&apos; courses and
-        materials.
+      <p className="eyebrow">Start studying</p>
+      <h1 className="mt-2 font-display text-2xl font-black text-ink">Create your account</h1>
+      <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
+        Use your university email so CourseMind can connect you with classmates, courses, and shared materials.
       </p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
@@ -74,14 +73,14 @@ export default function SignupPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+        {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{error}</p>}
         <button type="submit" disabled={busy} className="btn-primary w-full">
-          {busy ? "Creating account…" : "Create account"}
+          {busy ? "Creating account..." : "Create account"}
         </button>
       </form>
-      <p className="mt-4 text-center text-sm text-slate-500">
+      <p className="mt-4 text-center text-sm font-medium text-slate-500">
         Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-brand-600 hover:underline">
+        <Link href="/login" className="font-black text-brand-600 hover:text-brand-700">
           Log in
         </Link>
       </p>

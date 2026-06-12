@@ -1,7 +1,6 @@
 "use client";
 
 // Courses hub: my courses, browse/search all courses, join, create.
-// Client component because join/create/search are interactive.
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -67,10 +66,10 @@ export default function CoursesPage() {
     <div>
       <PageHeader
         title="Courses"
-        subtitle="Join your class — or be the first to create it."
+        subtitle="Join your class, or be the first to create it."
         action={
           <button className="btn-primary" onClick={() => setShowCreate((v) => !v)}>
-            {showCreate ? "Cancel" : "+ Create course"}
+            {showCreate ? "Cancel" : "Create course"}
           </button>
         }
       />
@@ -101,7 +100,7 @@ export default function CoursesPage() {
             <label className="label">Title</label>
             <input
               className="input"
-              placeholder="Data Structures & Algorithms"
+              placeholder="Data Structures and Algorithms"
               required
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -116,28 +115,27 @@ export default function CoursesPage() {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </div>
-          <label className="flex items-start gap-2.5 text-sm text-slate-600 sm:col-span-2">
+          <label className="flex items-start gap-2.5 text-sm font-medium leading-relaxed text-slate-600 sm:col-span-2">
             <input
               type="checkbox"
-              className="mt-0.5 h-4 w-4 accent-brand-600"
+              className="mt-1 h-4 w-4 accent-brand-600"
               checked={form.isCrossUniversity}
               onChange={(e) => setForm({ ...form, isCrossUniversity: e.target.checked })}
             />
             <span>
-              🌍 <strong>Cross-university</strong> — students from any university can discover and
-              join this course. Leave unchecked to keep it visible to your university only.
+              <strong className="text-ink">Cross-university course.</strong> Students from any university can discover and join it.
             </span>
           </label>
           <button type="submit" disabled={busy} className="btn-primary sm:col-span-2">
-            {busy ? "Creating…" : "Create & join"}
+            {busy ? "Creating..." : "Create and join"}
           </button>
         </form>
       )}
 
-      <div className="mb-6 flex gap-3">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row">
         <input
           className="input"
-          placeholder="Search by code, title, or subject…"
+          placeholder="Search by code, title, or subject..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && load(query)}
@@ -147,30 +145,30 @@ export default function CoursesPage() {
         </button>
       </div>
 
-      {error && <p className="mb-4 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {error && <p className="mb-4 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{error}</p>}
 
       {loading ? (
-        <p className="py-12 text-center text-sm text-slate-400">Loading courses…</p>
+        <p className="py-12 text-center text-sm font-medium text-slate-400">Loading courses...</p>
       ) : courses.length === 0 ? (
-        <p className="py-12 text-center text-sm text-slate-400">
-          No courses found — create the first one for your class!
+        <p className="py-12 text-center text-sm font-medium text-slate-400">
+          No courses found. Create the first one for your class.
         </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {courses.map((course) => (
-            <div key={course.id} className="card flex flex-col">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-wide text-brand-600">
+            <div key={course.id} className="card-interactive flex flex-col">
+              <div className="flex items-start justify-between gap-3">
+                <span className="flex flex-wrap items-center gap-2 font-mono text-xs font-black uppercase tracking-wide text-aqua-600">
                   {course.code}
                   {course.isCrossUniversity && <CrossUniversityBadge />}
                 </span>
-                <span className="text-xs text-slate-400">
-                  {course.memberCount} enrolled · {course.materialCount} materials
+                <span className="text-right text-xs font-bold text-slate-400">
+                  {course.memberCount} enrolled - {course.materialCount} materials
                 </span>
               </div>
-              <p className="mt-2 font-display text-lg font-semibold">{course.title}</p>
-              <p className="mt-1 line-clamp-2 flex-1 text-sm text-slate-500">{course.description}</p>
-              <div className="mt-4">
+              <p className="mt-3 font-display text-lg font-black text-ink">{course.title}</p>
+              <p className="mt-1 line-clamp-2 flex-1 text-sm font-medium leading-relaxed text-slate-500">{course.description}</p>
+              <div className="mt-5">
                 {course.joined ? (
                   <Link href={`/courses/${course.id}`} className="btn-secondary w-full">
                     Open course

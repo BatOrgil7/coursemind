@@ -123,3 +123,35 @@ Next steps:
 - Add syllabus-import UX beyond using uploaded `SYLLABUS` materials.
 - Add a real weak-spot chart visualization if the product wants richer analytics.
 - Run the full CourseMind-to-Hyntor rename pass when the user confirms.
+
+### 2026-06-12 - Codex - Web Visual Redesign
+
+Summary:
+- Reworked the web visual system around a more modern student-facing palette, glass surfaces, sharper 8px cards, stronger typography, and consistent command/button treatment.
+- Updated the authenticated shell, dashboard, tutor hub, tutor chat, courses, course detail, smart study, upload, materials, discussions, workspaces, quizzes, auth screens, and public landing page.
+- Removed old emoji/encoding artifacts from the touched UI and replaced mode/context markers with short structured badges.
+- Kept behavior and data contracts unchanged.
+
+Files touched:
+- `apps/web/tailwind.config.ts`
+- `apps/web/app/globals.css`
+- `apps/web/components/ui.tsx`
+- `apps/web/components/GenerateQuizButton.tsx`
+- Most `apps/web/app` web pages and two API route comments touched for encoding cleanup.
+- `docs/AI_HANDOFF.md`
+
+Checks run:
+- `npm run typecheck --workspace apps/web`
+- `npm run typecheck`
+- `git diff --check`
+- In-app browser QA at desktop and mobile viewports on `/tutor`, `/dashboard`, `/courses`, `/code-review`, and a course Smart Study route.
+
+Browser QA notes:
+- Demo login with `alex@demo.edu / coursemind` succeeded.
+- `/tutor` rendered the new session cards and past-session surface with no horizontal overflow.
+- Mobile app shell now uses a two-column nav grid instead of a horizontal scrollbar.
+- Dashboard, Courses, Code Review, and Smart Study rendered with no console errors, no old mojibake artifacts, and no horizontal overflow.
+
+Next steps:
+- Run the production build after this entry.
+- Continue using CourseMind in UI until the user explicitly confirms a full rename pass.

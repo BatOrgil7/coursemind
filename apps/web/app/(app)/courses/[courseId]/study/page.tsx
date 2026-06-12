@@ -1,7 +1,6 @@
 "use client";
 
-// Phase 3 smart-study hub for one course: study plans, weak spots,
-// mock exams, and flashcard review all hang off the shared course context.
+// Smart-study hub for one course.
 import { use, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -140,7 +139,7 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
   }
 
   if (!data && !error) {
-    return <p className="py-12 text-center text-sm text-slate-400">Loading smart study tools...</p>;
+    return <p className="py-12 text-center text-sm font-medium text-slate-400">Loading smart study tools...</p>;
   }
 
   return (
@@ -155,25 +154,26 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
         }
       />
 
-      {error && <p className="mb-4 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
-      {notice && <p className="mb-4 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{notice}</p>}
+      {error && <p className="mb-4 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{error}</p>}
+      {notice && <p className="mb-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">{notice}</p>}
 
       {data && (
         <div className="grid gap-6 lg:grid-cols-3">
           <section className="space-y-6 lg:col-span-2">
             <div className="card">
-              <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
+              <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <h2 className="font-display text-lg font-semibold">Exam plan</h2>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Builds a schedule from course materials, syllabus text, and missed quiz topics.
+                  <p className="eyebrow">Exam prep</p>
+                  <h2 className="mt-2 font-display text-xl font-black text-ink">Study plan</h2>
+                  <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">
+                    Schedule review around course materials, syllabus text, and missed quiz topics.
                   </p>
                 </div>
-                <form onSubmit={createPlan} className="flex gap-2">
+                <form onSubmit={createPlan} className="flex flex-col gap-2 sm:flex-row">
                   <input
                     name="examDate"
                     type="date"
-                    className="input w-40"
+                    className="input sm:w-40"
                     value={examDate}
                     onChange={(e) => setExamDate(e.target.value)}
                     required
@@ -186,15 +186,15 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
 
               {plan ? (
                 <div>
-                  <p className="mb-3 text-sm text-slate-500">
+                  <p className="mb-3 text-sm font-medium text-slate-500">
                     Latest plan for {new Date(plan.examDate).toLocaleDateString()}.
                   </p>
                   <div className="space-y-2">
                     {plan.schedule.map((day) => (
                       <label
                         key={day.date}
-                        className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
-                          day.done ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-white"
+                        className={`flex items-start gap-3 rounded-lg border px-4 py-3 text-sm ${
+                          day.done ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-white/75"
                         }`}
                       >
                         <input
@@ -204,12 +204,12 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
                           disabled={busy === `day:${day.date}`}
                           onChange={(e) => togglePlanDay(plan.id, day.date, e.target.checked)}
                         />
-                        <span className="min-w-28 font-mono text-xs font-semibold text-slate-500">
+                        <span className="min-w-28 font-mono text-xs font-black text-slate-500">
                           {day.date}
                         </span>
                         <span className="flex-1">
-                          <span className="font-medium">{day.topics.join(", ")}</span>
-                          <span className="ml-2 text-xs text-slate-400">{day.minutes} min</span>
+                          <span className="font-semibold text-ink">{day.topics.join(", ")}</span>
+                          <span className="ml-2 text-xs font-medium text-slate-400">{day.minutes} min</span>
                         </span>
                       </label>
                     ))}
@@ -218,22 +218,23 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
               ) : (
                 <EmptyState
                   title="No plan yet"
-                  body="Pick an exam date and Hyntor will turn your shared course context into a realistic study schedule."
+                  body="Pick an exam date and CourseMind will turn your shared course context into a realistic study schedule."
                 />
               )}
             </div>
 
             <div className="card">
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+              <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
-                  <h2 className="font-display text-lg font-semibold">Flashcards</h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="eyebrow">Memory</p>
+                  <h2 className="mt-2 font-display text-xl font-black text-ink">Flashcards</h2>
+                  <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">
                     Generate cards from shared materials, then review due cards with spaced repetition.
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <select
-                    className="input w-64"
+                    className="input sm:w-64"
                     value={selectedMaterialId}
                     onChange={(e) => setSelectedMaterialId(e.target.value)}
                     disabled={readableMaterials.length === 0}
@@ -260,16 +261,16 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
               </div>
 
               {currentCard ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+                  <p className="text-xs font-black uppercase tracking-wide text-slate-400">
                     Due now
                   </p>
-                  <p className="mt-2 whitespace-pre-wrap font-display text-xl font-semibold">
+                  <p className="mt-2 whitespace-pre-wrap font-display text-xl font-black text-ink">
                     {currentCard.front}
                   </p>
                   {revealed ? (
                     <>
-                      <p className="mt-4 rounded-xl bg-white px-4 py-3 text-sm text-slate-700">
+                      <p className="mt-4 rounded-lg bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm">
                         {currentCard.back}
                       </p>
                       <div className="mt-4 grid gap-2 sm:grid-cols-4">
@@ -292,7 +293,7 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
                   )}
                 </div>
               ) : (
-                <p className="rounded-2xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">
+                <p className="rounded-lg border border-dashed border-slate-300 px-4 py-8 text-center text-sm font-medium text-slate-500">
                   No cards due right now. Generate cards from a material to start reviewing.
                 </p>
               )}
@@ -301,22 +302,23 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
 
           <aside className="space-y-6">
             <div className="card">
-              <h2 className="font-display text-lg font-semibold">Weak spots</h2>
+              <p className="eyebrow">Focus</p>
+              <h2 className="mt-2 font-display text-xl font-black text-ink">Weak spots</h2>
               {data.weakTopics.length === 0 ? (
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
                   Missed quiz topics will show up here after you take practice quizzes.
                 </p>
               ) : (
                 <div className="mt-4 space-y-3">
                   {data.weakTopics.slice(0, 8).map((topic) => (
                     <div key={topic.topic}>
-                      <div className="mb-1 flex justify-between text-xs">
-                        <span className="font-semibold text-slate-600">{topic.topic}</span>
-                        <span className="text-slate-400">{topic.count} miss{topic.count === 1 ? "" : "es"}</span>
+                      <div className="mb-1 flex justify-between gap-3 text-xs">
+                        <span className="font-black text-slate-600">{topic.topic}</span>
+                        <span className="font-medium text-slate-400">{topic.count} miss{topic.count === 1 ? "" : "es"}</span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                         <div
-                          className="h-full rounded-full bg-rose-400"
+                          className="h-full rounded-full bg-coral-400"
                           style={{ width: `${Math.min(100, topic.count * 24)}%` }}
                         />
                       </div>
@@ -327,9 +329,10 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
             </div>
 
             <div className="card">
-              <h2 className="font-display text-lg font-semibold">Mock exam</h2>
-              <p className="mt-2 text-sm text-slate-500">
-                Generates a timed exam across the whole shared course library.
+              <p className="eyebrow">Timed practice</p>
+              <h2 className="mt-2 font-display text-xl font-black text-ink">Mock exam</h2>
+              <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
+                Generate a timed exam across the whole shared course library.
               </p>
               <button
                 type="button"
@@ -342,15 +345,15 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
             </div>
 
             <div className="card">
-              <h2 className="font-display text-lg font-semibold">Review queue</h2>
+              <p className="eyebrow">Review queue</p>
               <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-xl bg-slate-50 p-3">
-                  <dt className="text-slate-400">Due</dt>
-                  <dd className="font-display text-2xl font-bold">{data.flashcards.due}</dd>
+                <div className="metric-tile">
+                  <dt className="text-xs font-black uppercase tracking-wide text-slate-400">Due</dt>
+                  <dd className="font-display text-2xl font-black text-ink">{data.flashcards.due}</dd>
                 </div>
-                <div className="rounded-xl bg-slate-50 p-3">
-                  <dt className="text-slate-400">Total</dt>
-                  <dd className="font-display text-2xl font-bold">{data.flashcards.total}</dd>
+                <div className="metric-tile">
+                  <dt className="text-xs font-black uppercase tracking-wide text-slate-400">Total</dt>
+                  <dd className="font-display text-2xl font-black text-ink">{data.flashcards.total}</dd>
                 </div>
               </dl>
             </div>

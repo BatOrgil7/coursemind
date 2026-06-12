@@ -11,8 +11,8 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
   return (
     <div>
       <PageHeader
-        title={`${course.code} — ${course.title}`}
-        subtitle={`${course.subject} · ${course.memberCount} enrolled${
+        title={`${course.code} - ${course.title}`}
+        subtitle={`${course.subject} - ${course.memberCount} enrolled${
           course.isCrossUniversity && course.universityCount > 1
             ? ` from ${course.universityCount} universities`
             : ""
@@ -20,19 +20,19 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
         action={
           <div className="flex flex-wrap gap-3">
             <Link href={`/courses/${course.id}/workspaces`} className="btn-secondary">
-              👥 Workspaces
+              Workspaces
             </Link>
             <Link href={`/courses/${course.id}/discussions`} className="btn-secondary">
-              💬 Discussions
+              Discussions
             </Link>
             <Link href={`/courses/${course.id}/study`} className="btn-secondary">
               Smart study
             </Link>
             <Link href={`/tutor?courseId=${course.id}`} className="btn-secondary">
-              🧠 Ask the tutor
+              Ask the tutor
             </Link>
             <Link href={`/courses/${course.id}/upload`} className="btn-primary">
-              + Upload material
+              Upload material
             </Link>
           </div>
         }
@@ -42,41 +42,40 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
           <CrossUniversityBadge />
         </div>
       )}
-      {course.description && <p className="mb-8 max-w-3xl text-sm text-slate-600">{course.description}</p>}
+      {course.description && <p className="mb-8 max-w-3xl text-sm font-medium leading-relaxed text-slate-600">{course.description}</p>}
 
       <div className="grid gap-8 lg:grid-cols-5">
-        {/* Shared material library */}
         <section className="lg:col-span-3">
-          <h2 className="mb-3 font-display text-lg font-semibold">
-            📚 Shared library{" "}
-            <span className="text-sm font-normal text-slate-400">
-              — every upload helps the whole class
-            </span>
-          </h2>
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <div>
+              <p className="eyebrow">Library</p>
+              <h2 className="font-display text-xl font-black text-ink">Shared materials</h2>
+            </div>
+            <span className="text-xs font-bold text-slate-400">{course.materials.length} files</span>
+          </div>
           {course.materials.length === 0 ? (
             <EmptyState
               title="No materials yet"
-              body="Be the hero: upload the first lecture notes, slides, or syllabus. The AI tutor gets dramatically better once it can ground answers in your professor's actual materials."
+              body="Upload the first lecture notes, slides, syllabus, homework, or test so the AI tutor can ground answers in this class."
               cta="Upload the first material"
               href={`/courses/${course.id}/upload`}
             />
           ) : (
             <div className="space-y-3">
               {course.materials.map((material) => (
-                <div key={material.id} className="card flex items-start justify-between gap-4 p-4">
+                <div key={material.id} className="surface-panel flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <Link
                       href={`/materials/${material.id}`}
-                      className="font-medium text-ink hover:text-brand-700 hover:underline"
+                      className="font-black text-ink hover:text-brand-700"
                     >
                       {material.title}
                     </Link>
-                    <p className="mt-1 text-xs text-slate-400">
-                      <MaterialTypeBadge type={material.type} /> · by {material.uploaderName} ·{" "}
-                      {new Date(material.createdAt).toLocaleDateString()}
-                      {!material.hasText && (
-                        <span className="ml-2 text-amber-600">⚠ no extracted text</span>
-                      )}
+                    <p className="mt-1 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-400">
+                      <MaterialTypeBadge type={material.type} />
+                      <span>by {material.uploaderName}</span>
+                      <span>{new Date(material.createdAt).toLocaleDateString()}</span>
+                      {!material.hasText && <span className="font-bold text-amber-600">No extracted text</span>}
                     </p>
                   </div>
                   <GenerateQuizButton
@@ -90,22 +89,23 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
           )}
         </section>
 
-        {/* Quizzes */}
         <section className="lg:col-span-2">
-          <h2 className="mb-3 font-display text-lg font-semibold">🧪 Practice quizzes</h2>
+          <div className="mb-3">
+            <p className="eyebrow">Practice</p>
+            <h2 className="font-display text-xl font-black text-ink">Quizzes</h2>
+          </div>
           {course.quizzes.length === 0 ? (
-            <p className="card text-sm text-slate-500">
-              No quizzes yet — hit <strong>Generate quiz</strong> on any material with extracted
-              text.
+            <p className="card text-sm font-medium text-slate-500">
+              No quizzes yet. Generate one from any material with extracted text.
             </p>
           ) : (
             <div className="space-y-3">
               {course.quizzes.map((quiz) => (
-                <Link key={quiz.id} href={`/quizzes/${quiz.id}`} className="card block p-4 transition hover:shadow-lift">
-                  <p className="text-sm font-medium">{quiz.title}</p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    {quiz.isMockExam ? "Mock exam · " : ""}
-                    {quiz.attemptCount} attempt{quiz.attemptCount === 1 ? "" : "s"} ·{" "}
+                <Link key={quiz.id} href={`/quizzes/${quiz.id}`} className="card-interactive block p-4">
+                  <p className="text-sm font-black text-ink">{quiz.title}</p>
+                  <p className="mt-1 text-xs font-medium text-slate-400">
+                    {quiz.isMockExam ? "Mock exam - " : ""}
+                    {quiz.attemptCount} attempt{quiz.attemptCount === 1 ? "" : "s"} -{" "}
                     {new Date(quiz.createdAt).toLocaleDateString()}
                   </p>
                 </Link>

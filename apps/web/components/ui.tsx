@@ -1,55 +1,62 @@
-// Small shared UI atoms. Kept deliberately simple — plain Tailwind,
-// no component library — so every piece is easy to read and restyle.
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { TIER_LABELS } from "@coursemind/core";
 
 export function Logo({ dark = false }: { dark?: boolean }) {
   return (
-    <span className={`font-display text-xl font-bold tracking-tight ${dark ? "text-white" : "text-ink"}`}>
-      Course<span className="text-brand-500">Mind</span>
+    <span
+      className={`inline-flex items-center gap-2 font-display text-xl font-black tracking-tight ${
+        dark ? "text-white" : "text-ink"
+      }`}
+    >
+      <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-aqua-400 to-brand-500 text-xs font-black text-white shadow-lift">
+        CM
+      </span>
+      Course<span className="text-aqua-500">Mind</span>
     </span>
   );
 }
 
 const TIER_STYLES: Record<number, string> = {
-  0: "bg-emerald-100 text-emerald-800",
-  1: "bg-sky-100 text-sky-800",
-  2: "bg-violet-100 text-violet-800",
-  3: "bg-amber-100 text-amber-800",
-  4: "bg-rose-100 text-rose-800",
+  0: "bg-emerald-100 text-emerald-800 ring-emerald-200",
+  1: "bg-aqua-100 text-aqua-600 ring-aqua-300",
+  2: "bg-brand-100 text-brand-700 ring-brand-200",
+  3: "bg-amber-100 text-amber-800 ring-amber-200",
+  4: "bg-coral-100 text-coral-500 ring-coral-100",
 };
 
-/** Shows which hint tier an AI reply used — the visible face of the tier system. */
 export function TierBadge({ tier }: { tier: number }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${TIER_STYLES[tier] ?? TIER_STYLES[0]}`}
-      title="CourseMind escalates hints only as you engage — that's how you actually learn."
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black ring-1 ${
+        TIER_STYLES[tier] ?? TIER_STYLES[0]
+      }`}
+      title="CourseMind escalates hints only as you engage."
     >
-      Tier {tier} · {TIER_LABELS[tier] ?? "Hint"}
+      Tier {tier} - {TIER_LABELS[tier] ?? "Hint"}
     </span>
   );
 }
 
-export const MODE_META: Record<string, { label: string; emoji: string; blurb: string }> = {
+export const MODE_META: Record<string, { label: string; mark: string; blurb: string }> = {
   CONCEPT: {
     label: "Learn a concept",
-    emoji: "💡",
+    mark: "AI",
     blurb: "Full, generous explanations of anything in your course.",
   },
   ASSIGNMENT_HELP: {
     label: "Assignment help",
-    emoji: "🧭",
-    blurb: "Tiered hints that guide you to YOUR answer — never hand it over.",
+    mark: "HW",
+    blurb: "Tiered hints that guide you to your own answer - never hand it over.",
   },
   CODE_REVIEW: {
     label: "Code review",
-    emoji: "🔍",
-    blurb: "Paste homework code before submitting — get pointed questions, not rewrites.",
+    mark: "CR",
+    blurb: "Paste homework code before submitting - get pointed questions, not rewrites.",
   },
   DEBUG: {
     label: "Debug with me",
-    emoji: "🐛",
+    mark: "DBG",
     blurb: "Step-by-step Socratic debugging of your code.",
   },
 };
@@ -57,59 +64,63 @@ export const MODE_META: Record<string, { label: string; emoji: string; blurb: st
 export function ModeBadge({ mode }: { mode: string }) {
   const meta = MODE_META[mode];
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700">
-      {meta?.emoji} {meta?.label ?? mode}
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-black text-brand-700 ring-1 ring-brand-100">
+      <span className="rounded bg-white/80 px-1 font-black text-aqua-600">{meta?.mark}</span>
+      {meta?.label ?? mode}
     </span>
   );
 }
 
-export const WORKSPACE_TYPE_META: Record<string, { label: string; emoji: string }> = {
-  STUDY_GROUP: { label: "Study group", emoji: "👥" },
-  PROJECT: { label: "Project", emoji: "🛠️" },
+export const WORKSPACE_TYPE_META: Record<string, { label: string; mark: string }> = {
+  STUDY_GROUP: { label: "Study group", mark: "SG" },
+  PROJECT: { label: "Project", mark: "PR" },
 };
 
 export function WorkspaceTypeBadge({ type }: { type: string }) {
-  const meta = WORKSPACE_TYPE_META[type] ?? { label: type, emoji: "👥" };
+  const meta = WORKSPACE_TYPE_META[type] ?? { label: type, mark: "SG" };
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700">
-      {meta.emoji} {meta.label}
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-black text-brand-700 ring-1 ring-brand-100">
+      <span className="rounded bg-white/80 px-1 font-black text-aqua-600">{meta.mark}</span>
+      {meta.label}
     </span>
   );
 }
 
-export const CONTEXT_TYPE_META: Record<string, { label: string; emoji: string }> = {
-  COURSE: { label: "Course", emoji: "📚" },
-  QUIZ: { label: "Quiz", emoji: "🧪" },
-  MATERIAL: { label: "Material", emoji: "📄" },
-  EXAM: { label: "Exam", emoji: "📝" },
+export const CONTEXT_TYPE_META: Record<string, { label: string; mark: string }> = {
+  COURSE: { label: "Course", mark: "CO" },
+  QUIZ: { label: "Quiz", mark: "QZ" },
+  MATERIAL: { label: "Material", mark: "MT" },
+  EXAM: { label: "Exam", mark: "EX" },
 };
 
-/** Which part of the course a discussion thread is about (EXAM threads get amber). */
 export function ContextTypeBadge({ type }: { type: string }) {
-  const meta = CONTEXT_TYPE_META[type] ?? { label: type, emoji: "💬" };
-  const style = type === "EXAM" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600";
+  const meta = CONTEXT_TYPE_META[type] ?? { label: type, mark: "CH" };
+  const style =
+    type === "EXAM"
+      ? "bg-amber-100 text-amber-800 ring-amber-200"
+      : "bg-slate-100 text-slate-600 ring-slate-200";
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${style}`}>
-      {meta.emoji} {meta.label}
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-black ring-1 ${style}`}>
+      <span className="rounded bg-white/70 px-1">{meta.mark}</span>
+      {meta.label}
     </span>
   );
 }
 
-/** Marks a course shared beyond a single university (Phase 2). */
 export function CrossUniversityBadge() {
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-semibold text-sky-800"
+      className="inline-flex items-center gap-1 rounded-full bg-aqua-100 px-2.5 py-1 text-[11px] font-black text-aqua-600 ring-1 ring-aqua-300"
       title="Open to students from every university"
     >
-      🌍 Cross-university
+      Global course
     </span>
   );
 }
 
 export function MaterialTypeBadge({ type }: { type: string }) {
   return (
-    <span className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+    <span className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide text-slate-600 ring-1 ring-slate-200">
       {type}
     </span>
   );
@@ -128,8 +139,9 @@ export function EmptyState({
 }) {
   return (
     <div className="card flex flex-col items-center py-12 text-center">
-      <p className="font-display text-lg font-semibold text-slate-700">{title}</p>
-      <p className="mt-2 max-w-md text-sm text-slate-500">{body}</p>
+      <div className="mb-4 h-1.5 w-16 rounded-full bg-gradient-to-r from-aqua-400 via-brand-500 to-lime-400" />
+      <p className="font-display text-lg font-black text-slate-800">{title}</p>
+      <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-500">{body}</p>
       {cta && href && (
         <Link href={href} className="btn-primary mt-5">
           {cta}
@@ -146,13 +158,14 @@ export function PageHeader({
 }: {
   title: string;
   subtitle?: string;
-  action?: React.ReactNode;
+  action?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
+        <p className="eyebrow mb-3">CourseMind</p>
+        <h1 className="font-display text-3xl font-black tracking-tight text-ink sm:text-4xl">{title}</h1>
+        {subtitle && <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-slate-500">{subtitle}</p>}
       </div>
       {action}
     </div>

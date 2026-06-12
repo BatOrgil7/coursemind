@@ -1,7 +1,6 @@
 "use client";
 
-// Take a quiz. Answers and explanations are never sent to this page —
-// the server strips them (see quiz.get) so they can't leak via devtools.
+// Take a quiz. Answers and explanations stay server-side until review.
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -53,7 +52,7 @@ export default function TakeQuizPage({ params }: { params: Promise<{ quizId: str
   }
 
   if (!quiz && !error) {
-    return <p className="py-12 text-center text-sm text-slate-400">Loading quiz…</p>;
+    return <p className="py-12 text-center text-sm font-medium text-slate-400">Loading quiz...</p>;
   }
   if (error && !quiz) {
     return <p className="py-12 text-center text-sm text-rose-600">{error}</p>;
@@ -65,19 +64,19 @@ export default function TakeQuizPage({ params }: { params: Promise<{ quizId: str
     <div>
       <PageHeader
         title={quiz!.title}
-        subtitle={`${quiz!.questions.length} questions · grading includes AI feedback on written answers`}
+        subtitle={`${quiz!.questions.length} questions - grading includes AI feedback on written answers`}
         action={
           <Link href={`/courses/${quiz!.courseId}`} className="btn-secondary">
-            ← Back to course
+            Back to course
           </Link>
         }
       />
 
       {attempts.length > 0 && (
-        <p className="mb-6 rounded-xl bg-brand-50 px-4 py-2.5 text-sm text-brand-800">
-          You&apos;ve taken this quiz {attempts.length} time{attempts.length === 1 ? "" : "s"} — best
-          score {Math.max(...attempts.map((a) => a.score))}%.{" "}
-          <Link href={`/quizzes/attempts/${attempts[0].id}`} className="font-semibold underline">
+        <p className="mb-6 rounded-lg border border-brand-100 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-800">
+          You have taken this quiz {attempts.length} time{attempts.length === 1 ? "" : "s"} with a best score of{" "}
+          {Math.max(...attempts.map((a) => a.score))}%.{" "}
+          <Link href={`/quizzes/attempts/${attempts[0].id}`} className="font-black underline">
             Review your last attempt
           </Link>
         </p>
@@ -86,25 +85,25 @@ export default function TakeQuizPage({ params }: { params: Promise<{ quizId: str
       <div className="space-y-6">
         {quiz!.questions.map((question, index) => (
           <div key={question.id} className="card">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Question {index + 1} · {question.topic}
+            <p className="mb-1 text-xs font-black uppercase tracking-wide text-slate-400">
+              Question {index + 1} - {question.topic}
             </p>
-            <p className="whitespace-pre-wrap font-medium">{question.prompt}</p>
+            <p className="whitespace-pre-wrap font-semibold text-ink">{question.prompt}</p>
             {question.type === "mcq" && question.options ? (
               <div className="mt-4 space-y-2">
                 {question.options.map((option, optionIndex) => (
                   <label
                     key={optionIndex}
-                    className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 px-4 py-3 text-sm transition ${
+                    className={`flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3 text-sm font-medium transition ${
                       answers[question.id] === String(optionIndex)
-                        ? "border-brand-600 bg-brand-50"
-                        : "border-slate-200 hover:border-brand-300"
+                        ? "border-aqua-300 bg-brand-50 text-brand-800 shadow-card"
+                        : "border-slate-200 bg-white/60 hover:border-aqua-200"
                     }`}
                   >
                     <input
                       type="radio"
                       name={question.id}
-                      className="mt-0.5"
+                      className="mt-0.5 accent-brand-600"
                       checked={answers[question.id] === String(optionIndex)}
                       onChange={() =>
                         setAnswers((prev) => ({ ...prev, [question.id]: String(optionIndex) }))
@@ -118,7 +117,7 @@ export default function TakeQuizPage({ params }: { params: Promise<{ quizId: str
               <textarea
                 className={`input mt-4 ${question.type === "code" ? "font-mono text-xs" : ""}`}
                 rows={question.type === "code" ? 8 : 4}
-                placeholder={question.type === "code" ? "Write your code here…" : "Your answer…"}
+                placeholder={question.type === "code" ? "Write your code here..." : "Your answer..."}
                 value={answers[question.id] ?? ""}
                 onChange={(e) => setAnswers((prev) => ({ ...prev, [question.id]: e.target.value }))}
               />
@@ -127,14 +126,14 @@ export default function TakeQuizPage({ params }: { params: Promise<{ quizId: str
         ))}
       </div>
 
-      {error && <p className="mt-4 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {error && <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{error}</p>}
 
-      <div className="sticky bottom-0 mt-8 flex items-center justify-between rounded-2xl border border-slate-200 bg-white/95 px-5 py-4 shadow-lift backdrop-blur">
-        <p className="text-sm text-slate-500">
+      <div className="sticky bottom-0 mt-8 flex items-center justify-between gap-4 rounded-lg border border-white/70 bg-white/90 px-5 py-4 shadow-lift backdrop-blur">
+        <p className="text-sm font-bold text-slate-500">
           {answeredCount}/{quiz!.questions.length} answered
         </p>
         <button onClick={submit} disabled={busy} className="btn-primary">
-          {busy ? "Grading… (~15s)" : "Submit & grade"}
+          {busy ? "Grading... (~15s)" : "Submit and grade"}
         </button>
       </div>
     </div>

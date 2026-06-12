@@ -1,4 +1,4 @@
-// The single tRPC HTTP endpoint — consumed by the web client AND the
+// The single tRPC HTTP endpoint - consumed by the web client AND the
 // Expo mobile app (mobile authenticates with "Authorization: Bearer <jwt>").
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter, createContext } from "@coursemind/api";

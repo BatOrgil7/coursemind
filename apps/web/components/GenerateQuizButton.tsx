@@ -1,6 +1,6 @@
 "use client";
 
-// "Generate quiz" — calls the AI, then jumps straight into taking it.
+// Calls the AI, then jumps straight into taking the generated quiz.
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, errorMessage } from "@/lib/trpc";
@@ -38,11 +38,11 @@ export function GenerateQuizButton({
         onClick={generate}
         disabled={busy || disabled}
         className="btn-secondary text-xs"
-        title={disabled ? "No extracted text — the AI can't read this material" : "Generate a ~10-question practice quiz from this material"}
+        title={disabled ? "No extracted text - the AI cannot read this material" : "Generate a practice quiz from this material"}
       >
-        {busy ? "Generating… (~20s)" : "🧪 Generate quiz"}
+        {busy ? "Generating... (~20s)" : "Generate quiz"}
       </button>
-      {error && <p className="mt-2 max-w-sm text-xs text-rose-600">{error}</p>}
+      {error && <p className="mt-2 max-w-sm text-xs font-medium text-rose-600">{error}</p>}
     </div>
   );
 }

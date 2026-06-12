@@ -1,8 +1,6 @@
 "use client";
 
-// The tutor chat. Every assistant reply shows its tier badge, making the
-// "hints, not handouts" mechanic visible — students see themselves earning
-// deeper help by engaging.
+// The tutor chat. Assistant replies show the hint tier when relevant.
 import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { api, errorMessage } from "@/lib/trpc";
@@ -13,10 +11,10 @@ import type { TutorMessage } from "@coursemind/core";
 type SessionPayload = Awaited<ReturnType<typeof api.tutor.getSession.query>>;
 
 const MODE_PLACEHOLDERS: Record<string, string> = {
-  CONCEPT: "Ask anything — e.g. “Why does quicksort degrade to O(n²)?”",
-  ASSIGNMENT_HELP: "Describe the assignment problem you're stuck on…",
-  CODE_REVIEW: "Paste your code (with a note about what it should do)…",
-  DEBUG: "Paste the broken code + the error or wrong behavior you're seeing…",
+  CONCEPT: "Ask anything, like: Why does quicksort degrade to O(n^2)?",
+  ASSIGNMENT_HELP: "Describe the assignment problem you're stuck on.",
+  CODE_REVIEW: "Paste your code with a note about what it should do.",
+  DEBUG: "Paste the broken code plus the error or wrong behavior.",
 };
 
 export default function TutorSessionPage({
@@ -41,7 +39,7 @@ export default function TutorSessionPage({
         setMessages(data.messages);
         if (!data.aiConfigured) {
           setNotice(
-            "Heads up: no Anthropic API key is configured yet, so the tutor can't reply. See README.md → 'Enabling AI features'."
+            "No Anthropic API key is configured yet, so the tutor cannot reply. See README.md under Enabling AI features."
           );
         }
       } catch (err) {
@@ -74,12 +72,10 @@ export default function TutorSessionPage({
         },
       ]);
       if (!reply.aiConfigured) {
-        // Not persisted server-side; remove the optimistic user message too.
-        setNotice("The tutor needs an ANTHROPIC_API_KEY to reply — see README.md.");
+        setNotice("The tutor needs an ANTHROPIC_API_KEY to reply. See README.md.");
       }
     } catch (err) {
       setError(errorMessage(err));
-      // Put the unsent text back so the student doesn't lose it.
       setInput(content);
       setMessages((prev) => prev.slice(0, -1));
     } finally {
@@ -88,103 +84,114 @@ export default function TutorSessionPage({
   }
 
   if (!session && !error) {
-    return <p className="py-12 text-center text-sm text-slate-400">Loading session…</p>;
+    return <p className="py-12 text-center text-sm text-slate-400">Loading session...</p>;
   }
   if (error && !session) {
     return <p className="py-12 text-center text-sm text-rose-600">{error}</p>;
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col">
-      {/* Header */}
-      <div className="mb-4 flex items-center justify-between gap-4">
+    <div className="flex min-h-[calc(100vh-8rem)] flex-col gap-4">
+      <header className="surface-panel flex flex-wrap items-center justify-between gap-4 p-4">
         <div className="min-w-0">
-          <Link href="/tutor" className="text-xs text-brand-600 hover:underline">
-            ← All sessions
+          <Link href="/tutor" className="text-xs font-black uppercase tracking-[0.16em] text-aqua-600 hover:text-brand-700">
+            All sessions
           </Link>
-          <h1 className="truncate font-display text-lg font-bold">{session!.title}</h1>
+          <h1 className="truncate font-display text-xl font-black text-ink">{session!.title}</h1>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           <ModeBadge mode={session!.mode} />
           {session!.course && (
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-              📚 {session!.course.code}
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-600 ring-1 ring-slate-200">
+              {session!.course.code}
             </span>
           )}
         </div>
-      </div>
+      </header>
 
       {notice && (
-        <p className="mb-3 rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-800">⚠ {notice}</p>
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800">
+          {notice}
+        </p>
       )}
 
-      {/* Messages */}
-      <div className="flex-1 space-y-4 overflow-y-auto pb-4 pr-1">
-        {messages.length === 0 && (
-          <div className="card mx-auto mt-8 max-w-lg text-center">
-            <p className="text-3xl">🧠</p>
-            <p className="mt-2 font-display font-semibold">
-              {session!.mode === "ASSIGNMENT_HELP"
-                ? "Stuck on an assignment? Good — that's where learning happens."
-                : "What do you want to understand?"}
-            </p>
-            <p className="mt-2 text-sm text-slate-500">
-              {session!.mode === "ASSIGNMENT_HELP"
-                ? "I'll guide you with hints that go deeper as you engage — the final answer will be yours, and you'll actually own it."
-                : MODE_PLACEHOLDERS[session!.mode]}
-            </p>
-          </div>
-        )}
-        {messages.map((message, i) =>
-          message.role === "user" ? (
-            <div key={i} className="ml-auto max-w-[80%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-3 text-[15px] text-white">
-              <p className="whitespace-pre-wrap">{message.content}</p>
+      <div className="flex-1 overflow-y-auto rounded-lg border border-white/70 bg-white/[0.48] p-4 shadow-card backdrop-blur">
+        <div className="space-y-4">
+          {messages.length === 0 && (
+            <div className="mx-auto mt-10 max-w-lg text-center">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-lg bg-ink text-xs font-black text-white shadow-card">
+                AI
+              </div>
+              <p className="mt-4 font-display text-lg font-black text-ink">
+                {session!.mode === "ASSIGNMENT_HELP"
+                  ? "Start with what you tried."
+                  : "What do you want to understand?"}
+              </p>
+              <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
+                {session!.mode === "ASSIGNMENT_HELP"
+                  ? "The tutor will guide you through hints and checks so the final answer is still yours."
+                  : MODE_PLACEHOLDERS[session!.mode]}
+              </p>
             </div>
-          ) : (
-            <div key={i} className="max-w-[85%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 shadow-card">
-              {typeof message.tier === "number" && (
-                <div className="mb-2">
-                  <TierBadge tier={message.tier} />
-                </div>
-              )}
-              <Markdown>{message.content}</Markdown>
+          )}
+          {messages.map((message, i) =>
+            message.role === "user" ? (
+              <div
+                key={i}
+                className="ml-auto max-w-[88%] rounded-lg bg-gradient-to-br from-brand-600 to-aqua-500 px-4 py-3 text-[15px] font-medium text-white shadow-card sm:max-w-[78%]"
+              >
+                <p className="whitespace-pre-wrap">{message.content}</p>
+              </div>
+            ) : (
+              <div
+                key={i}
+                className="max-w-[92%] rounded-lg border border-slate-200/80 bg-white px-4 py-3 shadow-card sm:max-w-[82%]"
+              >
+                {typeof message.tier === "number" && (
+                  <div className="mb-2">
+                    <TierBadge tier={message.tier} />
+                  </div>
+                )}
+                <Markdown>{message.content}</Markdown>
+              </div>
+            )
+          )}
+          {busy && (
+            <div className="max-w-[82%] rounded-lg border border-slate-200/80 bg-white px-4 py-3 text-sm font-semibold text-slate-400 shadow-card">
+              Thinking...
             </div>
-          )
-        )}
-        {busy && (
-          <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-400 shadow-card">
-            Thinking…
-          </div>
-        )}
-        <div ref={bottomRef} />
+          )}
+          <div ref={bottomRef} />
+        </div>
       </div>
 
       {error && session && (
-        <p className="mb-2 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>
+        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{error}</p>
       )}
 
-      {/* Composer */}
-      <div className="flex items-end gap-3 border-t border-slate-200 pt-4">
-        <textarea
-          className="input min-h-[3rem] flex-1 resize-y"
-          rows={2}
-          placeholder={MODE_PLACEHOLDERS[session!.mode]}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              void send();
-            }
-          }}
-        />
-        <button onClick={send} disabled={busy || !input.trim()} className="btn-primary">
-          Send
-        </button>
+      <div className="surface-panel p-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <textarea
+            className="input min-h-[3.2rem] flex-1 resize-y"
+            rows={2}
+            placeholder={MODE_PLACEHOLDERS[session!.mode]}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                void send();
+              }
+            }}
+          />
+          <button onClick={send} disabled={busy || !input.trim()} className="btn-primary sm:min-w-28">
+            Send
+          </button>
+        </div>
+        <p className="mt-2 text-center text-[11px] font-semibold text-slate-400">
+          Enter to send. Shift+Enter for a new line.
+        </p>
       </div>
-      <p className="mt-2 text-center text-[11px] text-slate-400">
-        Enter to send · Shift+Enter for a new line
-      </p>
     </div>
   );
 }

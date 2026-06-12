@@ -1,8 +1,6 @@
 "use client";
 
-// Workspaces hub for a course: study groups & project teams.
-// List, create, join — the workspace itself (board + chat) lives at
-// /workspaces/[workspaceId].
+// Workspaces hub for a course: study groups and project teams.
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -60,23 +58,23 @@ export default function WorkspacesPage({ params }: { params: Promise<{ courseId:
   }
 
   if (!data && !error) {
-    return <p className="py-12 text-center text-sm text-slate-400">Loading workspaces…</p>;
+    return <p className="py-12 text-center text-sm font-medium text-slate-400">Loading workspaces...</p>;
   }
 
   return (
     <div>
       <PageHeader
-        title="👥 Workspaces"
+        title="Workspaces"
         subtitle={
-          data ? `${data.course.code} — study groups & project teams` : "Study groups & project teams"
+          data ? `${data.course.code} - study groups and project teams` : "Study groups and project teams"
         }
         action={
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Link href={`/courses/${courseId}`} className="btn-secondary">
-              ← Back to course
+              Back to course
             </Link>
             <button className="btn-primary" onClick={() => setShowCreate((v) => !v)}>
-              {showCreate ? "Cancel" : "+ New workspace"}
+              {showCreate ? "Cancel" : "New workspace"}
             </button>
           </div>
         }
@@ -90,19 +88,18 @@ export default function WorkspacesPage({ params }: { params: Promise<{ courseId:
                 type="button"
                 key={key}
                 onClick={() => setForm({ ...form, type: key })}
-                className={`rounded-2xl border-2 p-4 text-left transition ${
+                className={`rounded-lg border p-4 text-left transition ${
                   form.type === key
-                    ? "border-brand-600 bg-brand-50"
-                    : "border-slate-200 bg-white hover:border-brand-300"
+                    ? "border-aqua-300 bg-gradient-to-br from-brand-50 to-aqua-50 shadow-card"
+                    : "border-slate-200/80 bg-white/70 hover:-translate-y-0.5 hover:border-aqua-200 hover:shadow-card"
                 }`}
               >
-                <p className="font-display font-semibold">
-                  {meta.emoji} {meta.label}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <span className="icon-mark mb-4 bg-slate-100 text-brand-700">{meta.mark}</span>
+                <p className="font-display font-black text-ink">{meta.label}</p>
+                <p className="mt-1 text-xs font-medium text-slate-500">
                   {key === "STUDY_GROUP"
-                    ? "Study together: shared to-do board + group chat."
-                    : "Ship a group project: task board, assignments, chat."}
+                    ? "Study together with a shared board and group chat."
+                    : "Ship a group project with tasks, assignments, and chat."}
                 </p>
               </button>
             ))}
@@ -111,14 +108,14 @@ export default function WorkspacesPage({ params }: { params: Promise<{ courseId:
             <label className="label">Name</label>
             <input
               className="input"
-              placeholder={form.type === "PROJECT" ? "Final project — Team Rocket" : "Tuesday study crew"}
+              placeholder={form.type === "PROJECT" ? "Final project team" : "Tuesday study crew"}
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="label">What's it about? (optional)</label>
+            <label className="label">What is it about? (optional)</label>
             <textarea
               className="input"
               rows={2}
@@ -127,36 +124,36 @@ export default function WorkspacesPage({ params }: { params: Promise<{ courseId:
             />
           </div>
           <button type="submit" disabled={busy} className="btn-primary sm:col-span-2">
-            {busy ? "Creating…" : "Create & open"}
+            {busy ? "Creating..." : "Create and open"}
           </button>
         </form>
       )}
 
-      {error && <p className="mb-4 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {error && <p className="mb-4 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{error}</p>}
 
       {data &&
         (data.workspaces.length === 0 ? (
           <EmptyState
             title="No workspaces yet"
-            body="Start the first study group or project team for this course — task board and group chat included."
+            body="Start the first study group or project team for this course. Task board and group chat included."
           />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {data.workspaces.map((w) => (
-              <div key={w.id} className="card flex flex-col">
+              <div key={w.id} className="card-interactive flex flex-col">
                 <div className="flex items-center justify-between gap-2">
                   <WorkspaceTypeBadge type={w.type} />
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs font-bold text-slate-400">
                     {w.memberCount} member{w.memberCount === 1 ? "" : "s"}
                   </span>
                 </div>
-                <p className="mt-2 font-display text-lg font-semibold">{w.name}</p>
-                <p className="mt-1 flex-1 text-xs text-slate-400">
-                  {w.openTaskCount} open task{w.openTaskCount === 1 ? "" : "s"} · {w.messageCount}{" "}
-                  message{w.messageCount === 1 ? "" : "s"} · created{" "}
+                <p className="mt-3 font-display text-lg font-black text-ink">{w.name}</p>
+                <p className="mt-1 flex-1 text-xs font-medium text-slate-400">
+                  {w.openTaskCount} open task{w.openTaskCount === 1 ? "" : "s"} - {w.messageCount}{" "}
+                  message{w.messageCount === 1 ? "" : "s"} - created{" "}
                   {new Date(w.createdAt).toLocaleDateString()}
                 </p>
-                <div className="mt-4">
+                <div className="mt-5">
                   {w.joined ? (
                     <Link href={`/workspaces/${w.id}`} className="btn-secondary w-full">
                       Open workspace

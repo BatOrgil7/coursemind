@@ -3,62 +3,112 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
     @apply bg-paper text-ink antialiased;
+    background:
+      linear-gradient(135deg, rgba(124, 58, 237, 0.08), transparent 28%),
+      linear-gradient(225deg, rgba(6, 182, 212, 0.1), transparent 32%),
+      linear-gradient(180deg, #fbfcff 0%, #f6f7fb 48%, #f3f6fb 100%);
+  }
+
+  ::selection {
+    @apply bg-aqua-300 text-ink;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-lift transition hover:-translate-y-0.5 hover:bg-brand-500 focus:outline-none focus:ring-2 focus:ring-aqua-400 focus:ring-offset-2 focus:ring-offset-paper disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-50;
+    background-image: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
   }
+
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-brand-400 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-aqua-300 hover:text-brand-700 hover:shadow-card focus:outline-none focus:ring-2 focus:ring-aqua-400 focus:ring-offset-2 focus:ring-offset-paper disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-50;
   }
+
   .card {
-    @apply rounded-2xl border border-slate-200 bg-white p-6 shadow-card;
+    @apply rounded-lg border border-white/70 bg-white/[0.86] p-6 shadow-card backdrop-blur-xl;
   }
+
+  .card-interactive {
+    @apply rounded-lg border border-white/70 bg-white/[0.86] p-6 shadow-card backdrop-blur-xl transition hover:-translate-y-1 hover:border-aqua-200 hover:shadow-lift;
+  }
+
   .input {
-    @apply w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100;
+    @apply w-full rounded-lg border border-slate-200 bg-white/90 px-3.5 py-2.5 text-sm font-medium text-ink shadow-sm placeholder:text-slate-400 focus:border-aqua-400 focus:outline-none focus:ring-4 focus:ring-aqua-100;
   }
+
   .label {
-    @apply mb-1.5 block text-sm font-medium text-slate-700;
+    @apply mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-slate-500;
+  }
+
+  .surface-panel {
+    @apply rounded-lg border border-white/70 bg-white/[0.72] shadow-card backdrop-blur-xl;
+  }
+
+  .rail-link {
+    @apply flex min-w-0 shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-slate-300 transition hover:bg-white/[0.08] hover:text-white;
+  }
+
+  .metric-tile {
+    @apply rounded-lg border border-white/70 bg-white/70 p-4 shadow-sm backdrop-blur;
+  }
+
+  .icon-mark {
+    @apply grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-ink text-[11px] font-black tracking-wide text-white shadow-sm;
+  }
+
+  .eyebrow {
+    @apply text-xs font-black uppercase tracking-[0.18em] text-aqua-600;
   }
 }
 
-/* Markdown rendering inside tutor chat bubbles */
 .prose-chat {
   @apply text-[15px] leading-relaxed;
 }
+
 .prose-chat p {
   @apply my-2;
 }
+
 .prose-chat h1,
 .prose-chat h2,
 .prose-chat h3 {
   @apply mb-2 mt-4 font-display font-semibold;
 }
+
 .prose-chat ul {
   @apply my-2 list-disc pl-5;
 }
+
 .prose-chat ol {
   @apply my-2 list-decimal pl-5;
 }
+
 .prose-chat li {
   @apply my-1;
 }
+
 .prose-chat code {
   @apply rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[13px] text-brand-800;
 }
+
 .prose-chat pre {
-  @apply my-3 overflow-x-auto rounded-xl bg-ink p-4;
+  @apply my-3 overflow-x-auto rounded-lg bg-ink p-4;
 }
+
 .prose-chat pre code {
   @apply bg-transparent p-0 text-slate-100;
 }
+
 .prose-chat blockquote {
-  @apply my-2 border-l-4 border-brand-200 pl-3 italic text-slate-600;
+  @apply my-2 border-l-4 border-aqua-300 pl-3 italic text-slate-600;
 }
+
 .prose-chat strong {
   @apply font-semibold;
 }

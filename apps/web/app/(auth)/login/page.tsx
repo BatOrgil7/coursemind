@@ -28,8 +28,9 @@ export default function LoginPage() {
 
   return (
     <div>
-      <h1 className="font-display text-xl font-bold">Welcome back</h1>
-      <p className="mt-1 text-sm text-slate-500">Log in with your university email.</p>
+      <p className="eyebrow">Welcome back</p>
+      <h1 className="mt-2 font-display text-2xl font-black text-ink">Log in to CourseMind</h1>
+      <p className="mt-2 text-sm font-medium text-slate-500">Use your university email to continue.</p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
           <label className="label" htmlFor="email">University email</label>
@@ -54,14 +55,14 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+        {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{error}</p>}
         <button type="submit" disabled={busy} className="btn-primary w-full">
-          {busy ? "Logging in…" : "Log in"}
+          {busy ? "Logging in..." : "Log in"}
         </button>
       </form>
-      <p className="mt-4 text-center text-sm text-slate-500">
+      <p className="mt-4 text-center text-sm font-medium text-slate-500">
         New here?{" "}
-        <Link href="/signup" className="font-semibold text-brand-600 hover:underline">
+        <Link href="/signup" className="font-black text-brand-600 hover:text-brand-700">
           Create an account
         </Link>
       </p>

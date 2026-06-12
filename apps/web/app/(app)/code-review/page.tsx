@@ -1,8 +1,6 @@
 "use client";
 
-// Pre-submit code review: paste homework code, get pointed questions —
-// never rewrites. Creates a CODE_REVIEW tutor session with the code as
-// the first message, then drops into the normal chat.
+// Pre-submit code review: paste homework code, get pointed questions.
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, errorMessage } from "@/lib/trpc";
@@ -51,45 +49,57 @@ export default function CodeReviewPage() {
     <div>
       <PageHeader
         title="Pre-submit code review"
-        subtitle="Paste your homework code before turning it in. You'll get pointed questions about bugs, edge cases, and style — and zero rewritten code. Finding the fix is the workout."
+        subtitle="Paste homework code before turning it in. You get pointed questions about bugs, edge cases, and style without rewritten answers."
       />
-      <form onSubmit={submit} className="card max-w-3xl space-y-4">
-        <div>
-          <label className="label">Course (optional — grounds review in course materials)</label>
-          <select className="input" value={courseId} onChange={(e) => setCourseId(e.target.value)}>
-            <option value="">No course</option>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.code} — {c.title}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="label">What is this code supposed to do?</label>
-          <input
-            className="input"
-            placeholder="e.g. Insert a key into a hash table with linear probing"
-            value={context}
-            onChange={(e) => setContext(e.target.value)}
-          />
-        </div>
-        <div>
-          <label className="label">Your code</label>
-          <textarea
-            className="input font-mono text-xs"
-            rows={16}
-            required
-            placeholder="Paste your code here…"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-          />
-        </div>
-        {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
-        <button type="submit" disabled={busy || !code.trim()} className="btn-primary">
-          {busy ? "Reviewing… (~20s)" : "🔍 Review my code"}
-        </button>
-      </form>
+      <div className="grid gap-6 lg:grid-cols-[0.95fr_0.55fr]">
+        <form onSubmit={submit} className="card space-y-4">
+          <div>
+            <label className="label">Course context</label>
+            <select className="input" value={courseId} onChange={(e) => setCourseId(e.target.value)}>
+              <option value="">No course</option>
+              {courses.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.code} - {c.title}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="label">What should this code do?</label>
+            <input
+              className="input"
+              placeholder="Example: Insert a key into a hash table with linear probing"
+              value={context}
+              onChange={(e) => setContext(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="label">Your code</label>
+            <textarea
+              className="input min-h-80 font-mono text-xs"
+              rows={16}
+              required
+              placeholder="Paste your code here..."
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
+          </div>
+          {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{error}</p>}
+          <button type="submit" disabled={busy || !code.trim()} className="btn-primary">
+            {busy ? "Reviewing... (~20s)" : "Review my code"}
+          </button>
+        </form>
+
+        <aside className="surface-panel h-fit p-6">
+          <p className="eyebrow">Review style</p>
+          <h2 className="mt-2 font-display text-2xl font-black text-ink">Find the bug. Own the fix.</h2>
+          <div className="mt-6 space-y-3 text-sm font-medium leading-relaxed text-slate-500">
+            <p>The tutor reads your course context when available.</p>
+            <p>It calls out edge cases, assumptions, and style risks.</p>
+            <p>It asks the question that gets you to the next step instead of rewriting the answer.</p>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

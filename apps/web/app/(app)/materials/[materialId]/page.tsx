@@ -16,11 +16,11 @@ export default async function MaterialPage({
     <div>
       <PageHeader
         title={material.title}
-        subtitle={`${material.course.code} · uploaded by ${material.uploaderName} · ${new Date(material.createdAt).toLocaleDateString()}`}
+        subtitle={`${material.course.code} - uploaded by ${material.uploaderName} - ${new Date(material.createdAt).toLocaleDateString()}`}
         action={
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Link href={`/tutor?courseId=${material.course.id}`} className="btn-secondary">
-              🧠 Ask about this
+              Ask about this
             </Link>
             <GenerateQuizButton
               courseId={material.course.id}
@@ -30,26 +30,24 @@ export default async function MaterialPage({
           </div>
         }
       />
-      <p className="mb-4">
+      <p className="mb-4 flex flex-wrap items-center gap-3">
         <MaterialTypeBadge type={material.type} />
-        <Link href={`/courses/${material.course.id}`} className="ml-3 text-sm text-brand-600 hover:underline">
-          ← Back to {material.course.code}
+        <Link href={`/courses/${material.course.id}`} className="text-sm font-bold text-brand-600 hover:text-brand-700">
+          Back to {material.course.code}
         </Link>
       </p>
 
       <div className="card">
-        <h2 className="mb-3 font-display text-sm font-semibold uppercase tracking-wide text-slate-400">
-          Extracted text (what the AI tutor reads)
+        <h2 className="mb-3 font-display text-sm font-black uppercase tracking-wide text-slate-400">
+          Extracted text read by the tutor
         </h2>
         {material.extractedText ? (
           <pre className="max-h-[36rem] overflow-y-auto whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-700">
             {material.extractedText}
           </pre>
         ) : (
-          <p className="text-sm text-amber-700">
-            ⚠ No text could be extracted from this material, so the AI tutor can&apos;t use it. If
-            it&apos;s a scanned PDF, try an OCR&apos;d version — or paste the content as text from
-            the course&apos;s upload page.
+          <p className="text-sm font-medium leading-relaxed text-amber-700">
+            No text could be extracted from this material, so the AI tutor cannot use it. If it is a scanned PDF, try an OCR version or paste the content as text from the upload page.
           </p>
         )}
       </div>

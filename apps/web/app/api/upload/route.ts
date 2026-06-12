@@ -1,5 +1,5 @@
 // Multipart file upload endpoint (multipart doesn't flow through tRPC).
-// All the real work — enrollment check, text extraction, DB write, XP —
+// All the real work - enrollment check, text extraction, DB write, XP -
 // happens in @coursemind/api's createMaterialFromFile, so mobile can hit
 // this same endpoint with its Bearer token and identical behavior.
 //
@@ -15,7 +15,7 @@ import { auth } from "@/auth";
 const MAX_FILE_BYTES = 25 * 1024 * 1024; // 25 MB
 
 export async function POST(req: Request) {
-  // Resolve the caller from either transport (web session or mobile JWT)
+  // Resolve the caller from either transport (web session or mobile JWT).
   const session = await auth();
   let userId = session?.user?.id ?? null;
   if (!userId) {

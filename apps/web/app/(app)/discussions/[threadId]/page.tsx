@@ -1,9 +1,6 @@
 "use client";
 
-// A discussion thread. Anyone enrolled can post; the class can also
-// INVOKE the AI tutor into the thread — it reads the whole discussion
-// and posts one hint-based reply (tier badge shown, same system as the
-// private tutor, capped lower because the board is public).
+// A discussion thread. Students can post, reply, and invoke the tutor.
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { api, errorMessage } from "@/lib/trpc";
@@ -78,7 +75,7 @@ export default function ThreadPage({ params }: { params: Promise<{ threadId: str
   }
 
   if (!thread && !error) {
-    return <p className="py-12 text-center text-sm text-slate-400">Loading thread…</p>;
+    return <p className="py-12 text-center text-sm font-medium text-slate-400">Loading thread...</p>;
   }
   if (error && !thread) {
     return <p className="py-12 text-center text-sm text-rose-600">{error}</p>;
@@ -90,27 +87,25 @@ export default function ThreadPage({ params }: { params: Promise<{ threadId: str
 
   return (
     <div className="mx-auto max-w-3xl">
-      {/* Header */}
-      <div className="mb-6">
+      <header className="surface-panel mb-6 p-5">
         <Link
           href={`/courses/${t.course.id}/discussions`}
-          className="text-xs text-brand-600 hover:underline"
+          className="text-xs font-black uppercase tracking-[0.16em] text-aqua-600 hover:text-brand-700"
         >
-          ← {t.course.code} discussions
+          {t.course.code} discussions
         </Link>
-        <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="font-display text-2xl font-bold text-ink">{t.title}</h1>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <h1 className="font-display text-2xl font-black text-ink">{t.title}</h1>
           <ContextTypeBadge type={t.contextType} />
         </div>
-        <p className="mt-1 text-xs text-slate-400">started by {t.creatorName}</p>
-      </div>
+        <p className="mt-1 text-xs font-medium text-slate-400">started by {t.creatorName}</p>
+      </header>
 
       {notice && (
-        <p className="mb-4 rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-800">⚠ {notice}</p>
+        <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-800">{notice}</p>
       )}
-      {error && <p className="mb-4 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {error && <p className="mb-4 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{error}</p>}
 
-      {/* Posts */}
       <div className="space-y-4">
         {topLevel.map((post) => (
           <div key={post.id}>
@@ -125,50 +120,47 @@ export default function ThreadPage({ params }: { params: Promise<{ threadId: str
           </div>
         ))}
         {asking && (
-          <div className="rounded-2xl border border-brand-200 bg-brand-50/50 px-4 py-3 text-sm text-slate-400">
-            🧠 The tutor is reading the thread…
+          <div className="rounded-lg border border-brand-200 bg-brand-50/70 px-4 py-3 text-sm font-semibold text-slate-500">
+            The tutor is reading the thread...
           </div>
         )}
       </div>
 
-      {/* Invoke the tutor */}
-      <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-brand-100 bg-brand-50/60 px-4 py-3">
-        <p className="text-xs text-slate-600">
-          <span className="font-semibold text-brand-700">🧠 Stuck as a group?</span> Invoke the AI
-          tutor — it reads the thread and replies with hints
+      <div className="surface-panel mt-6 flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs font-medium leading-relaxed text-slate-600">
+          <span className="font-black text-brand-700">Stuck as a group?</span> Invoke the AI tutor. It reads the thread and replies with hints
           {t.contextType === "EXAM" || t.contextType === "QUIZ"
             ? ", never answers to graded questions."
             : " and grounded explanations."}
         </p>
         <button className="btn-primary shrink-0" onClick={handleAskTutor} disabled={asking}>
-          {asking ? "Thinking…" : "Invoke tutor"}
+          {asking ? "Thinking..." : "Invoke tutor"}
         </button>
       </div>
 
-      {/* Reply composer */}
-      <form onSubmit={handleReply} className="mt-6 border-t border-slate-200 pt-4">
+      <form onSubmit={handleReply} className="surface-panel mt-6 p-4">
         {replyTo && (
-          <p className="mb-2 flex items-center gap-2 text-xs text-slate-500">
-            ↪ Replying to <span className="font-semibold">{replyTo.authorName}</span>
+          <p className="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
+            Replying to <span className="font-black">{replyTo.authorName}</span>
             <button
               type="button"
-              className="text-brand-600 hover:underline"
+              className="font-black text-brand-600 hover:text-brand-700"
               onClick={() => setReplyTo(null)}
             >
               cancel
             </button>
           </p>
         )}
-        <div className="flex items-end gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <textarea
             className="input min-h-[3rem] flex-1 resize-y"
             rows={2}
-            placeholder={replyTo ? `Reply to ${replyTo.authorName}…` : "Add to the discussion…"}
+            placeholder={replyTo ? `Reply to ${replyTo.authorName}...` : "Add to the discussion..."}
             value={reply}
             onChange={(e) => setReply(e.target.value)}
           />
           <button type="submit" className="btn-primary" disabled={posting || !reply.trim()}>
-            {posting ? "Posting…" : "Post"}
+            {posting ? "Posting..." : "Post"}
           </button>
         </div>
       </form>
@@ -179,24 +171,23 @@ export default function ThreadPage({ params }: { params: Promise<{ threadId: str
 function PostCard({ post, onReply }: { post: Post; onReply: () => void }) {
   return (
     <div
-      className={`rounded-2xl px-4 py-3 ${
+      className={`rounded-lg px-4 py-3 ${
         post.isAi
-          ? "border border-brand-200 bg-brand-50/50"
-          : "border border-slate-200 bg-white shadow-card"
+          ? "border border-brand-200 bg-brand-50/70"
+          : "border border-white/70 bg-white/[0.86] shadow-card backdrop-blur"
       }`}
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-slate-600">
-          {post.isAi ? "🧠 " : ""}
-          {post.authorName}
-          <span className="ml-2 font-normal text-slate-400">
+        <p className="text-xs font-bold text-slate-600">
+          {post.isAi ? "Tutor" : post.authorName}
+          <span className="ml-2 font-medium text-slate-400">
             {new Date(post.createdAt).toLocaleString()}
           </span>
         </p>
         <div className="flex shrink-0 items-center gap-2">
           {post.isAi && typeof post.tier === "number" && <TierBadge tier={post.tier} />}
           {!post.isAi && (
-            <button className="text-xs text-brand-600 hover:underline" onClick={onReply}>
+            <button className="text-xs font-black text-brand-600 hover:text-brand-700" onClick={onReply}>
               Reply
             </button>
           )}

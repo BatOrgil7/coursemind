@@ -1,13 +1,9 @@
 "use client";
 
-// A workspace: members, the shared task board, and group chat.
-// Chat is SIMPLE POLLING on the ChatMessage table — the list refetches
-// every CHAT_POLL_INTERVAL_MS (see docs/ARCHITECTURE.md; no websockets,
-// no paid realtime service).
+// A workspace: members, shared task board, and group chat.
 import { use, useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { api, errorMessage } from "@/lib/trpc";
-import { WorkspaceTypeBadge } from "@/components/ui";
+import { PageHeader, WorkspaceTypeBadge } from "@/components/ui";
 import {
   CHAT_POLL_INTERVAL_MS,
   TASK_STATUSES,
@@ -52,19 +48,19 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
   }
 
   if (!workspace && !error) {
-    return <p className="py-12 text-center text-sm text-slate-400">Loading workspace…</p>;
+    return <p className="py-12 text-center text-sm font-medium text-slate-400">Loading workspace...</p>;
   }
   if (error && !workspace) {
     return (
       <div className="card mx-auto mt-12 max-w-md text-center">
-        <p className="text-3xl">👥</p>
-        <p className="mt-2 font-display font-semibold">
-          {error === NEEDS_JOIN ? "You're not in this workspace yet" : "Couldn't open this workspace"}
+        <div className="icon-mark mx-auto bg-gradient-to-br from-brand-600 to-aqua-500">WS</div>
+        <p className="mt-4 font-display text-lg font-black text-ink">
+          {error === NEEDS_JOIN ? "You are not in this workspace yet" : "Could not open this workspace"}
         </p>
-        <p className="mt-2 text-sm text-slate-500">{error}</p>
+        <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">{error}</p>
         {error === NEEDS_JOIN && (
           <button className="btn-primary mt-5" onClick={handleJoin} disabled={busy}>
-            {busy ? "Joining…" : "Join this workspace"}
+            {busy ? "Joining..." : "Join this workspace"}
           </button>
         )}
       </div>
@@ -74,38 +70,26 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
   const w = workspace!;
   return (
     <div>
-      {/* Header */}
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div className="min-w-0">
-          <Link
-            href={`/courses/${w.course.id}/workspaces`}
-            className="text-xs text-brand-600 hover:underline"
+      <PageHeader
+        title={w.name}
+        subtitle={`${w.course.code} workspace${w.project.description ? ` - ${w.project.description}` : ""}`}
+        action={<WorkspaceTypeBadge type={w.type} />}
+      />
+
+      <div className="mb-6 flex flex-wrap gap-2">
+        {w.members.map((m) => (
+          <span
+            key={m.userId}
+            className="rounded-full bg-white/80 px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-slate-200"
+            title={m.role === "OWNER" ? "Workspace owner" : "Member"}
           >
-            ← {w.course.code} workspaces
-          </Link>
-          <div className="mt-1 flex items-center gap-3">
-            <h1 className="truncate font-display text-2xl font-bold text-ink">{w.name}</h1>
-            <WorkspaceTypeBadge type={w.type} />
-          </div>
-          {w.project.description && (
-            <p className="mt-1 max-w-2xl text-sm text-slate-500">{w.project.description}</p>
-          )}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {w.members.map((m) => (
-            <span
-              key={m.userId}
-              className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600"
-              title={m.role === "OWNER" ? "Workspace owner" : "Member"}
-            >
-              {m.role === "OWNER" ? "👑 " : ""}
-              {m.name}
-            </span>
-          ))}
-        </div>
+            {m.name}
+            {m.role === "OWNER" ? " (owner)" : ""}
+          </span>
+        ))}
       </div>
 
-      {error && <p className="mb-4 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {error && <p className="mb-4 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{error}</p>}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <TaskBoard workspace={w} onChanged={load} onError={setError} />
@@ -114,8 +98,6 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
     </div>
   );
 }
-
-// ---------- Task board ----------
 
 function TaskBoard({
   workspace,
@@ -154,16 +136,19 @@ function TaskBoard({
 
   return (
     <section className="lg:col-span-2">
-      <div className="mb-3 flex items-center justify-between gap-4">
-        <h2 className="font-display text-lg font-semibold">📋 Task board</h2>
-        <form onSubmit={addTask} className="flex flex-1 justify-end gap-2">
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="eyebrow">Planning</p>
+          <h2 className="font-display text-xl font-black text-ink">Task board</h2>
+        </div>
+        <form onSubmit={addTask} className="flex flex-1 gap-2 sm:max-w-md">
           <input
-            className="input max-w-64 py-1.5 text-sm"
-            placeholder="Add a task…"
+            className="input py-2 text-sm"
+            placeholder="Add a task..."
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
           />
-          <button type="submit" className="btn-secondary py-1.5" disabled={busy || !newTitle.trim()}>
+          <button type="submit" className="btn-secondary py-2" disabled={busy || !newTitle.trim()}>
             Add
           </button>
         </form>
@@ -173,20 +158,20 @@ function TaskBoard({
         {TASK_STATUSES.map((status) => {
           const tasks = workspace.project.tasks.filter((t) => t.status === status);
           return (
-            <div key={status} className="rounded-2xl bg-slate-100/70 p-3">
-              <p className="mb-2 px-1 text-xs font-bold uppercase tracking-wide text-slate-500">
-                {TASK_STATUS_LABELS[status]} · {tasks.length}
+            <div key={status} className="surface-panel p-3">
+              <p className="mb-2 px-1 text-xs font-black uppercase tracking-wide text-slate-500">
+                {TASK_STATUS_LABELS[status]} - {tasks.length}
               </p>
               <div className="space-y-2">
                 {tasks.length === 0 && (
-                  <p className="px-1 py-3 text-center text-xs text-slate-400">Nothing here</p>
+                  <p className="px-1 py-3 text-center text-xs font-medium text-slate-400">Nothing here</p>
                 )}
                 {tasks.map((task) => (
-                  <div key={task.id} className="rounded-xl bg-white p-3 shadow-card">
+                  <div key={task.id} className="rounded-lg bg-white p-3 shadow-card">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-medium leading-snug">{task.title}</p>
+                      <p className="text-sm font-semibold leading-snug text-ink">{task.title}</p>
                       <button
-                        className="text-xs text-slate-300 transition hover:text-rose-500"
+                        className="text-xs font-black text-slate-300 transition hover:text-rose-500"
                         title="Delete task"
                         disabled={busy}
                         onClick={() =>
@@ -198,12 +183,12 @@ function TaskBoard({
                           )
                         }
                       >
-                        ✕
+                        x
                       </button>
                     </div>
                     <div className="mt-2 flex items-center justify-between gap-2">
                       <select
-                        className="max-w-[60%] rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-[11px] text-slate-600"
+                        className="max-w-[60%] rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-[11px] font-medium text-slate-600"
                         value={task.assigneeId ?? ""}
                         disabled={busy}
                         title="Assignee"
@@ -230,7 +215,7 @@ function TaskBoard({
                       </div>
                     </div>
                     {task.assigneeId && !memberName(task.assigneeId) && (
-                      <p className="mt-1 text-[10px] text-amber-600">assignee left the workspace</p>
+                      <p className="mt-1 text-[10px] font-medium text-amber-600">assignee left the workspace</p>
                     )}
                   </div>
                 ))}
@@ -261,7 +246,7 @@ function MoveButton({
   if (!target) return <span className="w-6" />;
   return (
     <button
-      className="rounded-lg bg-slate-100 px-1.5 py-1 text-[11px] text-slate-500 transition hover:bg-brand-100 hover:text-brand-700"
+      className="rounded-lg bg-slate-100 px-1.5 py-1 text-[11px] font-black text-slate-500 transition hover:bg-brand-100 hover:text-brand-700"
       title={`Move to ${TASK_STATUS_LABELS[target]}`}
       disabled={busy}
       onClick={() =>
@@ -274,12 +259,10 @@ function MoveButton({
         )
       }
     >
-      {dir === -1 ? "←" : "→"}
+      {dir === -1 ? "<" : ">"}
     </button>
   );
 }
-
-// ---------- Group chat (polled) ----------
 
 function ChatPanel({ workspaceId }: { workspaceId: string }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -293,7 +276,7 @@ function ChatPanel({ workspaceId }: { workspaceId: string }) {
     try {
       setMessages(await api.workspace.chatList.query({ workspaceId }));
     } catch {
-      // Polling: stay quiet on transient errors; the next tick retries.
+      // Polling stays quiet on transient errors; the next tick retries.
     }
   }, [workspaceId]);
 
@@ -303,7 +286,6 @@ function ChatPanel({ workspaceId }: { workspaceId: string }) {
     return () => clearInterval(id);
   }, [refresh]);
 
-  // Only auto-scroll when something new arrived, not on every poll.
   useEffect(() => {
     if (messages.length !== lastCountRef.current) {
       lastCountRef.current = messages.length;
@@ -329,28 +311,31 @@ function ChatPanel({ workspaceId }: { workspaceId: string }) {
 
   return (
     <section className="flex h-[32rem] flex-col lg:col-span-1">
-      <h2 className="mb-3 font-display text-lg font-semibold">💬 Group chat</h2>
-      <div className="card flex flex-1 flex-col overflow-hidden p-0">
+      <div className="mb-3">
+        <p className="eyebrow">Live room</p>
+        <h2 className="font-display text-xl font-black text-ink">Group chat</h2>
+      </div>
+      <div className="surface-panel flex flex-1 flex-col overflow-hidden">
         <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
           {messages.length === 0 && (
-            <p className="py-8 text-center text-xs text-slate-400">
-              No messages yet — say hi to your group 👋
+            <p className="py-8 text-center text-xs font-medium text-slate-400">
+              No messages yet. Say hi to your group.
             </p>
           )}
           {messages.map((m) => (
             <div key={m.id} className={m.mine ? "text-right" : "text-left"}>
-              <p className="text-[10px] text-slate-400">
-                {m.mine ? "" : `${m.authorName} · `}
+              <p className="text-[10px] font-medium text-slate-400">
+                {m.mine ? "" : `${m.authorName} - `}
                 {new Date(m.createdAt).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
               </p>
               <p
-                className={`mt-0.5 inline-block max-w-[90%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-left text-sm ${
+                className={`mt-0.5 inline-block max-w-[90%] whitespace-pre-wrap rounded-lg px-3 py-2 text-left text-sm font-medium ${
                   m.mine
-                    ? "rounded-br-md bg-brand-600 text-white"
-                    : "rounded-bl-md bg-slate-100 text-ink"
+                    ? "bg-gradient-to-br from-brand-600 to-aqua-500 text-white"
+                    : "bg-white text-ink shadow-sm"
                 }`}
               >
                 {m.body}
@@ -358,12 +343,12 @@ function ChatPanel({ workspaceId }: { workspaceId: string }) {
             </div>
           ))}
         </div>
-        {error && <p className="bg-rose-50 px-3 py-1.5 text-xs text-rose-700">{error}</p>}
+        {error && <p className="bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-700">{error}</p>}
         <div className="flex items-end gap-2 border-t border-slate-200 p-3">
           <textarea
             className="input min-h-[2.5rem] flex-1 resize-none py-2 text-sm"
             rows={1}
-            placeholder="Message the group…"
+            placeholder="Message the group..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
@@ -378,8 +363,8 @@ function ChatPanel({ workspaceId }: { workspaceId: string }) {
           </button>
         </div>
       </div>
-      <p className="mt-1.5 text-center text-[10px] text-slate-400">
-        Updates every {Math.round(CHAT_POLL_INTERVAL_MS / 1000)}s · Enter to send
+      <p className="mt-1.5 text-center text-[10px] font-medium text-slate-400">
+        Updates every {Math.round(CHAT_POLL_INTERVAL_MS / 1000)}s. Enter to send.
       </p>
     </section>
   );

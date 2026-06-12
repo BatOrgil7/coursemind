@@ -54,6 +54,28 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
     () => data?.materials.filter((material) => material.hasText) ?? [],
     [data?.materials]
   );
+  const planStats = useMemo(() => {
+    if (!plan) return null;
+    const completedDays = plan.schedule.filter((day) => day.done).length;
+    const totalDays = plan.schedule.length;
+    const completion = totalDays === 0 ? 0 : Math.round((completedDays / totalDays) * 100);
+    const nextDay =
+      plan.schedule
+        .filter((day) => !day.done)
+        .sort((a, b) => a.date.localeCompare(b.date))[0] ?? null;
+    const remainingMinutes = plan.schedule
+      .filter((day) => !day.done)
+      .reduce((sum, day) => sum + day.minutes, 0);
+    return { completedDays, totalDays, completion, nextDay, remainingMinutes };
+  }, [plan]);
+  const maxWeakCount = useMemo(
+    () => Math.max(1, ...(data?.weakTopics.map((topic) => topic.count) ?? [])),
+    [data?.weakTopics]
+  );
+  const totalWeakMisses = useMemo(
+    () => data?.weakTopics.reduce((sum, topic) => sum + topic.count, 0) ?? 0,
+    [data?.weakTopics]
+  );
 
   async function createPlan(e: React.FormEvent) {
     e.preventDefault();
@@ -302,28 +324,110 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
 
           <aside className="space-y-6">
             <div className="card">
+              <p className="eyebrow">Readiness</p>
+              <h2 className="mt-2 font-display text-xl font-semibold text-ink">Course pulse</h2>
+              <div className="mt-5 space-y-4">
+                <div>
+                  <div className="mb-2 flex items-center justify-between gap-3 text-xs font-semibold text-slate-400">
+                    <span>Study plan progress</span>
+                    <span>{planStats ? `${planStats.completion}%` : "No plan"}</span>
+                  </div>
+                  <div
+                    className="h-2 overflow-hidden rounded-full bg-slate-100"
+                    role="progressbar"
+                    aria-label="Study plan progress"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={planStats?.completion ?? 0}
+                  >
+                    <div
+                      className="h-full rounded-full bg-brand-600"
+                      style={{ width: `${planStats?.completion ?? 0}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                  <div className="rounded-lg bg-slate-50 p-3">
+                    <p className="text-xs font-semibold text-slate-400">Next study block</p>
+                    <p className="mt-1 text-sm font-semibold text-ink">
+                      {planStats?.nextDay
+                        ? `${new Date(planStats.nextDay.date).toLocaleDateString()} - ${planStats.nextDay.minutes} min`
+                        : "Create a plan"}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-slate-50 p-3">
+                    <p className="text-xs font-semibold text-slate-400">Review pressure</p>
+                    <p className="mt-1 text-sm font-semibold text-ink">
+                      {data.flashcards.due} due of {data.flashcards.total}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-slate-50 p-3">
+                    <p className="text-xs font-semibold text-slate-400">Weak-topic misses</p>
+                    <p className="mt-1 text-sm font-semibold text-ink">{totalWeakMisses}</p>
+                  </div>
+                </div>
+
+                {planStats?.nextDay && (
+                  <p className="rounded-lg bg-brand-50 px-3 py-2 text-xs font-medium leading-relaxed text-brand-800">
+                    Next: {planStats.nextDay.topics.join(", ")}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="card">
               <p className="eyebrow">Focus</p>
-              <h2 className="mt-2 font-display text-xl font-semibold text-ink">Weak spots</h2>
+              <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <h2 className="font-display text-xl font-semibold text-ink">Weak topic radar</h2>
+                  <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">
+                    Ranked by missed quiz topics so review starts where it matters most.
+                  </p>
+                </div>
+                {data.weakTopics.length > 0 && (
+                  <Link href={`/tutor?courseId=${courseId}`} className="btn-secondary px-3 py-2 text-xs">
+                    Review with tutor
+                  </Link>
+                )}
+              </div>
               {data.weakTopics.length === 0 ? (
                 <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
                   Missed quiz topics will show up here after you take practice quizzes.
                 </p>
               ) : (
-                <div className="mt-4 space-y-3">
+                <div className="mt-5 space-y-4">
                   {data.weakTopics.slice(0, 8).map((topic) => (
                     <div key={topic.topic}>
-                      <div className="mb-1 flex justify-between gap-3 text-xs">
-                        <span className="font-semibold text-slate-600">{topic.topic}</span>
-                        <span className="font-medium text-slate-400">{topic.count} miss{topic.count === 1 ? "" : "es"}</span>
+                      <div className="mb-1.5 flex justify-between gap-3 text-xs">
+                        <span className="font-semibold text-slate-700">{topic.topic}</span>
+                        <span className="font-medium text-slate-400">
+                          {topic.count} miss{topic.count === 1 ? "" : "es"}
+                        </span>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-2.5 overflow-hidden rounded-full bg-slate-100"
+                        role="progressbar"
+                        aria-label={`${topic.topic} weak-topic misses`}
+                        aria-valuemin={0}
+                        aria-valuemax={maxWeakCount}
+                        aria-valuenow={topic.count}
+                      >
                         <div
                           className="h-full rounded-full bg-coral-400"
-                          style={{ width: `${Math.min(100, topic.count * 24)}%` }}
+                          style={{ width: `${Math.max(14, Math.round((topic.count / maxWeakCount) * 100))}%` }}
                         />
                       </div>
                     </div>
                   ))}
+                  <div className="rounded-lg bg-slate-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
+                      Best next move
+                    </p>
+                    <p className="mt-1 text-sm font-semibold leading-relaxed text-ink">
+                      Review {data.weakTopics[0]?.topic}, then take a short practice quiz to see if it drops from the radar.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

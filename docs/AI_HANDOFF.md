@@ -223,3 +223,29 @@ Browser QA notes:
 Next steps:
 - Add a dedicated weak-topic visualization inside the course Smart Study page if richer analytics are needed.
 - Bring Smart Study surfaces into the native mobile app.
+
+### 2026-06-12 - Codex - Course Smart Study Analytics
+
+Summary:
+- Upgraded the course Smart Study page with a readiness panel showing study-plan progress, next study block, review queue pressure, and weak-topic misses.
+- Reworked the weak spots panel into a weak-topic radar with ranked severity bars, a focused tutor link, and a recommended next move.
+- Added accessible progressbar labels and values for the new visual progress indicators.
+
+Files touched:
+- `apps/web/app/(app)/courses/[courseId]/study/page.tsx`
+- `docs/AI_HANDOFF.md`
+
+Checks run:
+- `npm run typecheck`
+- `git diff --check`
+- `npm run build`
+- In-app browser QA on the CS201 Smart Study route at default and `390x844` viewports.
+
+Browser QA notes:
+- Smart Study page rendered the new Course pulse and Weak topic radar panels after client data load.
+- Desktop/default and iPhone-width checks had no horizontal overflow.
+- No console errors were reported.
+
+Next steps:
+- Bring Smart Study surfaces into the native mobile app.
+- Consider adding click-through weak-topic filters for quiz generation later.

@@ -48,7 +48,7 @@ export const quizRouter = router({
 
       const raw = await askClaude({
         system:
-          "You are an expert university exam writer. You respond with ONLY valid JSON — no prose, no markdown fences.",
+          "You are an expert university exam writer. You respond with ONLY valid JSON - no prose, no markdown fences.",
         messages: [
           {
             role: "user",
@@ -77,14 +77,14 @@ export const quizRouter = router({
           courseId: input.courseId,
           sourceMaterialId: material.id,
           creatorId: null, // AI-generated
-          title: `${material.title} — Practice Quiz`,
+          title: `${material.title} - Practice Quiz`,
           questions: JSON.stringify(questions),
         },
       });
       return { id: quiz.id, questionCount: questions.length };
     }),
 
-  /** Quiz for TAKING — answers/explanations stripped so they can't leak. */
+  /** Quiz for TAKING - answers/explanations stripped so they can't leak. */
   /** Generate a timed mock exam across the whole course library. */
   generateMockExam: protectedProcedure
     .input(
@@ -198,10 +198,10 @@ export const quizRouter = router({
               questionId: q.id,
               response,
               correct,
-              feedback: correct ? "Correct!" : "Not quite — see the explanation below.",
+              feedback: correct ? "Correct!" : "Not quite - see the explanation below.",
             };
           }
-          // short / code → AI-graded when possible, honest self-check otherwise
+          // short / code -> AI-graded when possible, honest self-check otherwise
           if (!isAiConfigured()) {
             return { questionId: q.id, response, correct: null, feedback: SELF_CHECK_FEEDBACK };
           }

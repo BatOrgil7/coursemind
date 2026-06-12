@@ -1,4 +1,4 @@
-// Authenticated app shell: dark sidebar + content area.
+// Authenticated app shell.
 // Server component - redirects to /login when there's no session, so every
 // page inside (app)/ can assume a logged-in user.
 import Link from "next/link";
@@ -25,31 +25,30 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen lg:flex">
-      <aside className="relative z-20 border-b border-white/10 bg-brand-950 px-4 py-4 text-white shadow-lift lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-b-0 lg:border-r lg:border-white/10 lg:py-6">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(150deg,rgba(6,182,212,0.18),transparent_36%),linear-gradient(20deg,rgba(163,230,53,0.12),transparent_34%)]" />
-        <Link href="/dashboard" className="relative px-2">
-          <Logo dark />
+      <aside className="relative z-20 border-b border-slate-200/70 bg-white/80 px-4 py-4 text-ink shadow-sm backdrop-blur-xl lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-b-0 lg:border-r lg:py-6">
+        <Link href="/dashboard" className="px-2">
+          <Logo />
         </Link>
-        <nav className="relative mt-4 grid grid-cols-2 gap-2 pb-1 sm:flex sm:gap-1 sm:overflow-x-auto lg:mt-8 lg:flex-1 lg:flex-col lg:space-y-1 lg:overflow-visible lg:pb-0">
+        <nav className="mt-4 grid grid-cols-2 gap-2 pb-1 sm:flex sm:gap-1 sm:overflow-x-auto lg:mt-8 lg:flex-1 lg:flex-col lg:space-y-1 lg:overflow-visible lg:pb-0">
           {NAV.map((item) => (
             <Link key={item.href} href={item.href} className="rail-link">
-              <span className="grid h-7 w-7 place-items-center rounded-md bg-white/10 text-[10px] font-black text-aqua-200 ring-1 ring-white/10">
+              <span className="grid h-7 w-7 place-items-center rounded-md bg-slate-100 text-[10px] font-semibold text-slate-600 ring-1 ring-slate-200">
                 {item.mark}
               </span>
               {item.label}
             </Link>
           ))}
         </nav>
-        <div className="relative mt-4 grid gap-3 rounded-lg border border-white/10 bg-white/[0.06] p-3 backdrop-blur sm:grid-cols-[auto_1fr_auto] sm:items-center lg:mt-0 lg:block lg:space-y-3">
+        <div className="mt-4 grid gap-3 rounded-lg border border-slate-200 bg-white/70 p-3 shadow-sm backdrop-blur-xl sm:grid-cols-[auto_1fr_auto] sm:items-center lg:mt-0 lg:block lg:space-y-3">
           <div className="grid grid-cols-2 gap-2 text-xs">
             <span
-              className="inline-flex items-center justify-center rounded-md bg-white/10 px-2 py-1 font-black text-lime-300"
+              className="inline-flex items-center justify-center rounded-md bg-slate-100 px-2 py-1 font-semibold text-slate-700"
               title="Daily study streak"
             >
               {me.streakCount} day{me.streakCount === 1 ? "" : "s"}
             </span>
             <span
-              className="inline-flex items-center justify-center rounded-md bg-white/10 px-2 py-1 font-black text-aqua-200"
+              className="inline-flex items-center justify-center rounded-md bg-brand-50 px-2 py-1 font-semibold text-brand-700"
               title="Experience points"
             >
               {me.xp} XP
@@ -57,7 +56,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </div>
           <div className="px-2">
             <p className="truncate text-sm font-semibold">{me.name}</p>
-            <p className="truncate text-xs text-slate-400">{me.university.name}</p>
+            <p className="truncate text-xs text-slate-500">{me.university.name}</p>
           </div>
           <form
             className="sm:justify-self-end lg:block"
@@ -66,7 +65,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               await signOut({ redirectTo: "/" });
             }}
           >
-            <button className="w-full rounded-lg border border-white/10 px-3 py-2 text-xs font-bold text-slate-300 transition hover:bg-white/10 hover:text-white">
+            <button className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">
               Sign out
             </button>
           </form>

@@ -29,7 +29,7 @@ export default function LoginPage() {
   return (
     <div>
       <p className="eyebrow">Welcome back</p>
-      <h1 className="mt-2 font-display text-2xl font-black text-ink">Log in to CourseMind</h1>
+      <h1 className="mt-2 font-display text-2xl font-semibold text-ink">Log in to Hyntor</h1>
       <p className="mt-2 text-sm font-medium text-slate-500">Use your university email to continue.</p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
@@ -62,7 +62,7 @@ export default function LoginPage() {
       </form>
       <p className="mt-4 text-center text-sm font-medium text-slate-500">
         New here?{" "}
-        <Link href="/signup" className="font-black text-brand-600 hover:text-brand-700">
+        <Link href="/signup" className="font-semibold text-brand-600 hover:text-brand-700">
           Create an account
         </Link>
       </p>

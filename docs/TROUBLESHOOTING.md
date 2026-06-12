@@ -1,4 +1,4 @@
-# Troubleshooting CourseMind
+# Troubleshooting Hyntor
 
 **Start here when something breaks.** This guide is organized by symptom. Each entry says
 what's probably wrong, how to confirm it, and how to fix it.
@@ -14,7 +14,7 @@ what's probably wrong, how to confirm it, and how to fix it.
 3. **Re-install if dependencies look weird:** delete `node_modules` + run `npm install` at
    the repo root (and separately inside `apps/mobile` for the mobile app).
 4. **The database is just a file:** `packages/db/prisma/dev.db`. Worst case, delete it and
-   run `npm run db:setup` for a fresh, seeded database. (You lose dev data — that's fine.)
+   run `npm run db:setup` for a fresh, seeded database. (You lose dev data - that's fine.)
 
 ---
 
@@ -31,12 +31,12 @@ npm run dev
 ### Login does nothing / immediately says "Invalid email or password"
 - Did you run `npm run db:setup`? The demo users come from the seed.
 - Check the password is exactly `coursemind` (all lowercase).
-- If you changed `AUTH_SECRET` in `apps/web/.env.local`, every session is invalidated —
+- If you changed `AUTH_SECRET` in `apps/web/.env.local`, every session is invalidated  -
   that's normal, just log in again. If `AUTH_SECRET` is missing entirely, the server
-  terminal will show a NextAuth "secret" error → run `npm run setup`.
+  terminal will show a NextAuth "secret" error -> run `npm run setup`.
 
 ### Every page redirects to /login even after logging in
-Cookies are tied to the URL. Use `http://localhost:3000` exactly — not `127.0.0.1`,
+Cookies are tied to the URL. Use `http://localhost:3000` exactly - not `127.0.0.1`,
 not a different port.
 
 ### "AI features aren't configured yet"
@@ -45,23 +45,23 @@ That's the friendly message meaning `ANTHROPIC_API_KEY` is empty.
 2. Restart the dev server. (Env files are only read at startup.)
 
 ### AI calls fail with 401 / "authentication_error"
-Your API key is wrong or revoked. Check it at https://console.anthropic.com/settings/keys —
+Your API key is wrong or revoked. Check it at https://console.anthropic.com/settings/keys  -
 it must start with `sk-ant-`. No quotes problems? The line should look like:
 `ANTHROPIC_API_KEY="sk-ant-api03-..."`
 
 ### AI calls fail with 429 / "rate limit"
 You're out of API credits or hitting rate limits. Check your usage at
-https://console.anthropic.com — quiz generation uses the most tokens of any feature.
+https://console.anthropic.com - quiz generation uses the most tokens of any feature.
 
 ### Quiz generation fails with "unexpected quiz format"
 The model occasionally returns malformed JSON. It's safe to just click **Generate quiz**
-again. If it fails repeatedly on one material, that material's text may be too messy —
+again. If it fails repeatedly on one material, that material's text may be too messy  -
 open the material page and look at what was extracted.
 
 ### Upload says "No text could be extracted"
 Usually a **scanned/image-only PDF** (photos of pages, no real text). The AI can't read
 those yet. Fixes: use an OCR'd copy, export the source document to PDF again, or paste
-the text via **Upload material → Paste text**.
+the text via **Upload material -> Paste text**.
 
 ### `prisma generate` fails with EPERM on Windows
 The query engine DLL is locked by a running dev server. Stop `npm run dev`, run the
@@ -88,8 +88,8 @@ If it doesn't pick a change up: restart the dev server. If it STILL doesn't: del
 The app can't reach the API. Two things must be true:
 1. The web server is running (`npm run dev` at the repo root).
 2. The app uses the right URL **for where it's running** (see table in README):
-   - Android emulator → `http://10.0.2.2:3000` (NOT localhost — that's the emulator itself)
-   - Physical phone → your PC's LAN IP (`ipconfig` → "IPv4 Address"), phone on the same Wi-Fi,
+   - Android emulator -> `http://10.0.2.2:3000` (NOT localhost - that's the emulator itself)
+   - Physical phone -> your PC's LAN IP (`ipconfig` -> "IPv4 Address"), phone on the same Wi-Fi,
      and Windows Firewall allowing Node on private networks.
    ```powershell
    $env:EXPO_PUBLIC_API_URL = "http://10.0.2.2:3000"; npx expo start
@@ -114,7 +114,7 @@ If that fails: delete `apps/mobile/node_modules`, run `npm install` there again.
 ### Login works on web but not mobile
 Mobile auth uses a different code path (JWT via `user.mobileLogin`, not NextAuth cookies)
 but the SAME `AUTH_SECRET`. If you regenerate `AUTH_SECRET`, stored mobile tokens become
-invalid — sign out and back in on the device.
+invalid - sign out and back in on the device.
 
 ---
 
@@ -123,7 +123,7 @@ invalid — sign out and back in on the device.
 ```bash
 npm run db:studio
 ```
-Opens Prisma Studio at http://localhost:5555 — a GUI to browse and edit every table.
+Opens Prisma Studio at http://localhost:5555 - a GUI to browse and edit every table.
 Great for checking "did my upload actually store extracted text?" (Material table,
 `extractedText` column) or "what tier did my tutor session reach?" (TutorSession).
 
@@ -147,7 +147,7 @@ Great for checking "did my upload actually store extracted text?" (Material tabl
 
 ## Still stuck?
 
-Run these and read the output carefully — they catch most breakage:
+Run these and read the output carefully - they catch most breakage:
 ```bash
 npm run typecheck     # type errors across all packages
 npm run db:setup      # repairs a missing/empty database

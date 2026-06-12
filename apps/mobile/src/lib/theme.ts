@@ -1,4 +1,4 @@
-// CourseMind design tokens — mirrors the web palette
+// Hyntor design tokens - mirrors the web palette
 // (apps/web/tailwind.config.ts) so both platforms feel like one product.
 // TODO: migrate styling to NativeWind for full Tailwind parity.
 export const colors = {

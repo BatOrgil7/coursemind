@@ -1,8 +1,8 @@
-// The tutor router — where the Section 6 mechanic actually runs.
+// The tutor router - where the Section 6 mechanic actually runs.
 //
 // Tier escalation is enforced HERE, server-side, not by trusting the model:
 // for ASSIGNMENT_HELP the allowed ceiling starts at Tier 1 and rises by one
-// per student message (capped at 4) — the student "earns" deeper help by
+// per student message (capped at 4) - the student "earns" deeper help by
 // engaging. The model reports the tier it used via a [TIER:n] prefix, which
 // we strip and record on TutorSession.tierReached.
 import { z } from "zod";

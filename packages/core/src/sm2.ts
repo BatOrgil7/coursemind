@@ -1,13 +1,13 @@
-// SM-2 spaced repetition (Phase 3). Pure functions — `now` is always a
+// SM-2 spaced repetition (Phase 3). Pure functions - `now` is always a
 // parameter, never read inside, so scheduling is deterministic and
 // testable. State lives on the Flashcard row (easeFactor, intervalDays,
 // repetitions, nextReviewAt).
 //
 // The four ratings the student sees map onto SM-2 quality scores:
-//   AGAIN → 2  (failed recall — relearn; card comes back in ~10 minutes)
-//   HARD  → 3  (recalled with serious difficulty)
-//   GOOD  → 4  (recalled with some hesitation)
-//   EASY  → 5  (perfect recall)
+//   AGAIN -> 2  (failed recall - relearn; card comes back in ~10 minutes)
+//   HARD  -> 3  (recalled with serious difficulty)
+//   GOOD  -> 4  (recalled with some hesitation)
+//   EASY  -> 5  (perfect recall)
 // Quality < 3 resets repetitions; the ease factor never drops below 1.3.
 
 export const REVIEW_RATINGS = ["AGAIN", "HARD", "GOOD", "EASY"] as const;
@@ -36,7 +36,7 @@ export function reviewCard(state: Sm2State, rating: ReviewRating, now = new Date
   );
 
   if (quality < 3) {
-    // Failed recall: relearn — back in the queue within the session.
+    // Failed recall: relearn - back in the queue within the session.
     return {
       easeFactor,
       intervalDays: 0,
@@ -57,7 +57,7 @@ export function reviewCard(state: Sm2State, rating: ReviewRating, now = new Date
   };
 }
 
-/** What each rating would schedule — shown on the review buttons
+/** What each rating would schedule - shown on the review buttons
  *  ("Good · 6d") so students learn how the system responds to honesty. */
 export function previewIntervals(state: Sm2State): Record<ReviewRating, string> {
   const out = {} as Record<ReviewRating, string>;

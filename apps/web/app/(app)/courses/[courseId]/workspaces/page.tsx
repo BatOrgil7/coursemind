@@ -90,12 +90,12 @@ export default function WorkspacesPage({ params }: { params: Promise<{ courseId:
                 onClick={() => setForm({ ...form, type: key })}
                 className={`rounded-lg border p-4 text-left transition ${
                   form.type === key
-                    ? "border-aqua-300 bg-gradient-to-br from-brand-50 to-aqua-50 shadow-card"
-                    : "border-slate-200/80 bg-white/70 hover:-translate-y-0.5 hover:border-aqua-200 hover:shadow-card"
+                    ? "border-brand-300 bg-brand-50 shadow-card"
+                    : "border-slate-200/80 bg-white/70 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card"
                 }`}
               >
                 <span className="icon-mark mb-4 bg-slate-100 text-brand-700">{meta.mark}</span>
-                <p className="font-display font-black text-ink">{meta.label}</p>
+                <p className="font-display font-semibold text-ink">{meta.label}</p>
                 <p className="mt-1 text-xs font-medium text-slate-500">
                   {key === "STUDY_GROUP"
                     ? "Study together with a shared board and group chat."
@@ -147,7 +147,7 @@ export default function WorkspacesPage({ params }: { params: Promise<{ courseId:
                     {w.memberCount} member{w.memberCount === 1 ? "" : "s"}
                   </span>
                 </div>
-                <p className="mt-3 font-display text-lg font-black text-ink">{w.name}</p>
+                <p className="mt-3 font-display text-lg font-semibold text-ink">{w.name}</p>
                 <p className="mt-1 flex-1 text-xs font-medium text-slate-400">
                   {w.openTaskCount} open task{w.openTaskCount === 1 ? "" : "s"} - {w.messageCount}{" "}
                   message{w.messageCount === 1 ? "" : "s"} - created{" "}

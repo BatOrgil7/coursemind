@@ -42,23 +42,23 @@ export default async function DashboardPage() {
         <div className="grid gap-4 md:grid-cols-[1.1fr_0.9fr] md:items-center">
           <div>
             <p className="eyebrow">Today</p>
-            <h2 className="mt-2 font-display text-2xl font-black text-ink">Study with your class context in view.</h2>
+            <h2 className="mt-2 font-display text-2xl font-semibold text-ink">Study with your class context in view.</h2>
             <p className="mt-2 max-w-xl text-sm font-medium leading-relaxed text-slate-500">
               Shared materials, practice, and tutor sessions all build around the same course library.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-1">
             <div className="metric-tile">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Streak</p>
-              <p className="mt-1 font-display text-2xl font-black text-ink">{me.streakCount} days</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Streak</p>
+              <p className="mt-1 font-display text-2xl font-semibold text-ink">{me.streakCount} days</p>
             </div>
             <div className="metric-tile">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">XP</p>
-              <p className="mt-1 font-display text-2xl font-black text-ink">{me.xp}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">XP</p>
+              <p className="mt-1 font-display text-2xl font-semibold text-ink">{me.xp}</p>
             </div>
             <div className="metric-tile">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Courses</p>
-              <p className="mt-1 font-display text-2xl font-black text-ink">{courses.length}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Courses</p>
+              <p className="mt-1 font-display text-2xl font-semibold text-ink">{courses.length}</p>
             </div>
           </div>
         </div>
@@ -67,14 +67,14 @@ export default async function DashboardPage() {
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         {QUICK_ACTIONS.map((action) => (
           <Link key={action.href} href={action.href} className="card-interactive block">
-            <span className="icon-mark bg-gradient-to-br from-brand-600 to-aqua-500">{action.mark}</span>
-            <p className="mt-4 font-display font-black text-ink">{action.title}</p>
+            <span className="icon-mark bg-brand-600">{action.mark}</span>
+            <p className="mt-4 font-display font-semibold text-ink">{action.title}</p>
             <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">{action.body}</p>
           </Link>
         ))}
       </div>
 
-      <h2 className="mb-3 font-display text-xl font-black text-ink">Your courses</h2>
+      <h2 className="mb-3 font-display text-xl font-semibold text-ink">Your courses</h2>
       {courses.length === 0 ? (
         <EmptyState
           title="No courses yet"
@@ -87,12 +87,12 @@ export default async function DashboardPage() {
           {courses.map((course) => (
             <Link key={course.id} href={`/courses/${course.id}`} className="card-interactive block">
               <div className="flex items-center justify-between gap-3">
-                <span className="font-mono text-xs font-black uppercase tracking-wide text-aqua-600">
+                <span className="font-mono text-xs font-semibold uppercase tracking-wide text-brand-600">
                   {course.code}
                 </span>
                 <span className="text-xs font-bold text-slate-400">{course.memberCount} enrolled</span>
               </div>
-              <p className="mt-3 font-display text-lg font-black text-ink">{course.title}</p>
+              <p className="mt-3 font-display text-lg font-semibold text-ink">{course.title}</p>
               <p className="mt-1 line-clamp-2 text-sm font-medium leading-relaxed text-slate-500">{course.description}</p>
               <p className="mt-4 text-xs font-bold text-slate-400">
                 {course.materialCount} materials - {course.quizCount} quizzes
@@ -104,7 +104,7 @@ export default async function DashboardPage() {
 
       {sessions.length > 0 && (
         <section className="mt-10">
-          <h2 className="mb-3 font-display text-xl font-black text-ink">Recent tutor sessions</h2>
+          <h2 className="mb-3 font-display text-xl font-semibold text-ink">Recent tutor sessions</h2>
           <div className="surface-panel divide-y divide-slate-100/80 overflow-hidden">
             {sessions.slice(0, 5).map((s) => (
               <Link
@@ -113,7 +113,7 @@ export default async function DashboardPage() {
                 className="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-white/70"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-black text-ink">{s.title}</p>
+                  <p className="truncate text-sm font-semibold text-ink">{s.title}</p>
                   <p className="mt-0.5 text-xs font-medium text-slate-400">
                     {s.courseCode ?? "No course"} - {new Date(s.updatedAt).toLocaleDateString()}
                   </p>

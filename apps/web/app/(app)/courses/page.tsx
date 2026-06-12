@@ -158,7 +158,7 @@ export default function CoursesPage() {
           {courses.map((course) => (
             <div key={course.id} className="card-interactive flex flex-col">
               <div className="flex items-start justify-between gap-3">
-                <span className="flex flex-wrap items-center gap-2 font-mono text-xs font-black uppercase tracking-wide text-aqua-600">
+                <span className="flex flex-wrap items-center gap-2 font-mono text-xs font-semibold uppercase tracking-wide text-brand-600">
                   {course.code}
                   {course.isCrossUniversity && <CrossUniversityBadge />}
                 </span>
@@ -166,7 +166,7 @@ export default function CoursesPage() {
                   {course.memberCount} enrolled - {course.materialCount} materials
                 </span>
               </div>
-              <p className="mt-3 font-display text-lg font-black text-ink">{course.title}</p>
+              <p className="mt-3 font-display text-lg font-semibold text-ink">{course.title}</p>
               <p className="mt-1 line-clamp-2 flex-1 text-sm font-medium leading-relaxed text-slate-500">{course.description}</p>
               <div className="mt-5">
                 {course.joined ? (

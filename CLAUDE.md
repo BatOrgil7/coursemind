@@ -2,7 +2,7 @@
 
 ## Shared AI Context
 
-This repository is the Hyntor project, formerly CourseMind.
+This repository is the Hyntor project, formerly Hyntor.
 
 Hyntor is a student-first class study platform. Students join courses and share the class materials that matter for studying: lecture notes, slides, homework prompts, tests, practice exams, discussion context, and other course files. The point is not just "AI tutoring from uploaded notes"; the app gives the AI enough class-specific context to help students understand what their professor is teaching and prepare for that class.
 
@@ -44,7 +44,7 @@ The core product promise is: AI help that knows the class, helps students learn,
 
 ## Current Project Notes
 
-- Existing docs still use the old CourseMind name in many places. Treat Hyntor as the likely new brand unless the user says otherwise.
+- Existing docs still use the old Hyntor name in many places. Treat Hyntor as the likely new brand unless the user says otherwise.
 - Do not mechanically rename everything until the user explicitly asks for a full rename pass.
 - Be careful with claims around sharing homework and tests. The product can support course context, homework prompts, tests, and practice materials, but UX and policy copy should still distinguish learning help from answer dumping.
 - If changing AI behavior, review `packages/core/src/prompts.ts` and the relevant API routers in `packages/api/src/routers`.

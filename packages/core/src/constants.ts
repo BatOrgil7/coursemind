@@ -39,7 +39,7 @@ export const MAX_HINT_TIER = 4;
 export const DISCUSSION_MAX_TIER = 3;
 
 // Group chat is simple polling on the ChatMessage table (no websockets,
-// no paid realtime service — see docs/ARCHITECTURE.md). Clients refetch
+// no paid realtime service - see docs/ARCHITECTURE.md). Clients refetch
 // the message list this often.
 export const CHAT_POLL_INTERVAL_MS = 3000;
 
@@ -66,7 +66,7 @@ export type ActivityType = keyof typeof XP_RULES;
 export const AI_MODEL = "claude-sonnet-4-6";
 
 // How much extracted material text we pass as grounding context per call.
-// ~60k chars ≈ ~15k tokens — generous grounding while staying well inside
+// ~60k chars approx ~15k tokens - generous grounding while staying well inside
 // the context window even with a long chat history.
 export const MAX_GROUNDING_CHARS = 60_000;
 export const MAX_CHARS_PER_MATERIAL = 12_000;

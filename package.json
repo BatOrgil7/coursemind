@@ -1,8 +1,8 @@
 {
-  "name": "coursemind",
+  "name": "hyntor",
   "private": true,
   "version": "0.1.0",
-  "description": "CourseMind — Don't just get the answer. Actually learn it. A responsible-AI study platform.",
+  "description": "Hyntor - Don't just get the answer. Actually learn it. A responsible-AI study platform.",
   "workspaces": [
     "apps/web",
     "packages/*"

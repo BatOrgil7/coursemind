@@ -27,10 +27,10 @@ export function buildFallbackStudyPlan(opts: {
   );
   if (totalDays < 1) {
     // Exam is today (or data is odd): one honest cram-lightly day.
-    return [{ date: examDay, topics: ["Light review — trust your prep, sleep well"], minutes: 30, done: false }];
+    return [{ date: examDay, topics: ["Light review - trust your prep, sleep well"], minutes: 30, done: false }];
   }
 
-  // Long horizon → study every other day so the plan stays realistic.
+  // Long horizon -> study every other day so the plan stays realistic.
   const stride = totalDays > 21 ? 2 : 1;
 
   const days: StudyPlanDay[] = [];
@@ -47,7 +47,7 @@ export function buildFallbackStudyPlan(opts: {
   // Exam day: light review of everything, never new material.
   days.push({
     date: examDay,
-    topics: ["Final review — skim notes, redo one practice problem per topic"],
+    topics: ["Final review - skim notes, redo one practice problem per topic"],
     minutes: 30,
     done: false,
   });

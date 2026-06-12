@@ -1,4 +1,4 @@
-// The app router — the single API surface consumed by web AND mobile.
+// The app router - the single API surface consumed by web AND mobile.
 // TODO Phase 4: leaderboard, material upvotes, annotations
 import { router } from "./trpc";
 import { userRouter } from "./routers/user";

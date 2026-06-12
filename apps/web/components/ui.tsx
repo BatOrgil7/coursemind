@@ -5,33 +5,33 @@ import { TIER_LABELS } from "@coursemind/core";
 export function Logo({ dark = false }: { dark?: boolean }) {
   return (
     <span
-      className={`inline-flex items-center gap-2 font-display text-xl font-black tracking-tight ${
+      className={`inline-flex items-center gap-2 font-display text-xl font-semibold tracking-tight ${
         dark ? "text-white" : "text-ink"
       }`}
     >
-      <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-aqua-400 to-brand-500 text-xs font-black text-white shadow-lift">
-        CM
+      <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-semibold text-white shadow-sm">
+        H
       </span>
-      Course<span className="text-aqua-500">Mind</span>
+      Hyntor
     </span>
   );
 }
 
 const TIER_STYLES: Record<number, string> = {
-  0: "bg-emerald-100 text-emerald-800 ring-emerald-200",
-  1: "bg-aqua-100 text-aqua-600 ring-aqua-300",
-  2: "bg-brand-100 text-brand-700 ring-brand-200",
-  3: "bg-amber-100 text-amber-800 ring-amber-200",
-  4: "bg-coral-100 text-coral-500 ring-coral-100",
+  0: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+  1: "bg-brand-50 text-brand-700 ring-brand-100",
+  2: "bg-slate-100 text-slate-700 ring-slate-200",
+  3: "bg-amber-50 text-amber-700 ring-amber-100",
+  4: "bg-coral-50 text-coral-500 ring-coral-100",
 };
 
 export function TierBadge({ tier }: { tier: number }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black ring-1 ${
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${
         TIER_STYLES[tier] ?? TIER_STYLES[0]
       }`}
-      title="CourseMind escalates hints only as you engage."
+      title="Hyntor escalates hints only as you engage."
     >
       Tier {tier} - {TIER_LABELS[tier] ?? "Hint"}
     </span>
@@ -64,8 +64,8 @@ export const MODE_META: Record<string, { label: string; mark: string; blurb: str
 export function ModeBadge({ mode }: { mode: string }) {
   const meta = MODE_META[mode];
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-black text-brand-700 ring-1 ring-brand-100">
-      <span className="rounded bg-white/80 px-1 font-black text-aqua-600">{meta?.mark}</span>
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700 ring-1 ring-brand-100">
+      <span className="rounded bg-white px-1 font-semibold text-brand-600">{meta?.mark}</span>
       {meta?.label ?? mode}
     </span>
   );
@@ -79,8 +79,8 @@ export const WORKSPACE_TYPE_META: Record<string, { label: string; mark: string }
 export function WorkspaceTypeBadge({ type }: { type: string }) {
   const meta = WORKSPACE_TYPE_META[type] ?? { label: type, mark: "SG" };
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-black text-brand-700 ring-1 ring-brand-100">
-      <span className="rounded bg-white/80 px-1 font-black text-aqua-600">{meta.mark}</span>
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700 ring-1 ring-brand-100">
+      <span className="rounded bg-white px-1 font-semibold text-brand-600">{meta.mark}</span>
       {meta.label}
     </span>
   );
@@ -97,11 +97,11 @@ export function ContextTypeBadge({ type }: { type: string }) {
   const meta = CONTEXT_TYPE_META[type] ?? { label: type, mark: "CH" };
   const style =
     type === "EXAM"
-      ? "bg-amber-100 text-amber-800 ring-amber-200"
+      ? "bg-amber-50 text-amber-700 ring-amber-100"
       : "bg-slate-100 text-slate-600 ring-slate-200";
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-black ring-1 ${style}`}>
-      <span className="rounded bg-white/70 px-1">{meta.mark}</span>
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${style}`}>
+      <span className="rounded bg-white/80 px-1">{meta.mark}</span>
       {meta.label}
     </span>
   );
@@ -110,7 +110,7 @@ export function ContextTypeBadge({ type }: { type: string }) {
 export function CrossUniversityBadge() {
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full bg-aqua-100 px-2.5 py-1 text-[11px] font-black text-aqua-600 ring-1 ring-aqua-300"
+      className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700 ring-1 ring-brand-100"
       title="Open to students from every university"
     >
       Global course
@@ -120,7 +120,7 @@ export function CrossUniversityBadge() {
 
 export function MaterialTypeBadge({ type }: { type: string }) {
   return (
-    <span className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide text-slate-600 ring-1 ring-slate-200">
+    <span className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-slate-600 ring-1 ring-slate-200">
       {type}
     </span>
   );
@@ -139,8 +139,8 @@ export function EmptyState({
 }) {
   return (
     <div className="card flex flex-col items-center py-12 text-center">
-      <div className="mb-4 h-1.5 w-16 rounded-full bg-gradient-to-r from-aqua-400 via-brand-500 to-lime-400" />
-      <p className="font-display text-lg font-black text-slate-800">{title}</p>
+      <div className="mb-4 h-1.5 w-16 rounded-full bg-brand-600" />
+      <p className="font-display text-lg font-semibold text-ink">{title}</p>
       <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-500">{body}</p>
       {cta && href && (
         <Link href={href} className="btn-primary mt-5">
@@ -163,8 +163,8 @@ export function PageHeader({
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <p className="eyebrow mb-3">CourseMind</p>
-        <h1 className="font-display text-3xl font-black tracking-tight text-ink sm:text-4xl">{title}</h1>
+        <p className="eyebrow mb-3">Hyntor</p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">{title}</h1>
         {subtitle && <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-slate-500">{subtitle}</p>}
       </div>
       {action}

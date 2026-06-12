@@ -1,6 +1,6 @@
 // tRPC client for the SAME shared API the web app uses.
 // The AppRouter import is TYPE-ONLY: it's erased at compile time, so no
-// server code is ever bundled into the app — only the type information
+// server code is ever bundled into the app - only the type information
 // that gives every api.* call end-to-end type safety.
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";

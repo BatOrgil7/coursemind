@@ -27,7 +27,7 @@ export const materialRouter = router({
       };
     }),
 
-  /** Paste-in notes/syllabus as text — no file needed. */
+  /** Paste-in notes/syllabus as text - no file needed. */
   createFromText: protectedProcedure
     .input(
       z.object({
@@ -57,7 +57,7 @@ export const materialRouter = router({
 
 /**
  * File-upload path. Multipart uploads don't flow through tRPC; the
- * /api/upload route handler (web) receives the file and calls this —
+ * /api/upload route handler (web) receives the file and calls this  -
  * the business logic stays in the shared API package per the spec.
  * Mobile hits the same /api/upload endpoint with its Bearer token.
  */

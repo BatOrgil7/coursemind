@@ -1,4 +1,4 @@
-// In-process API caller for React Server Components — same routers,
+// In-process API caller for React Server Components - same routers,
 // no HTTP hop. Always reflects the logged-in NextAuth session.
 import { appRouter, createContext } from "@coursemind/api";
 import { auth } from "@/auth";

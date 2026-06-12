@@ -33,9 +33,9 @@ export default function SignupPage() {
   return (
     <div>
       <p className="eyebrow">Start studying</p>
-      <h1 className="mt-2 font-display text-2xl font-black text-ink">Create your account</h1>
+      <h1 className="mt-2 font-display text-2xl font-semibold text-ink">Create your account</h1>
       <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
-        Use your university email so CourseMind can connect you with classmates, courses, and shared materials.
+        Use your university email so Hyntor can connect you with classmates, courses, and shared materials.
       </p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
@@ -80,7 +80,7 @@ export default function SignupPage() {
       </form>
       <p className="mt-4 text-center text-sm font-medium text-slate-500">
         Already have an account?{" "}
-        <Link href="/login" className="font-black text-brand-600 hover:text-brand-700">
+        <Link href="/login" className="font-semibold text-brand-600 hover:text-brand-700">
           Log in
         </Link>
       </p>

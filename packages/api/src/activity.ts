@@ -2,8 +2,8 @@
 // when the Phase 4 streaks/XP UI ships.
 //
 // Streak rule: compare the calendar day (UTC) of the user's last counted
-// activity with today. Same day → no change; yesterday → streak + 1;
-// anything older (or never) → streak resets to 1.
+// activity with today. Same day -> no change; yesterday -> streak + 1;
+// anything older (or never) -> streak resets to 1.
 import { prisma } from "@coursemind/db";
 import { XP_RULES, type ActivityType } from "@coursemind/core";
 

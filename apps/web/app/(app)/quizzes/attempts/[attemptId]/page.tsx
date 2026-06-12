@@ -38,16 +38,16 @@ export default async function AttemptReviewPage({
       <div className="surface-panel mb-8 flex flex-wrap items-center justify-between gap-6 p-6">
         <div>
           <p className="eyebrow">Your score</p>
-          <p className={`font-display text-5xl font-black ${scoreColor(attempt.score)}`}>
+          <p className={`font-display text-5xl font-semibold ${scoreColor(attempt.score)}`}>
             {attempt.score}%
           </p>
         </div>
         {attempt.weakTopics.length > 0 && (
           <div className="max-w-md">
-            <p className="text-sm font-black text-slate-600">Topics to revisit</p>
+            <p className="text-sm font-semibold text-slate-600">Topics to revisit</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {attempt.weakTopics.map((topic) => (
-                <span key={topic} className="rounded-full bg-rose-50 px-3 py-1 text-xs font-black text-rose-700 ring-1 ring-rose-100">
+                <span key={topic} className="rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-100">
                   {topic}
                 </span>
               ))}
@@ -75,11 +75,11 @@ export default async function AttemptReviewPage({
               }`}
             >
               <div className="mb-2 flex items-center justify-between gap-3">
-                <p className="text-xs font-black uppercase tracking-wide text-slate-400">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   Question {index + 1} - {question.topic}
                 </p>
                 <span
-                  className={`rounded-full px-2.5 py-0.5 text-[11px] font-black ${
+                  className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                     verdict === "correct"
                       ? "bg-emerald-100 text-emerald-800"
                       : verdict === "wrong"
@@ -102,7 +102,7 @@ export default async function AttemptReviewPage({
                         key={optionIndex}
                         className={`rounded-lg px-3 py-2 text-sm font-medium ${
                           isCorrect
-                            ? "bg-emerald-50 font-black text-emerald-800"
+                            ? "bg-emerald-50 font-semibold text-emerald-800"
                             : isChosen
                               ? "bg-rose-50 text-rose-800 line-through"
                               : "text-slate-500"
@@ -135,12 +135,12 @@ export default async function AttemptReviewPage({
 
               {answer?.feedback && (
                 <p className="mt-3 rounded-lg bg-brand-50 px-3 py-2 text-sm font-medium text-brand-900">
-                  <span className="font-black">Feedback:</span> {answer.feedback}
+                  <span className="font-semibold">Feedback:</span> {answer.feedback}
                 </p>
               )}
               {question.explanation && (
                 <p className="mt-3 border-t border-slate-100 pt-3 text-sm font-medium leading-relaxed text-slate-600">
-                  <span className="font-black text-slate-700">Why:</span> {question.explanation}
+                  <span className="font-semibold text-slate-700">Why:</span> {question.explanation}
                 </p>
               )}
             </div>

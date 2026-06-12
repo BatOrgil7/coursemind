@@ -182,7 +182,7 @@ export default function UploadPage({ params }: { params: Promise<{ courseId: str
 
         <aside className="surface-panel h-fit p-6">
           <p className="eyebrow">Shared library</p>
-          <h2 className="mt-2 font-display text-2xl font-black text-ink">Every useful upload improves the tutor.</h2>
+          <h2 className="mt-2 font-display text-2xl font-semibold text-ink">Every useful upload improves the tutor.</h2>
           <p className="mt-4 text-sm font-medium leading-relaxed text-slate-500">
             Slides, notes, syllabi, homework descriptions, and practice tests give the AI better context for everyone in the course.
           </p>

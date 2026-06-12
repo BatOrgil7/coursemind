@@ -1,4 +1,4 @@
-// Native course library — the first core mobile flow.
+// Native course library - the first core mobile flow.
 import { useCallback, useState } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet, RefreshControl } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
@@ -53,7 +53,7 @@ export default function CoursesScreen() {
             <View style={styles.empty}>
               <Text style={styles.emptyTitle}>No courses yet</Text>
               <Text style={styles.emptyBody}>
-                Join or create a course on the web app — it will show up here.
+                Join or create a course on the web app - it will show up here.
               </Text>
             </View>
           ) : null

@@ -47,7 +47,7 @@ export default function CourseScreen() {
         </View>
       ))}
       {course.materials.length === 0 && (
-        <Text style={styles.emptyText}>No materials yet — upload from the web app.</Text>
+        <Text style={styles.emptyText}>No materials yet - upload from the web app.</Text>
       )}
 
       <Text style={styles.heading}>🧪 Practice quizzes</Text>
@@ -55,12 +55,12 @@ export default function CourseScreen() {
         <Pressable key={q.id} style={styles.card} onPress={() => router.push(`/quiz/${q.id}`)}>
           <Text style={styles.cardTitle}>{q.title}</Text>
           <Text style={styles.cardMeta}>
-            {q.attemptCount} attempt{q.attemptCount === 1 ? "" : "s"} · tap to take →
+            {q.attemptCount} attempt{q.attemptCount === 1 ? "" : "s"} · tap to take ->
           </Text>
         </Pressable>
       ))}
       {course.quizzes.length === 0 && (
-        <Text style={styles.emptyText}>No quizzes yet — generate one from the web app.</Text>
+        <Text style={styles.emptyText}>No quizzes yet - generate one from the web app.</Text>
       )}
     </ScrollView>
   );

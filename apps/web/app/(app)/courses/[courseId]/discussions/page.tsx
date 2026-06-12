@@ -96,8 +96,8 @@ export default function DiscussionsPage({ params }: { params: Promise<{ courseId
                   onClick={() => setForm({ ...form, contextType: type })}
                   className={`rounded-lg border px-3 py-1.5 text-sm font-bold transition ${
                     form.contextType === type
-                      ? "border-aqua-300 bg-brand-50 text-brand-700"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-aqua-200"
+                      ? "border-brand-300 bg-brand-50 text-brand-700"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-brand-200"
                   }`}
                 >
                   {CONTEXT_TYPE_META[type].mark} {CONTEXT_TYPE_META[type].label}
@@ -142,7 +142,7 @@ export default function DiscussionsPage({ params }: { params: Promise<{ courseId
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`rounded-full px-3 py-1 text-xs font-black transition ${
+            className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
               filter === f
                 ? "bg-brand-600 text-white"
                 : "bg-white/75 text-slate-600 ring-1 ring-slate-200 hover:bg-white"
@@ -170,7 +170,7 @@ export default function DiscussionsPage({ params }: { params: Promise<{ courseId
                 className="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-white/70"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-black text-ink">{t.title}</p>
+                  <p className="truncate text-sm font-semibold text-ink">{t.title}</p>
                   <p className="mt-0.5 text-xs font-medium text-slate-400">
                     by {t.creatorName} - {t.postCount} post{t.postCount === 1 ? "" : "s"} - last activity{" "}
                     {new Date(t.lastPostAt).toLocaleDateString()}

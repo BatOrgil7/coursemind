@@ -53,8 +53,8 @@ export default function WorkspacePage({ params }: { params: Promise<{ workspaceI
   if (error && !workspace) {
     return (
       <div className="card mx-auto mt-12 max-w-md text-center">
-        <div className="icon-mark mx-auto bg-gradient-to-br from-brand-600 to-aqua-500">WS</div>
-        <p className="mt-4 font-display text-lg font-black text-ink">
+        <div className="icon-mark mx-auto bg-brand-600">WS</div>
+        <p className="mt-4 font-display text-lg font-semibold text-ink">
           {error === NEEDS_JOIN ? "You are not in this workspace yet" : "Could not open this workspace"}
         </p>
         <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">{error}</p>
@@ -139,7 +139,7 @@ function TaskBoard({
       <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="eyebrow">Planning</p>
-          <h2 className="font-display text-xl font-black text-ink">Task board</h2>
+          <h2 className="font-display text-xl font-semibold text-ink">Task board</h2>
         </div>
         <form onSubmit={addTask} className="flex flex-1 gap-2 sm:max-w-md">
           <input
@@ -159,7 +159,7 @@ function TaskBoard({
           const tasks = workspace.project.tasks.filter((t) => t.status === status);
           return (
             <div key={status} className="surface-panel p-3">
-              <p className="mb-2 px-1 text-xs font-black uppercase tracking-wide text-slate-500">
+              <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 {TASK_STATUS_LABELS[status]} - {tasks.length}
               </p>
               <div className="space-y-2">
@@ -171,7 +171,7 @@ function TaskBoard({
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-sm font-semibold leading-snug text-ink">{task.title}</p>
                       <button
-                        className="text-xs font-black text-slate-300 transition hover:text-rose-500"
+                        className="text-xs font-semibold text-slate-300 transition hover:text-rose-500"
                         title="Delete task"
                         disabled={busy}
                         onClick={() =>
@@ -246,7 +246,7 @@ function MoveButton({
   if (!target) return <span className="w-6" />;
   return (
     <button
-      className="rounded-lg bg-slate-100 px-1.5 py-1 text-[11px] font-black text-slate-500 transition hover:bg-brand-100 hover:text-brand-700"
+      className="rounded-lg bg-slate-100 px-1.5 py-1 text-[11px] font-semibold text-slate-500 transition hover:bg-brand-100 hover:text-brand-700"
       title={`Move to ${TASK_STATUS_LABELS[target]}`}
       disabled={busy}
       onClick={() =>
@@ -313,7 +313,7 @@ function ChatPanel({ workspaceId }: { workspaceId: string }) {
     <section className="flex h-[32rem] flex-col lg:col-span-1">
       <div className="mb-3">
         <p className="eyebrow">Live room</p>
-        <h2 className="font-display text-xl font-black text-ink">Group chat</h2>
+        <h2 className="font-display text-xl font-semibold text-ink">Group chat</h2>
       </div>
       <div className="surface-panel flex flex-1 flex-col overflow-hidden">
         <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
@@ -334,7 +334,7 @@ function ChatPanel({ workspaceId }: { workspaceId: string }) {
               <p
                 className={`mt-0.5 inline-block max-w-[90%] whitespace-pre-wrap rounded-lg px-3 py-2 text-left text-sm font-medium ${
                   m.mine
-                    ? "bg-gradient-to-br from-brand-600 to-aqua-500 text-white"
+                    ? "bg-brand-600 text-white"
                     : "bg-white text-ink shadow-sm"
                 }`}
               >

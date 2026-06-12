@@ -4,7 +4,7 @@ This file is the shared working log for Codex, Claude Code, and the user. Read i
 
 ## Project Summary
 
-Project name in transition: Hyntor, formerly CourseMind.
+Project name: Hyntor, formerly CourseMind.
 
 Hyntor is a student-first class study platform. Students join courses and share class materials that matter for studying: lecture notes, slides, homework prompts, tests, practice exams, discussion context, and other course files. The AI uses that class-specific context to help students understand the class and prepare effectively.
 
@@ -154,4 +154,45 @@ Browser QA notes:
 
 Next steps:
 - Run the production build after this entry.
-- Continue using CourseMind in UI until the user explicitly confirms a full rename pass.
+- Continue using Hyntor in UI until the user explicitly confirms a full rename pass.
+
+### 2026-06-12 - Codex - Hyntor Rename and iOS-Inspired Redesign
+
+Summary:
+- Renamed the product-facing brand to Hyntor across web UI, mobile metadata, docs, seed logs, and AI prompt persona.
+- Reworked the web visual system toward an iOS-inspired interface: system/SF-style font stack, white/translucent surfaces, Apple-like blue accent, quieter shadows, flatter rounded controls, and a light app shell.
+- Updated the landing, auth screens, authenticated shell, dashboard, tutor hub, and shared UI primitives for consistent Hyntor branding.
+- Cleaned encoding fallout from the earlier broad rename pass and normalized touched docs/prompts to ASCII.
+- Kept internal workspace package scopes as `@coursemind/*` to avoid a risky package namespace migration in the same change.
+
+Files touched:
+- `apps/web/tailwind.config.ts`
+- `apps/web/app/globals.css`
+- `apps/web/components/ui.tsx`
+- `apps/web/app/layout.tsx`
+- `apps/web/app/page.tsx`
+- `apps/web/app/(app)/layout.tsx`
+- Main web app pages under `apps/web/app/(app)`
+- `apps/web/app/(auth)/layout.tsx`
+- `apps/web/app/(auth)/login/page.tsx`
+- `apps/web/app/(auth)/signup/page.tsx`
+- `apps/mobile/app.json`
+- `packages/core/src/prompts.ts`
+- `packages/api/src/auth.ts`
+- `packages/api/src/routers/discussion.ts`
+- `packages/db/prisma/seed.ts`
+- Project docs and metadata
+
+Checks run:
+- `npm run typecheck`
+- `git diff --check`
+- `npm run build`
+- In-app browser QA on `/tutor`, `/dashboard`, and `/login` at desktop and iPhone-width viewports.
+
+Browser QA notes:
+- `/tutor` loaded as Alex with no console errors.
+- Desktop viewport `1440x900` and mobile viewport `390x844` had no horizontal overflow.
+- Dashboard and login pages rendered with Hyntor branding, system font stack, light surfaces, and no console errors.
+
+Next steps:
+- If the package namespace ever needs to match the product name, migrate `@coursemind/*` imports in a dedicated change.

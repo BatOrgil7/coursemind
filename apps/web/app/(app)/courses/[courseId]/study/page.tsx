@@ -164,7 +164,7 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
               <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <p className="eyebrow">Exam prep</p>
-                  <h2 className="mt-2 font-display text-xl font-black text-ink">Study plan</h2>
+                  <h2 className="mt-2 font-display text-xl font-semibold text-ink">Study plan</h2>
                   <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">
                     Schedule review around course materials, syllabus text, and missed quiz topics.
                   </p>
@@ -204,7 +204,7 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
                           disabled={busy === `day:${day.date}`}
                           onChange={(e) => togglePlanDay(plan.id, day.date, e.target.checked)}
                         />
-                        <span className="min-w-28 font-mono text-xs font-black text-slate-500">
+                        <span className="min-w-28 font-mono text-xs font-semibold text-slate-500">
                           {day.date}
                         </span>
                         <span className="flex-1">
@@ -218,7 +218,7 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
               ) : (
                 <EmptyState
                   title="No plan yet"
-                  body="Pick an exam date and CourseMind will turn your shared course context into a realistic study schedule."
+                  body="Pick an exam date and Hyntor will turn your shared course context into a realistic study schedule."
                 />
               )}
             </div>
@@ -227,7 +227,7 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
               <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
                   <p className="eyebrow">Memory</p>
-                  <h2 className="mt-2 font-display text-xl font-black text-ink">Flashcards</h2>
+                  <h2 className="mt-2 font-display text-xl font-semibold text-ink">Flashcards</h2>
                   <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">
                     Generate cards from shared materials, then review due cards with spaced repetition.
                   </p>
@@ -262,10 +262,10 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
 
               {currentCard ? (
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-                  <p className="text-xs font-black uppercase tracking-wide text-slate-400">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                     Due now
                   </p>
-                  <p className="mt-2 whitespace-pre-wrap font-display text-xl font-black text-ink">
+                  <p className="mt-2 whitespace-pre-wrap font-display text-xl font-semibold text-ink">
                     {currentCard.front}
                   </p>
                   {revealed ? (
@@ -303,7 +303,7 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
           <aside className="space-y-6">
             <div className="card">
               <p className="eyebrow">Focus</p>
-              <h2 className="mt-2 font-display text-xl font-black text-ink">Weak spots</h2>
+              <h2 className="mt-2 font-display text-xl font-semibold text-ink">Weak spots</h2>
               {data.weakTopics.length === 0 ? (
                 <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
                   Missed quiz topics will show up here after you take practice quizzes.
@@ -313,7 +313,7 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
                   {data.weakTopics.slice(0, 8).map((topic) => (
                     <div key={topic.topic}>
                       <div className="mb-1 flex justify-between gap-3 text-xs">
-                        <span className="font-black text-slate-600">{topic.topic}</span>
+                        <span className="font-semibold text-slate-600">{topic.topic}</span>
                         <span className="font-medium text-slate-400">{topic.count} miss{topic.count === 1 ? "" : "es"}</span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-slate-100">
@@ -330,7 +330,7 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
 
             <div className="card">
               <p className="eyebrow">Timed practice</p>
-              <h2 className="mt-2 font-display text-xl font-black text-ink">Mock exam</h2>
+              <h2 className="mt-2 font-display text-xl font-semibold text-ink">Mock exam</h2>
               <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
                 Generate a timed exam across the whole shared course library.
               </p>
@@ -348,12 +348,12 @@ export default function SmartStudyPage({ params }: { params: Promise<{ courseId:
               <p className="eyebrow">Review queue</p>
               <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div className="metric-tile">
-                  <dt className="text-xs font-black uppercase tracking-wide text-slate-400">Due</dt>
-                  <dd className="font-display text-2xl font-black text-ink">{data.flashcards.due}</dd>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Due</dt>
+                  <dd className="font-display text-2xl font-semibold text-ink">{data.flashcards.due}</dd>
                 </div>
                 <div className="metric-tile">
-                  <dt className="text-xs font-black uppercase tracking-wide text-slate-400">Total</dt>
-                  <dd className="font-display text-2xl font-black text-ink">{data.flashcards.total}</dd>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Total</dt>
+                  <dd className="font-display text-2xl font-semibold text-ink">{data.flashcards.total}</dd>
                 </div>
               </dl>
             </div>

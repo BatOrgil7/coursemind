@@ -51,7 +51,7 @@ export async function extractTextFromFile(
         return {
           text: "",
           materialType: "OTHER",
-          warning: `Files of type .${ext} can't be read yet — the file is stored, but the AI tutor can't use its contents. Supported: PDF, DOCX, PPTX, TXT, MD.`,
+          warning: `Files of type .${ext} can't be read yet - the file is stored, but the AI tutor can't use its contents. Supported: PDF, DOCX, PPTX, TXT, MD.`,
         };
     }
   } catch (err) {
@@ -70,7 +70,7 @@ function finish(raw: string, materialType: MaterialType): ExtractionResult {
       text: "",
       materialType,
       warning:
-        "No text could be extracted — this often means a scanned/image-only PDF. The file is stored, but the AI tutor can't read it. Try an OCR'd copy or paste the text directly.",
+        "No text could be extracted - this often means a scanned/image-only PDF. The file is stored, but the AI tutor can't read it. Try an OCR'd copy or paste the text directly.",
     };
   }
   return { text: text.slice(0, MAX_STORED_CHARS), materialType };

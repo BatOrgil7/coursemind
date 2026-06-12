@@ -49,11 +49,11 @@ export async function signupUser({ email, name, password }: SignupInput) {
 
   // University-email verification: personal-mail domains are rejected.
   // First student from an unknown .edu-style domain auto-creates their
-  // university's space (self-serve growth — the space is named after the
+  // university's space (self-serve growth - the space is named after the
   // domain and can be renamed later by an instructor).
   if (FREE_MAIL_DOMAINS.has(domain)) {
     throw new Error(
-      "CourseMind uses your university email to connect you with your classmates. Please sign up with your school email address (for the demo, use any name @demo.edu)."
+      "Hyntor uses your university email to connect you with your classmates. Please sign up with your school email address (for the demo, use any name @demo.edu)."
     );
   }
 

@@ -17,7 +17,7 @@ export const userRouter = router({
     }),
 
   // Mobile login: returns a long-lived JWT the Expo app stores securely.
-  // (Web login goes through NextAuth instead — see apps/web/auth.ts.)
+  // (Web login goes through NextAuth instead - see apps/web/auth.ts.)
   mobileLogin: publicProcedure
     .input(z.object({ email: z.string().email(), password: z.string() }))
     .mutation(async ({ input }) => {

@@ -68,9 +68,9 @@ function TutorHub() {
           <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="eyebrow">New session</p>
-              <h2 className="mt-2 font-display text-2xl font-black text-ink">Choose how you want help.</h2>
+              <h2 className="mt-2 font-display text-2xl font-semibold text-ink">Choose how you want help.</h2>
             </div>
-            <span className="rounded-full bg-lime-100 px-3 py-1 text-xs font-black text-lime-500 ring-1 ring-lime-300">
+            <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-brand-100">
               Course-grounded
             </span>
           </div>
@@ -82,18 +82,18 @@ function TutorHub() {
                 onClick={() => setMode(key)}
                 className={`group rounded-lg border p-4 text-left transition ${
                   mode === key
-                    ? "border-aqua-300 bg-gradient-to-br from-brand-50 to-aqua-50 shadow-card"
-                    : "border-slate-200/80 bg-white/70 hover:-translate-y-0.5 hover:border-aqua-200 hover:shadow-card"
+                    ? "border-brand-300 bg-brand-50 shadow-card"
+                    : "border-slate-200/80 bg-white/70 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card"
                 }`}
               >
                 <span
-                  className={`mb-4 grid h-9 w-9 place-items-center rounded-lg text-[11px] font-black ${
+                  className={`mb-4 grid h-9 w-9 place-items-center rounded-lg text-[11px] font-semibold ${
                     mode === key ? "bg-ink text-white" : "bg-slate-100 text-brand-700 group-hover:bg-ink group-hover:text-white"
                   }`}
                 >
                   {meta.mark}
                 </span>
-                <p className="font-display font-black text-ink">{meta.label}</p>
+                <p className="font-display font-semibold text-ink">{meta.label}</p>
                 <p className="mt-1 text-xs font-medium leading-relaxed text-slate-500">{meta.blurb}</p>
               </button>
             ))}
@@ -120,18 +120,18 @@ function TutorHub() {
 
         <aside className="surface-panel p-6">
           <p className="eyebrow">How it protects learning</p>
-          <h2 className="mt-2 font-display text-2xl font-black text-ink">Useful help without answer dumping.</h2>
+          <h2 className="mt-2 font-display text-2xl font-semibold text-ink">Useful help without answer dumping.</h2>
           <div className="mt-6 grid gap-3">
             <div className="metric-tile">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Materials</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Materials</p>
               <p className="mt-1 text-sm font-semibold text-ink">Uses the slides, homework, notes, and tests your class shares.</p>
             </div>
             <div className="metric-tile">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Assignments</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Assignments</p>
               <p className="mt-1 text-sm font-semibold text-ink">Escalates from hints to walkthroughs only as you engage.</p>
             </div>
             <div className="metric-tile">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Code</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Code</p>
               <p className="mt-1 text-sm font-semibold text-ink">Finds bugs and edge cases with questions, not rewrites.</p>
             </div>
           </div>
@@ -140,7 +140,7 @@ function TutorHub() {
 
       <section>
         <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="font-display text-xl font-black text-ink">Past sessions</h2>
+          <h2 className="font-display text-xl font-semibold text-ink">Past sessions</h2>
           <span className="text-xs font-bold text-slate-400">{sessions.length} total</span>
         </div>
         {sessions.length === 0 ? (
@@ -154,7 +154,7 @@ function TutorHub() {
                 className="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-white/70"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-black text-ink">{s.title}</p>
+                  <p className="truncate text-sm font-semibold text-ink">{s.title}</p>
                   <p className="mt-0.5 text-xs font-medium text-slate-400">
                     {s.courseCode ?? "No course"} - {new Date(s.updatedAt).toLocaleString()}
                   </p>

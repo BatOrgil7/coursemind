@@ -90,12 +90,12 @@ export default function ThreadPage({ params }: { params: Promise<{ threadId: str
       <header className="surface-panel mb-6 p-5">
         <Link
           href={`/courses/${t.course.id}/discussions`}
-          className="text-xs font-black uppercase tracking-[0.16em] text-aqua-600 hover:text-brand-700"
+          className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-600 hover:text-brand-700"
         >
           {t.course.code} discussions
         </Link>
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <h1 className="font-display text-2xl font-black text-ink">{t.title}</h1>
+          <h1 className="font-display text-2xl font-semibold text-ink">{t.title}</h1>
           <ContextTypeBadge type={t.contextType} />
         </div>
         <p className="mt-1 text-xs font-medium text-slate-400">started by {t.creatorName}</p>
@@ -128,7 +128,7 @@ export default function ThreadPage({ params }: { params: Promise<{ threadId: str
 
       <div className="surface-panel mt-6 flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs font-medium leading-relaxed text-slate-600">
-          <span className="font-black text-brand-700">Stuck as a group?</span> Invoke the AI tutor. It reads the thread and replies with hints
+          <span className="font-semibold text-brand-700">Stuck as a group?</span> Invoke the AI tutor. It reads the thread and replies with hints
           {t.contextType === "EXAM" || t.contextType === "QUIZ"
             ? ", never answers to graded questions."
             : " and grounded explanations."}
@@ -141,10 +141,10 @@ export default function ThreadPage({ params }: { params: Promise<{ threadId: str
       <form onSubmit={handleReply} className="surface-panel mt-6 p-4">
         {replyTo && (
           <p className="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
-            Replying to <span className="font-black">{replyTo.authorName}</span>
+            Replying to <span className="font-semibold">{replyTo.authorName}</span>
             <button
               type="button"
-              className="font-black text-brand-600 hover:text-brand-700"
+              className="font-semibold text-brand-600 hover:text-brand-700"
               onClick={() => setReplyTo(null)}
             >
               cancel
@@ -187,7 +187,7 @@ function PostCard({ post, onReply }: { post: Post; onReply: () => void }) {
         <div className="flex shrink-0 items-center gap-2">
           {post.isAi && typeof post.tier === "number" && <TierBadge tier={post.tier} />}
           {!post.isAi && (
-            <button className="text-xs font-black text-brand-600 hover:text-brand-700" onClick={onReply}>
+            <button className="text-xs font-semibold text-brand-600 hover:text-brand-700" onClick={onReply}>
               Reply
             </button>
           )}

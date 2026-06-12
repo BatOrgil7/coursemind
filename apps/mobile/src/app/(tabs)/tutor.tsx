@@ -95,7 +95,7 @@ export default function TutorScreen() {
 
       {error && <Text style={styles.error}>{error}</Text>}
       <Pressable style={[styles.button, busy && { opacity: 0.6 }]} onPress={start} disabled={busy}>
-        <Text style={styles.buttonText}>{busy ? "Starting…" : "Start session →"}</Text>
+        <Text style={styles.buttonText}>{busy ? "Starting…" : "Start session ->"}</Text>
       </Pressable>
 
       <Text style={[styles.heading, { marginTop: 24 }]}>Past sessions</Text>

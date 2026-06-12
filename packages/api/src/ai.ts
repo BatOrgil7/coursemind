@@ -11,7 +11,7 @@ export function isAiConfigured(): boolean {
 }
 
 export const AI_NOT_CONFIGURED_MESSAGE =
-  "AI features aren't configured yet. Add your Anthropic API key as ANTHROPIC_API_KEY in apps/web/.env.local and restart the dev server. Get a key at https://console.anthropic.com/settings/keys — see README.md → 'Enabling AI features'.";
+  "AI features aren't configured yet. Add your Anthropic API key as ANTHROPIC_API_KEY in apps/web/.env.local and restart the dev server. Get a key at https://console.anthropic.com/settings/keys - see README.md -> 'Enabling AI features'.";
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {

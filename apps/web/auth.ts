@@ -1,6 +1,6 @@
 // NextAuth v5 configuration (web sessions).
 // The actual credential check lives in @coursemind/api (verifyCredentials)
-// so web and mobile share ONE auth implementation — this file only adapts
+// so web and mobile share ONE auth implementation - this file only adapts
 // it to NextAuth's session machinery.
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";

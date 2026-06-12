@@ -1,35 +1,35 @@
-# CourseMind Architecture
+# Hyntor Architecture
 
-A guided tour of how the system fits together — written so you can find and fix anything.
+A guided tour of how the system fits together - written so you can find and fix anything.
 
 ## The big picture
 
 ```
-                ┌─────────────────────┐        ┌──────────────────────┐
-                │   apps/web          │        │   apps/mobile        │
-                │   Next.js 15        │        │   Expo / React Native│
-                │   (pages + UI)      │        │   (native screens)   │
-                └──────┬───────┬──────┘        └──────────┬───────────┘
-                       │       │                          │
-        in-process call│       │ HTTP /api/trpc           │ HTTP /api/trpc
-        (server pages) │       │ (browser)                │ + Bearer JWT
-                       ▼       ▼                          ▼
-                ┌─────────────────────────────────────────────────────┐
-                │                  packages/api                       │
-                │   tRPC routers: user, course, material, tutor,      │
-                │     quiz, workspace, discussion                     │
-                │   + auth (passwords, JWT), file extraction,         │
-                │     XP/streak engine, Anthropic client              │
-                └────────────┬──────────────────────┬─────────────────┘
-                             │                      │
-                             ▼                      ▼
-                ┌────────────────────┐   ┌─────────────────────────┐
-                │   packages/db      │   │   packages/core         │
-                │   Prisma + SQLite/ │   │   types, zod schemas,   │
-                │   PostgreSQL       │   │   TUTOR PROMPT SYSTEM   │
-                └────────────────────┘   └─────────────────────────┘
-                                                    │
-                                                    ▼
+                +---------------------+        +----------------------+
+                |   apps/web          |        |   apps/mobile        |
+                |   Next.js 15        |        |   Expo / React Native|
+                |   (pages + UI)      |        |   (native screens)   |
+                \--------+-------+------+        \------------+-----------+
+                       |       |                          |
+        in-process call|       | HTTP /api/trpc           | HTTP /api/trpc
+        (server pages) |       | (browser)                | + Bearer JWT
+                       v       v                          v
+                +-----------------------------------------------------+
+                |                  packages/api                       |
+                |   tRPC routers: user, course, material, tutor,      |
+                |     quiz, workspace, discussion                     |
+                |   + auth (passwords, JWT), file extraction,         |
+                |     XP/streak engine, Anthropic client              |
+                \--------------+----------------------+-----------------+
+                             |                      |
+                             v                      v
+                +--------------------+   +-------------------------+
+                |   packages/db      |   |   packages/core         |
+                |   Prisma + SQLite/ |   |   types, zod schemas,   |
+                |   PostgreSQL       |   |   TUTOR PROMPT SYSTEM   |
+                \----------------------+   \---------------------------+
+                                                    |
+                                                    v
                                          Anthropic API (claude-sonnet-4-6)
 ```
 
@@ -40,42 +40,42 @@ it's almost always in `packages/api` or `packages/core`.
 ## Request flows, end to end
 
 ### Web page load (e.g. /dashboard)
-1. `apps/web/app/(app)/layout.tsx` runs on the server, calls `auth()` (NextAuth) → session.
+1. `apps/web/app/(app)/layout.tsx` runs on the server, calls `auth()` (NextAuth) -> session.
 2. The page calls `serverApi()` (`apps/web/lib/server-api.ts`), which invokes tRPC routers
-   **in-process** — no HTTP hop for server-rendered pages.
+   **in-process** - no HTTP hop for server-rendered pages.
 3. Routers read via the Prisma singleton (`packages/db/src/index.ts`).
 
 ### Web interaction (e.g. submitting a quiz)
 1. A `"use client"` component calls `api.quiz.submit.mutate(...)` (`apps/web/lib/trpc.ts`).
-2. That's an HTTP POST to `/api/trpc/quiz.submit` → handled by
+2. That's an HTTP POST to `/api/trpc/quiz.submit` -> handled by
    `apps/web/app/api/trpc/[trpc]/route.ts`, which resolves the NextAuth session and builds
    the tRPC context.
 
 ### Mobile interaction
 Same HTTP endpoint, but the context is authenticated by the `Authorization: Bearer <jwt>`
 header instead of a cookie. The JWT is issued by `user.mobileLogin` and verified in
-`packages/api/src/trpc.ts → createContext`. Same secret (`AUTH_SECRET`), same user store.
+`packages/api/src/trpc.ts -> createContext`. Same secret (`AUTH_SECRET`), same user store.
 
 ### The tutor call (the most important flow)
 `tutor.sendMessage` in `packages/api/src/routers/tutor.ts`:
 1. Loads the session + message history (JSON column, zod-validated on read).
-2. Computes `maxTierAllowed`: `CONCEPT` → 0; `ASSIGNMENT_HELP` → `1 + prior user messages`,
-   capped at 4; `CODE_REVIEW`/`DEBUG` → governed by their mode prompts.
+2. Computes `maxTierAllowed`: `CONCEPT` -> 0; `ASSIGNMENT_HELP` -> `1 + prior user messages`,
+   capped at 4; `CODE_REVIEW`/`DEBUG` -> governed by their mode prompts.
 3. Gathers **grounding**: the course's materials with extracted text, best-upvoted first,
    sliced to a ~60k-char budget (`MAX_GROUNDING_CHARS` in core).
-4. Builds the system prompt (`buildTutorSystemPrompt` in `packages/core/src/prompts.ts`) —
+4. Builds the system prompt (`buildTutorSystemPrompt` in `packages/core/src/prompts.ts`)  -
    persona + grounding rules + materials + mode block + tier budget.
 5. Calls Claude. The reply starts with a `[TIER:n]` marker; `extractTierMarker` strips it.
 6. Persists the updated history and `tierReached = max(old, n)`.
 
 **Why server-side tier enforcement matters:** the model is told its ceiling each turn, but
-even if it misbehaved, the ceiling only rises as the student actually engages — the client
+even if it misbehaved, the ceiling only rises as the student actually engages - the client
 can't request Tier 4 outright.
 
 ### File upload
 Multipart doesn't flow through tRPC, so `apps/web/app/api/upload/route.ts` accepts the file
 (25 MB cap), stores it in `apps/web/uploads/` (dev), and calls `createMaterialFromFile()`
-in the API package — which checks enrollment, extracts text (`extract.ts`: pdf-parse /
+in the API package - which checks enrollment, extracts text (`extract.ts`: pdf-parse /
 mammoth / jszip), creates the Material row, and awards XP. Mobile can hit the same endpoint
 with its Bearer token.
 
@@ -84,7 +84,7 @@ with its Bearer token.
 | Decision | Why |
 |---|---|
 | **SQLite in dev** instead of Postgres | Nothing to install; the whole app runs in 5 minutes. The schema is written to switch to Postgres by changing one line (see README). |
-| **Enum-like fields are Strings** | SQLite has no Prisma enums. Allowed values live in ONE place — `packages/core/src/constants.ts` — and zod validates them at the API boundary. They can become native enums on Postgres later. |
+| **Enum-like fields are Strings** | SQLite has no Prisma enums. Allowed values live in ONE place - `packages/core/src/constants.ts` - and zod validates them at the API boundary. They can become native enums on Postgres later. |
 | **JSON columns are `String`** with zod parsing | Portable across SQLite/Postgres; `parseJsonColumn()` validates on read so corrupt data can't crash pages. |
 | **Mobile outside npm workspaces** | React Native + hoisted dependencies is a notorious failure mode on Windows. Standalone install = boring and reliable. The only cross-boundary import is the `AppRouter` **type** (erased at compile time). |
 | **tRPC versions must match exactly** between root and mobile | Two different `@trpc/server` type copies make `AppRouter` collapse to `never`. Pinned with `--save-exact`. |
@@ -94,20 +94,20 @@ with its Bearer token.
 
 ## Data model in one paragraph
 
-`University` ← `User` ← `Enrollment` → `Course` is the spine. Courses own `Material`
+`University` <- `User` <- `Enrollment` -> `Course` is the spine. Courses own `Material`
 (with `extractedText` for grounding), `Quiz` (questions as JSON) with `QuizAttempt`
 (answers + score + weakTopics), `TutorSession` (messages + tierReached), and the Phase 2+
 tables already migrated: `Workspace`/`WorkspaceMember`/`Project`, `DiscussionThread`/
 `DiscussionPost`, `ChatMessage`, `StudyPlan`, `Flashcard`, `MaterialUpvote`, `ActivityLog`.
 Full schema with comments: `packages/db/prisma/schema.prisma`.
 
-## Phase 2 — how collaboration works (shipped)
+## Phase 2 - how collaboration works (shipped)
 
 - **Workspaces** (`routers/workspace.ts`): study groups & project teams per course.
-  Every workspace gets a `Project` row at creation, so the task board always exists —
+  Every workspace gets a `Project` row at creation, so the task board always exists  -
   tasks are a JSON column (`ProjectTask[]`, zod-validated). Membership is enforced by
   `requireWorkspaceMember` in `trpc.ts` (same pattern as `requireEnrollment`).
-- **Group chat**: simple POLLING on `ChatMessage` — the client refetches
+- **Group chat**: simple POLLING on `ChatMessage` - the client refetches
   `workspace.chatList` every `CHAT_POLL_INTERVAL_MS` (3s, in core constants). No
   websockets, no paid realtime service; plenty for study-group-sized rooms. Upgrade
   path: swap the poll for a subscription transport later, the API shape stays.
@@ -117,14 +117,14 @@ Full schema with comments: `packages/db/prisma/schema.prisma`.
   grounding and it posts ONE reply (`authorId = null`). The reply keeps its `[TIER:n]`
   marker in the stored body (stripped on read) so the tier badge survives reloads.
   **Public-board tier policy**: the ceiling rises with student posts but caps at
-  Tier 3 (`DISCUSSION_MAX_TIER`) — a Tier 4 walkthrough of graded work, visible to the
+  Tier 3 (`DISCUSSION_MAX_TIER`) - a Tier 4 walkthrough of graded work, visible to the
   whole class, would be answer-dumping by proxy. See `buildDiscussionTutorPrompt`.
 - **Cross-university courses**: a course "belongs to" the universities of its enrolled
   members (the creator auto-enrolls, so a new course is instantly visible to their
   peers). `course.browse` shows your university's courses plus anything flagged
-  `isCrossUniversity` — those are open to everyone (🌍 badge in the UI).
+  `isCrossUniversity` - those are open to everyone (global badge in the UI).
 
-## Where Phase 3–4 features hook in
+## Where Phase 3-4 features hook in
 
 Search the repo for `TODO Phase`. Highlights:
 - **Spaced repetition / weak spots (P3)**: `QuizAttempt.weakTopics` is already being

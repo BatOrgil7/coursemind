@@ -1,5 +1,5 @@
 // Browser-side tRPC client (used in "use client" components).
-// Server components don't use this — they call the API in-process via
+// Server components don't use this - they call the API in-process via
 // lib/server-api.ts (no HTTP round-trip).
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";

@@ -1,6 +1,6 @@
 // Zod schemas + TypeScript types for every JSON payload stored in the
 // database (Quiz.questions, QuizAttempt.answers, TutorSession.messages,
-// Project.tasks, StudyPlan.schedule). Parse on read, validate on write —
+// Project.tasks, StudyPlan.schedule). Parse on read, validate on write  -
 // if bad JSON ever lands in the DB, these schemas catch it at the boundary
 // instead of crashing deep inside a React component.
 import { z } from "zod";
@@ -22,7 +22,7 @@ export const QuizQuestionSchema = z.object({
   // mcq only:
   options: z.array(z.string()).optional(),
   correctOption: z.number().int().optional(),
-  // short/code only — model answer used for grading + shown in review:
+  // short/code only - model answer used for grading + shown in review:
   sampleAnswer: z.string().optional(),
   explanation: z.string().default(""),
 });
@@ -32,7 +32,7 @@ export const QuizQuestionsSchema = z.array(QuizQuestionSchema);
 export const AttemptAnswerSchema = z.object({
   questionId: z.string(),
   response: z.string(), // for mcq this is the chosen option index as a string
-  correct: z.boolean().nullable(), // null = not auto-gradable (no AI key) — review manually
+  correct: z.boolean().nullable(), // null = not auto-gradable (no AI key) - review manually
   feedback: z.string().default(""),
 });
 export type AttemptAnswer = z.infer<typeof AttemptAnswerSchema>;

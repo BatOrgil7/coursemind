@@ -1,4 +1,4 @@
-// Phase 2: discussion boards — threads attached to a course (or to a
+// Phase 2: discussion boards - threads attached to a course (or to a
 // specific exam/quiz/material) where the AI tutor can be INVOKED as a
 // participant.
 //
@@ -8,7 +8,7 @@
 //
 // Public-board tier policy (see buildDiscussionTutorPrompt in core):
 // the ceiling starts at Tier 1 and rises with real student engagement
-// (posts in the thread), but caps at DISCUSSION_MAX_TIER (3) — a Tier 4
+// (posts in the thread), but caps at DISCUSSION_MAX_TIER (3) - a Tier 4
 // structured walkthrough of graded work, visible to the whole class,
 // would be answer-dumping by proxy.
 import { z } from "zod";
@@ -24,7 +24,7 @@ import { router, protectedProcedure, requireEnrollment } from "../trpc";
 import { askClaude, isAiConfigured, AI_NOT_CONFIGURED_MESSAGE } from "../ai";
 import { gatherGrounding } from "../grounding";
 
-const AI_AUTHOR_NAME = "CourseMind Tutor";
+const AI_AUTHOR_NAME = "Hyntor Tutor";
 
 export const discussionRouter = router({
   /** Threads in a course, optionally filtered by context type (e.g. EXAM). */
@@ -207,7 +207,7 @@ export const discussionRouter = router({
         .map((p) =>
           p.author
             ? `[${p.author.name}]\n${p.body}`
-            : `[${AI_AUTHOR_NAME} — you, earlier]\n${extractTierMarker(p.body).content}`
+            : `[${AI_AUTHOR_NAME} - you, earlier]\n${extractTierMarker(p.body).content}`
         )
         .join("\n\n---\n\n");
 

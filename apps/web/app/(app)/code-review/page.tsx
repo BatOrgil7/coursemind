@@ -92,7 +92,7 @@ export default function CodeReviewPage() {
 
         <aside className="surface-panel h-fit p-6">
           <p className="eyebrow">Review style</p>
-          <h2 className="mt-2 font-display text-2xl font-black text-ink">Find the bug. Own the fix.</h2>
+          <h2 className="mt-2 font-display text-2xl font-semibold text-ink">Find the bug. Own the fix.</h2>
           <div className="mt-6 space-y-3 text-sm font-medium leading-relaxed text-slate-500">
             <p>The tutor reads your course context when available.</p>
             <p>It calls out edge cases, assumptions, and style risks.</p>

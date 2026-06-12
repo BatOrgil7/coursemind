@@ -33,7 +33,7 @@ export const courseRouter = router({
    *  universities of its enrolled members (the creator auto-enrolls, so a
    *  new course is instantly visible to their university peers). You see
    *  courses with members from YOUR university, plus any course flagged
-   *  isCrossUniversity — those are open to everyone. */
+   *  isCrossUniversity - those are open to everyone. */
   browse: protectedProcedure
     .input(z.object({ query: z.string().max(100).optional() }))
     .query(async ({ ctx, input }) => {

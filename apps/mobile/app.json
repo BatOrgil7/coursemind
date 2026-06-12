@@ -1,21 +1,21 @@
 {
   "expo": {
-    "name": "CourseMind",
-    "slug": "coursemind",
+    "name": "Hyntor",
+    "slug": "hyntor",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "coursemind",
+    "scheme": "hyntor",
     "userInterfaceStyle": "light",
     "ios": {
-      "bundleIdentifier": "com.coursemind.app",
+      "bundleIdentifier": "com.hyntor.app",
       "supportsTablet": true,
       "icon": "./assets/expo.icon"
     },
     "android": {
-      "package": "com.coursemind.app",
+      "package": "com.hyntor.app",
       "adaptiveIcon": {
-        "backgroundColor": "#1e1b4b",
+        "backgroundColor": "#f5f5f7",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"

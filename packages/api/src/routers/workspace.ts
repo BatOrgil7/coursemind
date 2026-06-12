@@ -1,14 +1,14 @@
-// Phase 2: study-group / project workspaces — members, a shared task
+// Phase 2: study-group / project workspaces - members, a shared task
 // board, and group chat.
 //
 // The task board lives on the Project row's `tasks` JSON column
-// (ProjectTask[] — see packages/core/src/types.ts). EVERY workspace gets
+// (ProjectTask[] - see packages/core/src/types.ts). EVERY workspace gets
 // a Project row at creation, study groups included, so the board always
 // exists.
 //
 // Chat is SIMPLE POLLING on the ChatMessage table (see ARCHITECTURE.md):
 // clients refetch chat.list every CHAT_POLL_INTERVAL_MS. No websockets,
-// no paid realtime service — plenty for study-group-sized rooms.
+// no paid realtime service - plenty for study-group-sized rooms.
 import { randomUUID } from "crypto";
 import { z } from "zod";
 import {

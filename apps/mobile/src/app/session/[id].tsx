@@ -1,4 +1,4 @@
-// Native tutor chat — same tier-badge mechanic as the web app.
+// Native tutor chat - same tier-badge mechanic as the web app.
 import { useCallback, useRef, useState } from "react";
 import {
   View,
@@ -89,7 +89,7 @@ export default function SessionScreen() {
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>
-            Ask anything about your course. Hints go deeper as you engage — the final answer is
+            Ask anything about your course. Hints go deeper as you engage - the final answer is
             always yours. 🧠
           </Text>
         }

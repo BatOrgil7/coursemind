@@ -38,7 +38,7 @@ export default async function MaterialPage({
       </p>
 
       <div className="card">
-        <h2 className="mb-3 font-display text-sm font-black uppercase tracking-wide text-slate-400">
+        <h2 className="mb-3 font-display text-sm font-semibold uppercase tracking-wide text-slate-400">
           Extracted text read by the tutor
         </h2>
         {material.extractedText ? (

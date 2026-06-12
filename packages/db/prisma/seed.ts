@@ -1,7 +1,7 @@
 // Seed data: one demo university, three users, one course, two materials
 // with real extracted text, and one pre-generated practice quiz.
-// The quiz is pre-generated so the FULL core loop (take quiz → get scored
-// → see explanations) works even before an ANTHROPIC_API_KEY is configured.
+// The quiz is pre-generated so the FULL core loop (take quiz -> get scored
+// -> see explanations) works even before an ANTHROPIC_API_KEY is configured.
 //
 // Run with: npm run db:seed   (from the repo root)
 // Demo logins (password for all three): coursemind
@@ -13,7 +13,7 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-const HASH_TABLE_NOTES = `CS201 Lecture 9 — Hash Tables and Collision Resolution
+const HASH_TABLE_NOTES = `CS201 Lecture 9 - Hash Tables and Collision Resolution
 
 1. Motivation
 Arrays give O(1) access by index, but real programs look things up by key (a username, a word, a product ID). A hash table gives us (expected) O(1) insert, lookup, and delete by key. It is arguably the most used data structure in practice: Python dicts, Java HashMaps, JavaScript objects and Maps are all hash tables.
@@ -25,20 +25,20 @@ A hash table is an array of m buckets plus a hash function h(key) that maps a ke
 A good hash function is (a) deterministic, (b) fast, and (c) spreads keys uniformly across buckets. For strings, a common scheme is polynomial rolling hashing: h(s) = s[0]*p^(n-1) + s[1]*p^(n-2) + ... + s[n-1], computed mod a large prime, with p a small prime like 31. EXAM NOTE: you should be able to compute a small polynomial hash by hand.
 
 4. Collisions
-Two different keys can hash to the same bucket — a collision. By the pigeonhole principle collisions are unavoidable once you have more possible keys than buckets, so every hash table needs a collision resolution strategy. The two big families:
+Two different keys can hash to the same bucket - a collision. By the pigeonhole principle collisions are unavoidable once you have more possible keys than buckets, so every hash table needs a collision resolution strategy. The two big families:
 
 4a. Separate chaining
-Each bucket holds a linked list (or dynamic array) of all pairs that hashed there. Insert appends to the list; lookup walks the list comparing keys. With a good hash function and load factor α = n/m, the expected chain length is α, so expected lookup is O(1 + α). Worst case (all keys in one chain) degrades to O(n).
+Each bucket holds a linked list (or dynamic array) of all pairs that hashed there. Insert appends to the list; lookup walks the list comparing keys. With a good hash function and load factor alpha = n/m, the expected chain length is alpha, so expected lookup is O(1 + alpha). Worst case (all keys in one chain) degrades to O(n).
 
 4b. Open addressing
 All entries live directly in the array. On collision, probe for another slot according to a probe sequence:
-- Linear probing: try i, i+1, i+2, ... (simple, cache-friendly, but suffers primary clustering — runs of occupied slots grow and merge)
+- Linear probing: try i, i+1, i+2, ... (simple, cache-friendly, but suffers primary clustering - runs of occupied slots grow and merge)
 - Quadratic probing: try i, i+1^2, i+2^2, ... (reduces primary clustering, can suffer secondary clustering)
 - Double hashing: step size comes from a second hash function h2(key), the strongest of the three.
 Deletion under open addressing is tricky: you cannot simply empty a slot or you break probe chains. Standard fix: tombstones (mark slot as deleted-but-was-occupied).
 
 5. Load factor and resizing
-The load factor α = n/m drives performance. Chaining stays reasonable up to α ≈ 1; open addressing degrades sharply as α → 1 (probe lengths blow up). Typical policy: when α exceeds a threshold (e.g. 0.75 like Java's HashMap), allocate a new array of roughly double the size and re-insert every element (rehashing). Rehashing is O(n) but amortized O(1) per insert.
+The load factor alpha = n/m drives performance. Chaining stays reasonable up to alpha approx 1; open addressing degrades sharply as alpha -> 1 (probe lengths blow up). Typical policy: when alpha exceeds a threshold (e.g. 0.75 like Java's HashMap), allocate a new array of roughly double the size and re-insert every element (rehashing). Rehashing is O(n) but amortized O(1) per insert.
 
 6. Complexity summary
 Operation   | Average | Worst
@@ -52,9 +52,9 @@ The worst case happens with pathological key sets or a bad hash function. Java 8
 - You need stable worst-case guarantees (real-time systems)
 - Keys are tiny dense integers (a plain array is better)
 
-PROF'S EXAM HINTS (from review session): be ready to (1) trace linear probing inserts into a small table by hand, including a deletion with tombstones, (2) explain why doubling capacity keeps amortized insert O(1), (3) compare chaining vs open addressing trade-offs in 3–4 sentences.`;
+PROF'S EXAM HINTS (from review session): be ready to (1) trace linear probing inserts into a small table by hand, including a deletion with tombstones, (2) explain why doubling capacity keeps amortized insert O(1), (3) compare chaining vs open addressing trade-offs in 3-4 sentences.`;
 
-const BST_NOTES = `CS201 Lecture 11 — Binary Search Trees
+const BST_NOTES = `CS201 Lecture 11 - Binary Search Trees
 
 1. Definition
 A binary search tree (BST) is a binary tree where for every node N: all keys in N's left subtree are less than N.key, and all keys in the right subtree are greater. This invariant makes search a guided walk: at each node go left or right by comparison.
@@ -62,8 +62,8 @@ A binary search tree (BST) is a binary tree where for every node N: all keys in 
 2. Operations
 - search(k): start at root, compare, descend. O(h) where h is tree height.
 - insert(k): search until you fall off the tree, attach the new node there. O(h).
-- delete(k): three cases — leaf (just remove), one child (splice child up), two children (replace with in-order successor: the minimum of the right subtree, then delete that successor node). Deletion's two-child case is the classic exam question.
-- in-order traversal (left, node, right) visits keys in sorted order — this is THE defining property to remember.
+- delete(k): three cases - leaf (just remove), one child (splice child up), two children (replace with in-order successor: the minimum of the right subtree, then delete that successor node). Deletion's two-child case is the classic exam question.
+- in-order traversal (left, node, right) visits keys in sorted order - this is THE defining property to remember.
 
 3. Height matters
 All costs are O(h). A balanced tree has h = O(log n); inserting sorted input into a naive BST produces a degenerate "linked list" with h = n - 1, making everything O(n). This motivates self-balancing trees (AVL, red-black) covered next lecture.
@@ -73,7 +73,7 @@ BSTs give O(log n) operations but support ordered operations hash tables cannot:
 
 PROF'S EXAM HINTS: trace insertions one by one and draw the tree, perform a two-child deletion showing the successor swap, and explain what input order produces the worst-case height and why.`;
 
-// QuizQuestion[] — must match packages/core/src/types.ts (QuizQuestionSchema)
+// QuizQuestion[] - must match packages/core/src/types.ts (QuizQuestionSchema)
 const SEED_QUIZ_QUESTIONS = [
   {
     id: "q1",
@@ -81,9 +81,9 @@ const SEED_QUIZ_QUESTIONS = [
     topic: "hash functions",
     prompt: "What property is NOT required of a good hash function?",
     options: [
-      "It is deterministic — the same key always hashes to the same value",
+      "It is deterministic - the same key always hashes to the same value",
       "It distributes keys uniformly across buckets",
-      "It is reversible — the key can be recovered from the hash",
+      "It is reversible - the key can be recovered from the hash",
       "It is fast to compute",
     ],
     correctOption: 2,
@@ -95,11 +95,11 @@ const SEED_QUIZ_QUESTIONS = [
     type: "mcq",
     topic: "collision resolution",
     prompt:
-      "In separate chaining with load factor α = n/m and a good hash function, the expected cost of an unsuccessful lookup is:",
-    options: ["O(1 + α)", "O(α²)", "O(log n)", "O(m/n)"],
+      "In separate chaining with load factor alpha = n/m and a good hash function, the expected cost of an unsuccessful lookup is:",
+    options: ["O(1 + alpha)", "O(alpha^2)", "O(log n)", "O(m/n)"],
     correctOption: 0,
     explanation:
-      "Expected chain length equals the load factor α, so a lookup costs the hash computation O(1) plus walking an expected α entries: O(1 + α). Lecture 9, section 4a.",
+      "Expected chain length equals the load factor alpha, so a lookup costs the hash computation O(1) plus walking an expected alpha entries: O(1 + alpha). Lecture 9, section 4a.",
   },
   {
     id: "q3",
@@ -121,16 +121,16 @@ const SEED_QUIZ_QUESTIONS = [
     type: "mcq",
     topic: "load factor & resizing",
     prompt:
-      "A table doubles its capacity and rehashes when α exceeds 0.75. Rehashing costs O(n). Why is insertion still amortized O(1)?",
+      "A table doubles its capacity and rehashes when alpha exceeds 0.75. Rehashing costs O(n). Why is insertion still amortized O(1)?",
     options: [
       "Because rehashing happens in a background thread",
-      "Because each O(n) rehash is 'paid for' by the Θ(n) cheap insertions since the previous rehash",
+      "Because each O(n) rehash is 'paid for' by the Theta(n) cheap insertions since the previous rehash",
       "Because the hash function gets faster as the table grows",
-      "It isn't — amortized insertion is O(log n)",
+      "It isn't - amortized insertion is O(log n)",
     ],
     correctOption: 1,
     explanation:
-      "Between rehashes you perform Θ(n) constant-time insertions. Spreading the O(n) rehash cost over those insertions charges each one O(1) extra — the classic doubling argument (same as dynamic arrays). Lecture 9, section 5.",
+      "Between rehashes you perform Theta(n) constant-time insertions. Spreading the O(n) rehash cost over those insertions charges each one O(1) extra - the classic doubling argument (same as dynamic arrays). Lecture 9, section 5.",
   },
   {
     id: "q5",
@@ -147,11 +147,11 @@ const SEED_QUIZ_QUESTIONS = [
     type: "short",
     topic: "chaining vs open addressing",
     prompt:
-      "In 3–4 sentences, compare separate chaining and open addressing: name one advantage of each and state which degrades faster as the load factor approaches 1.",
+      "In 3-4 sentences, compare separate chaining and open addressing: name one advantage of each and state which degrades faster as the load factor approaches 1.",
     sampleAnswer:
-      "Chaining is simple, tolerates load factors at or above 1, and makes deletion trivial, but costs extra memory for list nodes and has poor cache locality. Open addressing stores everything in one array, so it is cache-friendly and allocation-free, but deletion needs tombstones. Open addressing degrades much faster as α → 1 because probe sequences lengthen sharply, while chaining degrades gradually (expected chain length just grows linearly with α).",
+      "Chaining is simple, tolerates load factors at or above 1, and makes deletion trivial, but costs extra memory for list nodes and has poor cache locality. Open addressing stores everything in one array, so it is cache-friendly and allocation-free, but deletion needs tombstones. Open addressing degrades much faster as alpha -> 1 because probe sequences lengthen sharply, while chaining degrades gradually (expected chain length just grows linearly with alpha).",
     explanation:
-      "Full credit needs: one real advantage per scheme, plus identifying open addressing as the one that collapses near α = 1. This is one of the prof's three stated review-session targets.",
+      "Full credit needs: one real advantage per scheme, plus identifying open addressing as the one that collapses near alpha = 1. This is one of the prof's three stated review-session targets.",
   },
   {
     id: "q7",
@@ -160,9 +160,9 @@ const SEED_QUIZ_QUESTIONS = [
     prompt:
       "Insert keys 19, 26, 12, 33 into an empty table of size 7 using h(k) = k mod 7 and linear probing. Give the final index of each key.",
     sampleAnswer:
-      "h(19)=5 → slot 5. h(26)=5 → collision, probe 6 → slot 6. h(12)=5 → collision, probe 6 (full), probe 0 → slot 0. h(33)=5 → collision, probe 6, 0 (full), probe 1 → slot 1. Final: 19→5, 26→6, 12→0, 33→1.",
+      "h(19)=5 -> slot 5. h(26)=5 -> collision, probe 6 -> slot 6. h(12)=5 -> collision, probe 6 (full), probe 0 -> slot 0. h(33)=5 -> collision, probe 6, 0 (full), probe 1 -> slot 1. Final: 19->5, 26->6, 12->0, 33->1.",
     explanation:
-      "All four keys are congruent to 5 mod 7, so they pile onto slot 5 and the probe sequence wraps around the end of the array — exactly the by-hand trace the prof said to expect.",
+      "All four keys are congruent to 5 mod 7, so they pile onto slot 5 and the probe sequence wraps around the end of the array - exactly the by-hand trace the prof said to expect.",
   },
   {
     id: "q8",
@@ -173,14 +173,14 @@ const SEED_QUIZ_QUESTIONS = [
     sampleAnswer:
       "def contains(table, key):\n    bucket = table[hash(key) % len(table)]\n    for (k, v) in bucket:\n        if k == key:\n            return True\n    return False",
     explanation:
-      "The essential moves: reduce the hash modulo the table length, then linearly scan ONLY that bucket comparing actual keys (the comparison is required — multiple keys share a bucket). Returning after checking just the first entry is the classic mistake.",
+      "The essential moves: reduce the hash modulo the table length, then linearly scan ONLY that bucket comparing actual keys (the comparison is required - multiple keys share a bucket). Returning after checking just the first entry is the classic mistake.",
   },
 ];
 
 async function main() {
-  console.log("Seeding CourseMind database...");
+  console.log("Seeding Hyntor database...");
   const passwordHash = await bcrypt.hash("coursemind", 10);
-  // lastActiveAt = yesterday → demo users' streaks CONTINUE (+1) on their
+  // lastActiveAt = yesterday -> demo users' streaks CONTINUE (+1) on their
   // first activity instead of resetting to 1.
   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
@@ -260,14 +260,14 @@ async function main() {
   }
 
   let hashNotes = await prisma.material.findFirst({
-    where: { courseId: course.id, title: "Lecture 9 — Hash Tables & Collision Resolution" },
+    where: { courseId: course.id, title: "Lecture 9 - Hash Tables & Collision Resolution" },
   });
   if (!hashNotes) {
     hashNotes = await prisma.material.create({
       data: {
         courseId: course.id,
         uploaderId: maya.id,
-        title: "Lecture 9 — Hash Tables & Collision Resolution",
+        title: "Lecture 9 - Hash Tables & Collision Resolution",
         type: "NOTES",
         extractedText: HASH_TABLE_NOTES,
         upvoteCount: 4,
@@ -276,14 +276,14 @@ async function main() {
   }
 
   const bstExists = await prisma.material.findFirst({
-    where: { courseId: course.id, title: "Lecture 11 — Binary Search Trees" },
+    where: { courseId: course.id, title: "Lecture 11 - Binary Search Trees" },
   });
   if (!bstExists) {
     await prisma.material.create({
       data: {
         courseId: course.id,
         uploaderId: alex.id,
-        title: "Lecture 11 — Binary Search Trees",
+        title: "Lecture 11 - Binary Search Trees",
         type: "NOTES",
         extractedText: BST_NOTES,
         upvoteCount: 2,
@@ -292,7 +292,7 @@ async function main() {
   }
 
   const quizExists = await prisma.quiz.findFirst({
-    where: { courseId: course.id, title: "Hash Tables — Practice Quiz" },
+    where: { courseId: course.id, title: "Hash Tables - Practice Quiz" },
   });
   if (!quizExists) {
     await prisma.quiz.create({
@@ -300,7 +300,7 @@ async function main() {
         courseId: course.id,
         sourceMaterialId: hashNotes.id,
         creatorId: null, // AI-generated
-        title: "Hash Tables — Practice Quiz",
+        title: "Hash Tables - Practice Quiz",
         questions: JSON.stringify(SEED_QUIZ_QUESTIONS),
       },
     });

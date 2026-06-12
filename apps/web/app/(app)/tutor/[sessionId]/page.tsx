@@ -94,15 +94,15 @@ export default function TutorSessionPage({
     <div className="flex min-h-[calc(100vh-8rem)] flex-col gap-4">
       <header className="surface-panel flex flex-wrap items-center justify-between gap-4 p-4">
         <div className="min-w-0">
-          <Link href="/tutor" className="text-xs font-black uppercase tracking-[0.16em] text-aqua-600 hover:text-brand-700">
+          <Link href="/tutor" className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-600 hover:text-brand-700">
             All sessions
           </Link>
-          <h1 className="truncate font-display text-xl font-black text-ink">{session!.title}</h1>
+          <h1 className="truncate font-display text-xl font-semibold text-ink">{session!.title}</h1>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <ModeBadge mode={session!.mode} />
           {session!.course && (
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-600 ring-1 ring-slate-200">
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
               {session!.course.code}
             </span>
           )}
@@ -119,10 +119,10 @@ export default function TutorSessionPage({
         <div className="space-y-4">
           {messages.length === 0 && (
             <div className="mx-auto mt-10 max-w-lg text-center">
-              <div className="mx-auto grid h-12 w-12 place-items-center rounded-lg bg-ink text-xs font-black text-white shadow-card">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-lg bg-ink text-xs font-semibold text-white shadow-card">
                 AI
               </div>
-              <p className="mt-4 font-display text-lg font-black text-ink">
+              <p className="mt-4 font-display text-lg font-semibold text-ink">
                 {session!.mode === "ASSIGNMENT_HELP"
                   ? "Start with what you tried."
                   : "What do you want to understand?"}
@@ -138,7 +138,7 @@ export default function TutorSessionPage({
             message.role === "user" ? (
               <div
                 key={i}
-                className="ml-auto max-w-[88%] rounded-lg bg-gradient-to-br from-brand-600 to-aqua-500 px-4 py-3 text-[15px] font-medium text-white shadow-card sm:max-w-[78%]"
+                className="ml-auto max-w-[88%] rounded-lg bg-brand-600 px-4 py-3 text-[15px] font-medium text-white shadow-card sm:max-w-[78%]"
               >
                 <p className="whitespace-pre-wrap">{message.content}</p>
               </div>

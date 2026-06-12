@@ -76,7 +76,7 @@ export default function TakeQuizPage({ params }: { params: Promise<{ quizId: str
         <p className="mb-6 rounded-lg border border-brand-100 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-800">
           You have taken this quiz {attempts.length} time{attempts.length === 1 ? "" : "s"} with a best score of{" "}
           {Math.max(...attempts.map((a) => a.score))}%.{" "}
-          <Link href={`/quizzes/attempts/${attempts[0].id}`} className="font-black underline">
+          <Link href={`/quizzes/attempts/${attempts[0].id}`} className="font-semibold underline">
             Review your last attempt
           </Link>
         </p>
@@ -85,7 +85,7 @@ export default function TakeQuizPage({ params }: { params: Promise<{ quizId: str
       <div className="space-y-6">
         {quiz!.questions.map((question, index) => (
           <div key={question.id} className="card">
-            <p className="mb-1 text-xs font-black uppercase tracking-wide text-slate-400">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
               Question {index + 1} - {question.topic}
             </p>
             <p className="whitespace-pre-wrap font-semibold text-ink">{question.prompt}</p>
@@ -96,8 +96,8 @@ export default function TakeQuizPage({ params }: { params: Promise<{ quizId: str
                     key={optionIndex}
                     className={`flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3 text-sm font-medium transition ${
                       answers[question.id] === String(optionIndex)
-                        ? "border-aqua-300 bg-brand-50 text-brand-800 shadow-card"
-                        : "border-slate-200 bg-white/60 hover:border-aqua-200"
+                        ? "border-brand-300 bg-brand-50 text-brand-800 shadow-card"
+                        : "border-slate-200 bg-white/60 hover:border-brand-200"
                     }`}
                   >
                     <input

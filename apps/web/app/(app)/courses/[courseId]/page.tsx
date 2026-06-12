@@ -49,7 +49,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
           <div className="mb-3 flex items-end justify-between gap-3">
             <div>
               <p className="eyebrow">Library</p>
-              <h2 className="font-display text-xl font-black text-ink">Shared materials</h2>
+              <h2 className="font-display text-xl font-semibold text-ink">Shared materials</h2>
             </div>
             <span className="text-xs font-bold text-slate-400">{course.materials.length} files</span>
           </div>
@@ -67,7 +67,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
                   <div className="min-w-0">
                     <Link
                       href={`/materials/${material.id}`}
-                      className="font-black text-ink hover:text-brand-700"
+                      className="font-semibold text-ink hover:text-brand-700"
                     >
                       {material.title}
                     </Link>
@@ -92,7 +92,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
         <section className="lg:col-span-2">
           <div className="mb-3">
             <p className="eyebrow">Practice</p>
-            <h2 className="font-display text-xl font-black text-ink">Quizzes</h2>
+            <h2 className="font-display text-xl font-semibold text-ink">Quizzes</h2>
           </div>
           {course.quizzes.length === 0 ? (
             <p className="card text-sm font-medium text-slate-500">
@@ -102,7 +102,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
             <div className="space-y-3">
               {course.quizzes.map((quiz) => (
                 <Link key={quiz.id} href={`/quizzes/${quiz.id}`} className="card-interactive block p-4">
-                  <p className="text-sm font-black text-ink">{quiz.title}</p>
+                  <p className="text-sm font-semibold text-ink">{quiz.title}</p>
                   <p className="mt-1 text-xs font-medium text-slate-400">
                     {quiz.isMockExam ? "Mock exam - " : ""}
                     {quiz.attemptCount} attempt{quiz.attemptCount === 1 ? "" : "s"} -{" "}

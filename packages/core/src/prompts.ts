@@ -18,7 +18,7 @@
 // starting its reply with "[TIER:n]" — the API strips this marker before
 // showing the message and records it on TutorSession.tierReached.
 
-import type { TutorMode } from "./constants";
+import { DISCUSSION_MAX_TIER, type ThreadContextType, type TutorMode } from "./constants";
 
 export interface GroundingMaterial {
   title: string;
@@ -91,7 +91,7 @@ The student pasted their own homework code and wants it reviewed BEFORE submitti
 }
 
 function debugPrompt(): string {
-  // TODO Phase 2: "Debug with me" gets its own UI; the prompt ships now.
+  // "Debug with me" — selectable from the tutor hub mode picker.
   return `MODE: DEBUG WITH ME (step-by-step Socratic debugging)
 Guide the student through debugging THEIR code without fixing it for them.
 - Work one hypothesis at a time: ask what they expected vs. what happened, then propose ONE concrete experiment (a print statement, a tiny input, a boundary case) and ask them to report back.
@@ -119,6 +119,57 @@ export function buildTutorSystemPrompt(input: TutorPromptInput): string {
     courseLine,
     GROUNDING_RULES,
     formatMaterials(materials),
+    modeBlock,
+    TIER_MARKER_RULE,
+  ].join("\n\n");
+}
+
+// ------------------------------------------------------------
+// Discussion-board tutor (Phase 2)
+// ------------------------------------------------------------
+// The tutor can be INVOKED into a public discussion thread. Same tier
+// system as private tutoring, with two public-board differences:
+//   - the ceiling caps at DISCUSSION_MAX_TIER (3): a Tier 4 structured
+//     walkthrough of graded work, posted where the whole class reads it,
+//     would be answer-dumping by proxy;
+//   - the reply is ONE self-contained post addressed to the thread, not
+//     a back-and-forth chat turn.
+
+export interface DiscussionPromptInput {
+  courseTitle: string;
+  threadTitle: string;
+  contextType: ThreadContextType;
+  materials: GroundingMaterial[];
+  /** Highest hint tier the model may use in this post (capped at 3). */
+  maxTierAllowed: number;
+}
+
+function discussionContextLine(contextType: ThreadContextType): string {
+  if (contextType === "EXAM" || contextType === "QUIZ") {
+    return `This thread is attached to ${contextType === "EXAM" ? "an exam" : "a quiz"} — graded work. Treat every "how do I solve..." in it as an assignment-help request: hint tiers only, never the literal answer to something students will be graded on.`;
+  }
+  return `This is a general course discussion. Concept questions are Tier 0 — answer fully and generously, citing the materials. But if the thread is really asking you to produce the answer to graded work (an assignment, exam, or quiz question), shift into the hint tiers for that part.`;
+}
+
+export function buildDiscussionTutorPrompt(input: DiscussionPromptInput): string {
+  const modeBlock = `MODE: CLASS DISCUSSION BOARD
+You have been invoked into the public discussion thread "${input.threadTitle}" — every student enrolled in the course can read what you write. The thread so far is provided in the user message as a labeled transcript. Write ONE self-contained reply post in markdown, addressed to the thread (use a student's name when responding to their specific point). Do not roleplay further conversation or sign your post.
+
+${discussionContextLine(input.contextType)}
+
+${TIER_DEFINITIONS}
+
+YOUR TIER BUDGET THIS POST: you may use at most Tier ${input.maxTierAllowed}. On a public board the budget never exceeds Tier ${DISCUSSION_MAX_TIER}, no matter how long the thread gets — deeper help than that belongs in a private tutor session, where it's earned one exchange at a time.
+- Default to the LOWEST tier that moves the whole class forward; the budget is a ceiling, not a target.
+- A thread where students have shown real work and real attempts earns the deeper tiers.
+
+${ANSWER_SEEKING}`;
+
+  return [
+    PERSONA,
+    `The students are working in the course: ${input.courseTitle}.`,
+    GROUNDING_RULES,
+    formatMaterials(input.materials),
     modeBlock,
     TIER_MARKER_RULE,
   ].join("\n\n");

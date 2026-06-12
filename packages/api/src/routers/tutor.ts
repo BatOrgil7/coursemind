@@ -12,34 +12,13 @@ import {
   parseJsonColumn,
   TutorMessagesSchema,
   TutorModeSchema,
-  MAX_GROUNDING_CHARS,
-  MAX_CHARS_PER_MATERIAL,
   type TutorMessage,
-  type GroundingMaterial,
 } from "@coursemind/core";
 import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure, requireEnrollment } from "../trpc";
 import { askClaude, isAiConfigured, AI_NOT_CONFIGURED_MESSAGE } from "../ai";
+import { gatherGrounding } from "../grounding";
 import { recordActivity } from "../activity";
-import type { PrismaClient } from "@coursemind/db";
-
-/** Best materials first (upvotes), sliced to fit the grounding budget. */
-async function gatherGrounding(prisma: PrismaClient, courseId: string): Promise<GroundingMaterial[]> {
-  const materials = await prisma.material.findMany({
-    where: { courseId, NOT: { extractedText: "" } },
-    orderBy: [{ upvoteCount: "desc" }, { createdAt: "desc" }],
-    select: { title: true, extractedText: true },
-  });
-  const grounding: GroundingMaterial[] = [];
-  let budget = MAX_GROUNDING_CHARS;
-  for (const m of materials) {
-    if (budget <= 0) break;
-    const text = m.extractedText.slice(0, Math.min(MAX_CHARS_PER_MATERIAL, budget));
-    grounding.push({ title: m.title, text });
-    budget -= text.length;
-  }
-  return grounding;
-}
 
 function computeMaxTier(mode: string, priorUserMessages: number): number {
   if (mode === "CONCEPT") return 0;

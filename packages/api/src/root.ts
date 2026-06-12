@@ -1,6 +1,4 @@
 // The app router — the single API surface consumed by web AND mobile.
-// TODO Phase 2: workspaceRouter (study groups, task boards, chat),
-//               discussionRouter (threads with AI tutor participation)
 // TODO Phase 3: studyPlanRouter, flashcardRouter, mockExam procedures
 // TODO Phase 4: leaderboard, material upvotes, annotations
 import { router } from "./trpc";
@@ -9,6 +7,8 @@ import { courseRouter } from "./routers/course";
 import { materialRouter } from "./routers/material";
 import { tutorRouter } from "./routers/tutor";
 import { quizRouter } from "./routers/quiz";
+import { workspaceRouter } from "./routers/workspace";
+import { discussionRouter } from "./routers/discussion";
 
 export const appRouter = router({
   user: userRouter,
@@ -16,6 +16,8 @@ export const appRouter = router({
   material: materialRouter,
   tutor: tutorRouter,
   quiz: quizRouter,
+  workspace: workspaceRouter,
+  discussion: discussionRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -19,6 +19,7 @@ export const courseRouter = router({
       title: e.course.title,
       subject: e.course.subject,
       description: e.course.description,
+      isCrossUniversity: e.course.isCrossUniversity,
       roleInCourse: e.roleInCourse,
       materialCount: e.course._count.materials,
       quizCount: e.course._count.quizzes,
@@ -26,15 +27,36 @@ export const courseRouter = router({
     }));
   }),
 
-  /** Browse courses available to join (search by code/title). */
+  /** Browse courses available to join (search by code/title).
+   *
+   *  Phase 2 cross-university scoping: a course "belongs to" the
+   *  universities of its enrolled members (the creator auto-enrolls, so a
+   *  new course is instantly visible to their university peers). You see
+   *  courses with members from YOUR university, plus any course flagged
+   *  isCrossUniversity — those are open to everyone. */
   browse: protectedProcedure
     .input(z.object({ query: z.string().max(100).optional() }))
     .query(async ({ ctx, input }) => {
+      const me = await ctx.prisma.user.findUniqueOrThrow({
+        where: { id: ctx.userId },
+        select: { universityId: true },
+      });
+      const visibility = {
+        OR: [
+          { isCrossUniversity: true },
+          { enrollments: { some: { user: { universityId: me.universityId } } } },
+        ],
+      };
       const q = input.query?.trim();
       const courses = await ctx.prisma.course.findMany({
         where: q
-          ? { OR: [{ code: { contains: q } }, { title: { contains: q } }, { subject: { contains: q } }] }
-          : undefined,
+          ? {
+              AND: [
+                visibility,
+                { OR: [{ code: { contains: q } }, { title: { contains: q } }, { subject: { contains: q } }] },
+              ],
+            }
+          : visibility,
         include: { _count: { select: { enrollments: true, materials: true } } },
         orderBy: { createdAt: "desc" },
         take: 50,
@@ -50,6 +72,7 @@ export const courseRouter = router({
         title: c.title,
         subject: c.subject,
         description: c.description,
+        isCrossUniversity: c.isCrossUniversity,
         memberCount: c._count.enrollments,
         materialCount: c._count.materials,
         joined: mine.has(c.id),
@@ -63,6 +86,7 @@ export const courseRouter = router({
         title: z.string().min(3).max(120),
         subject: z.string().min(2).max(60),
         description: z.string().max(2000).default(""),
+        isCrossUniversity: z.boolean().default(false),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -102,6 +126,7 @@ export const courseRouter = router({
             orderBy: { createdAt: "desc" },
             include: { _count: { select: { attempts: true } } },
           },
+          enrollments: { select: { user: { select: { universityId: true } } } },
           _count: { select: { enrollments: true } },
         },
       });
@@ -111,6 +136,8 @@ export const courseRouter = router({
         title: course.title,
         subject: course.subject,
         description: course.description,
+        isCrossUniversity: course.isCrossUniversity,
+        universityCount: new Set(course.enrollments.map((e) => e.user.universityId)).size,
         memberCount: course._count.enrollments,
         materials: course.materials.map((m) => ({
           id: m.id,

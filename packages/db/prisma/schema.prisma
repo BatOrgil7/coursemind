@@ -74,7 +74,7 @@ model Course {
   title             String
   subject           String // e.g. "Computer Science"
   description       String   @default("")
-  isCrossUniversity Boolean  @default(false) // TODO Phase 2: cross-university sharing UI
+  isCrossUniversity Boolean  @default(false) // Phase 2: true = discoverable by every university (see course.browse)
   createdAt         DateTime @default(now())
 
   enrollments   Enrollment[]

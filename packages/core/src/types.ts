@@ -4,7 +4,13 @@
 // if bad JSON ever lands in the DB, these schemas catch it at the boundary
 // instead of crashing deep inside a React component.
 import { z } from "zod";
-import { QUESTION_TYPES, TUTOR_MODES } from "./constants";
+import {
+  QUESTION_TYPES,
+  TASK_STATUSES,
+  THREAD_CONTEXT_TYPES,
+  TUTOR_MODES,
+  WORKSPACE_TYPES,
+} from "./constants";
 
 // ---------- Quiz ----------
 
@@ -45,13 +51,17 @@ export const TutorMessagesSchema = z.array(TutorMessageSchema);
 
 export const TutorModeSchema = z.enum(TUTOR_MODES);
 
-// ---------- Workspace project tasks (Phase 2) ----------
+// ---------- Workspaces & discussions (Phase 2) ----------
+
+export const WorkspaceTypeSchema = z.enum(WORKSPACE_TYPES);
+export const ThreadContextTypeSchema = z.enum(THREAD_CONTEXT_TYPES);
+export const ProjectTaskStatusSchema = z.enum(TASK_STATUSES);
 
 export const ProjectTaskSchema = z.object({
   id: z.string(),
   title: z.string(),
   assigneeId: z.string().nullable(),
-  status: z.enum(["TODO", "IN_PROGRESS", "DONE"]),
+  status: ProjectTaskStatusSchema,
 });
 export type ProjectTask = z.infer<typeof ProjectTaskSchema>;
 export const ProjectTasksSchema = z.array(ProjectTaskSchema);

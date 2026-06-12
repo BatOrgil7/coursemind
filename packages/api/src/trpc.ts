@@ -36,6 +36,20 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
   return next({ ctx: { ...ctx, userId: ctx.userId } });
 });
 
+/** Throws unless the user is a member of the workspace. Returns the membership. */
+export async function requireWorkspaceMember(userId: string, workspaceId: string) {
+  const member = await prisma.workspaceMember.findUnique({
+    where: { workspaceId_userId: { workspaceId, userId } },
+  });
+  if (!member) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "You need to join this workspace first.",
+    });
+  }
+  return member;
+}
+
 /** Throws unless the user is enrolled in the course. Returns the enrollment. */
 export async function requireEnrollment(userId: string, courseId: string) {
   const enrollment = await prisma.enrollment.findUnique({

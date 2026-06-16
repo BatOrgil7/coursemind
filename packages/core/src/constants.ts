@@ -65,16 +65,30 @@ export const TIER_LABELS: Record<number, string> = {
   4: "Structured walkthrough",
 };
 
-// XP awarded per activity (Phase 4 expands this; awarded from Phase 1
-// so the data is already there when the streaks/XP UI ships).
+// XP awarded per activity (awarded from Phase 1 so the data is already
+// there now that the Phase 4 streaks/XP/leaderboard UI ships).
+// MATERIAL_UPVOTED goes to the UPLOADER when a classmate upvotes their
+// material - it rewards good sharing (the core product loop) without
+// touching the uploader's streak (see material.upvote).
 export const XP_RULES = {
   MATERIAL_UPLOADED: 25,
+  MATERIAL_UPVOTED: 5,
   QUIZ_COMPLETED: 20,
   QUIZ_PERFECT: 15, // bonus on top of QUIZ_COMPLETED
   TUTOR_SESSION: 5,
   STREAK_DAY: 10,
 } as const;
 export type ActivityType = keyof typeof XP_RULES;
+
+// Human-readable labels for the leaderboard "how you earned XP" breakdown.
+export const XP_RULE_LABELS: Record<ActivityType, string> = {
+  MATERIAL_UPLOADED: "Materials shared",
+  MATERIAL_UPVOTED: "Upvotes received",
+  QUIZ_COMPLETED: "Quizzes completed",
+  QUIZ_PERFECT: "Perfect quiz scores",
+  TUTOR_SESSION: "Tutor sessions",
+  STREAK_DAY: "Daily streak days",
+};
 
 // Anthropic model used for ALL AI features. Change in one place.
 export const AI_MODEL = "claude-sonnet-4-6";

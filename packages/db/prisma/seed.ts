@@ -270,25 +270,43 @@ async function main() {
         title: "Lecture 9 - Hash Tables & Collision Resolution",
         type: "NOTES",
         extractedText: HASH_TABLE_NOTES,
-        upvoteCount: 4,
+        // upvoteCount is set from real MaterialUpvote rows below, so the
+        // denormalized count always matches the join table.
       },
     });
   }
 
-  const bstExists = await prisma.material.findFirst({
+  let bstNotes = await prisma.material.findFirst({
     where: { courseId: course.id, title: "Lecture 11 - Binary Search Trees" },
   });
-  if (!bstExists) {
-    await prisma.material.create({
+  if (!bstNotes) {
+    bstNotes = await prisma.material.create({
       data: {
         courseId: course.id,
         uploaderId: alex.id,
         title: "Lecture 11 - Binary Search Trees",
         type: "NOTES",
         extractedText: BST_NOTES,
-        upvoteCount: 2,
       },
     });
+  }
+
+  // Seed real upvotes (a student never upvotes their own upload), then
+  // recompute upvoteCount from the join table so the two never drift.
+  const seedUpvotes = [
+    { material: hashNotes, voters: [alex, sam] }, // Maya's notes
+    { material: bstNotes, voters: [maya, sam] }, // Alex's notes
+  ];
+  for (const { material, voters } of seedUpvotes) {
+    for (const voter of voters) {
+      await prisma.materialUpvote.upsert({
+        where: { materialId_userId: { materialId: material.id, userId: voter.id } },
+        update: {},
+        create: { materialId: material.id, userId: voter.id },
+      });
+    }
+    const upvoteCount = await prisma.materialUpvote.count({ where: { materialId: material.id } });
+    await prisma.material.update({ where: { id: material.id }, data: { upvoteCount } });
   }
 
   const quizExists = await prisma.quiz.findFirst({

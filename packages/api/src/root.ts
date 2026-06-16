@@ -1,5 +1,5 @@
 // The app router - the single API surface consumed by web AND mobile.
-// TODO Phase 4: leaderboard, material upvotes, annotations
+// TODO Phase 4: annotations (upvotes + leaderboard shipped)
 import { router } from "./trpc";
 import { userRouter } from "./routers/user";
 import { courseRouter } from "./routers/course";
@@ -10,6 +10,7 @@ import { workspaceRouter } from "./routers/workspace";
 import { discussionRouter } from "./routers/discussion";
 import { studyRouter } from "./routers/study";
 import { flashcardRouter } from "./routers/flashcard";
+import { leaderboardRouter } from "./routers/leaderboard";
 
 export const appRouter = router({
   user: userRouter,
@@ -21,6 +22,7 @@ export const appRouter = router({
   discussion: discussionRouter,
   study: studyRouter,
   flashcard: flashcardRouter,
+  leaderboard: leaderboardRouter,
 });
 
 export type AppRouter = typeof appRouter;

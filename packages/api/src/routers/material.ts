@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { MATERIAL_TYPES } from "@coursemind/core";
+import { TRPCError } from "@trpc/server";
+import { MATERIAL_TYPES, XP_RULES } from "@coursemind/core";
 import { router, protectedProcedure, requireEnrollment } from "../trpc";
 import { recordActivity } from "../activity";
 import { prisma } from "@coursemind/db";
@@ -14,6 +15,10 @@ export const materialRouter = router({
         include: { uploader: { select: { name: true } }, course: { select: { id: true, code: true, title: true } } },
       });
       await requireEnrollment(ctx.userId, material.courseId);
+      const myUpvote = await ctx.prisma.materialUpvote.findUnique({
+        where: { materialId_userId: { materialId: material.id, userId: ctx.userId } },
+        select: { id: true },
+      });
       return {
         id: material.id,
         title: material.title,
@@ -21,6 +26,8 @@ export const materialRouter = router({
         fileUrl: material.fileUrl,
         extractedText: material.extractedText,
         upvoteCount: material.upvoteCount,
+        upvotedByMe: myUpvote !== null,
+        isMine: material.uploaderId === ctx.userId,
         uploaderName: material.uploader.name,
         course: material.course,
         createdAt: material.createdAt,
@@ -52,7 +59,66 @@ export const materialRouter = router({
       return { id: material.id };
     }),
 
-  // TODO Phase 4: upvote mutation (MaterialUpvote join table is already in the schema)
+  /**
+   * Toggle the current user's upvote on a material. Upvotes are the
+   * class's quality signal - they reorder the shared library and the
+   * tutor's grounding (best-upvoted first). Keeping `upvoteCount` in sync
+   * with the join table inside a transaction makes it the source of truth.
+   * The first time a classmate upvotes, the UPLOADER earns XP (good
+   * sharing rewarded) - but not their streak, since it's a passive event.
+   */
+  upvote: protectedProcedure
+    .input(z.object({ materialId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const material = await ctx.prisma.material.findUniqueOrThrow({
+        where: { id: input.materialId },
+        select: { id: true, courseId: true, uploaderId: true },
+      });
+      await requireEnrollment(ctx.userId, material.courseId);
+      if (material.uploaderId === ctx.userId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can't upvote your own material - but thanks for sharing it with the class!",
+        });
+      }
+
+      const existing = await ctx.prisma.materialUpvote.findUnique({
+        where: { materialId_userId: { materialId: material.id, userId: ctx.userId } },
+        select: { id: true },
+      });
+      const upvoted = !existing;
+
+      const upvoteCount = await ctx.prisma.$transaction(async (tx) => {
+        if (existing) {
+          await tx.materialUpvote.delete({ where: { id: existing.id } });
+        } else {
+          await tx.materialUpvote.create({
+            data: { materialId: material.id, userId: ctx.userId },
+          });
+          // Reward the uploader for sharing something the class values.
+          // XP only (no streak): the uploader didn't act today.
+          await tx.user.update({
+            where: { id: material.uploaderId },
+            data: { xp: { increment: XP_RULES.MATERIAL_UPVOTED } },
+          });
+          await tx.activityLog.create({
+            data: {
+              userId: material.uploaderId,
+              type: "MATERIAL_UPVOTED",
+              points: XP_RULES.MATERIAL_UPVOTED,
+            },
+          });
+        }
+        const count = await tx.materialUpvote.count({ where: { materialId: material.id } });
+        await tx.material.update({
+          where: { id: material.id },
+          data: { upvoteCount: count },
+        });
+        return count;
+      });
+
+      return { upvoted, upvoteCount };
+    }),
 });
 
 /**

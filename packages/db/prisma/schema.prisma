@@ -60,6 +60,7 @@ model User {
   studyPlans       StudyPlan[]
   flashcards       Flashcard[]
   activityLogs     ActivityLog[]
+  annotations      Annotation[]
 
   @@index([universityId])
 }
@@ -113,18 +114,20 @@ model Material {
   type          String // PDF | PPTX | DOCX | NOTES | SYLLABUS | TEXT | OTHER
   fileUrl       String   @default("") // dev: local /uploads path; prod: object-storage URL
   extractedText String   @default("") // server-extracted text used as AI grounding context
-  upvoteCount   Int      @default(0) // TODO Phase 4: kept in sync via MaterialUpvote
+  upvoteCount   Int      @default(0) // Phase 4: kept in sync with MaterialUpvote (see material.upvote)
   createdAt     DateTime @default(now())
 
-  course   Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  uploader User             @relation(fields: [uploaderId], references: [id])
-  quizzes  Quiz[]
-  upvotes  MaterialUpvote[]
+  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  uploader    User             @relation(fields: [uploaderId], references: [id])
+  quizzes     Quiz[]
+  upvotes     MaterialUpvote[]
+  annotations Annotation[]
 
   @@index([courseId])
 }
 
-// TODO Phase 4: material upvoting - schema ready now so migrations stay stable.
+// Material upvoting (Phase 4): the class's quality signal. Material.upvoteCount
+// is kept in sync with these rows inside a transaction (see material.upvote).
 model MaterialUpvote {
   id         String   @id @default(cuid())
   materialId String
@@ -135,6 +138,23 @@ model MaterialUpvote {
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([materialId, userId])
+}
+
+// Inline annotations (Phase 4): shared, class-visible notes on a material.
+// `quote` is the snippet of the material the note is anchored to (empty for a
+// general note). Flat (no threading) - kept simple and student-native.
+model Annotation {
+  id         String   @id @default(cuid())
+  materialId String
+  authorId   String
+  quote      String   @default("") // the highlighted snippet this note anchors to
+  body       String
+  createdAt  DateTime @default(now())
+
+  material Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  author   User     @relation(fields: [authorId], references: [id])
+
+  @@index([materialId])
 }
 
 // ------------------------------------------------------------

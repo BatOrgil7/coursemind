@@ -3,6 +3,7 @@ import { serverApi } from "@/lib/server-api";
 import { MaterialTypeBadge, PageHeader } from "@/components/ui";
 import { GenerateQuizButton } from "@/components/GenerateQuizButton";
 import { UpvoteButton } from "@/components/UpvoteButton";
+import { AnnotationsPanel } from "@/components/AnnotationsPanel";
 
 export default async function MaterialPage({
   params,
@@ -58,6 +59,8 @@ export default async function MaterialPage({
           </p>
         )}
       </div>
+
+      <AnnotationsPanel materialId={material.id} />
     </div>
   );
 }

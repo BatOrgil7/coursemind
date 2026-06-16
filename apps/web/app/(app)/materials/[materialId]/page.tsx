@@ -2,6 +2,7 @@ import Link from "next/link";
 import { serverApi } from "@/lib/server-api";
 import { MaterialTypeBadge, PageHeader } from "@/components/ui";
 import { GenerateQuizButton } from "@/components/GenerateQuizButton";
+import { UpvoteButton } from "@/components/UpvoteButton";
 
 export default async function MaterialPage({
   params,
@@ -19,6 +20,12 @@ export default async function MaterialPage({
         subtitle={`${material.course.code} - uploaded by ${material.uploaderName} - ${new Date(material.createdAt).toLocaleDateString()}`}
         action={
           <div className="flex flex-wrap items-center gap-3">
+            <UpvoteButton
+              materialId={material.id}
+              initialCount={material.upvoteCount}
+              initialUpvoted={material.upvotedByMe}
+              isMine={material.isMine}
+            />
             <Link href={`/tutor?courseId=${material.course.id}`} className="btn-secondary">
               Ask about this
             </Link>

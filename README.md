@@ -155,9 +155,11 @@ That's the only change - the schema was written to be portable.
   group chat (simple polling - no extra infra), exam discussion boards where the AI tutor
   can be invoked (hint tiers only, capped at Tier 3 in public), cross-university courses,
   debug-with-me mode in the tutor hub
-- [next] **Phase 3 - Smart studying**: syllabus import, mock exams, spaced repetition,
-  weak-spot radar, flashcards, AI study plans (schema already in place)
-- [next] **Phase 4 - Engagement**: streak/XP UI, leaderboards, upvoting, annotations,
-  code sandbox, concept visualizer
+- [done] **Phase 3 - Smart studying** (live): syllabus import/autopilot, mock exams,
+  spaced repetition (SM-2 flashcards), weak-spot radar, AI study plans with a no-key
+  deterministic fallback, plus a native-mobile Smart Study screen
+- [in progress] **Phase 4 - Engagement**: material upvoting (the class's quality signal,
+  rewards uploaders with XP) and XP/streak leaderboards (school- or course-scoped) are
+  live; annotations, code sandbox, and concept visualizer remain
 
 Search the codebase for `TODO Phase` to see exactly where each feature hooks in.

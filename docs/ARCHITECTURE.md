@@ -16,8 +16,9 @@ A guided tour of how the system fits together - written so you can find and fix 
                        v       v                          v
                 +-----------------------------------------------------+
                 |                  packages/api                       |
-                |   tRPC routers: user, course, material, tutor,      |
-                |     quiz, workspace, discussion                     |
+                |   tRPC routers: user, course, material, tutor, quiz,|
+                |     workspace, discussion, study, flashcard,        |
+                |     leaderboard                                     |
                 |   + auth (passwords, JWT), file extraction,         |
                 |     XP/streak engine, Anthropic client              |
                 \--------------+----------------------+-----------------+
@@ -124,10 +125,22 @@ Full schema with comments: `packages/db/prisma/schema.prisma`.
   peers). `course.browse` shows your university's courses plus anything flagged
   `isCrossUniversity` - those are open to everyone (global badge in the UI).
 
-## Where Phase 3-4 features hook in
+## Phase 4 - engagement (in progress)
 
-Search the repo for `TODO Phase`. Highlights:
-- **Spaced repetition / weak spots (P3)**: `QuizAttempt.weakTopics` is already being
-  recorded; `Flashcard` has SM-2 fields (`easeFactor`, `intervalDays`, `repetitions`).
-- **Upvotes/leaderboard (P4)**: `MaterialUpvote` table + `ActivityLog` are live and
-  collecting data now.
+- **Material upvoting** (`material.upvote`): the class's quality signal. Toggling writes
+  the `MaterialUpvote` join table and recomputes `Material.upvoteCount` from it inside one
+  transaction, so the denormalized count never drifts from the join table (the source of
+  truth). Self-upvotes are blocked; the first upvote awards the UPLOADER XP
+  (`MATERIAL_UPVOTED`) without touching their streak. This count is what `gatherGrounding`
+  and the shared library already sort by, so better materials rise for everyone.
+- **Leaderboard** (`leaderboard.get`): ranks `User.xp` (streak as tiebreaker) over the
+  student's whole school or one enrolled course, always including the caller's own rank,
+  with a per-user XP-by-activity breakdown read from `ActivityLog`. No new tables - it
+  reads the XP/streak/activity data recorded since Phase 1.
+
+## Where remaining features hook in
+
+Search the repo for `TODO Phase`. Still open:
+- **Annotations / code sandbox / concept visualizer (P4)**: not yet built.
+- The spine (`MaterialUpvote`, `ActivityLog`, XP/streak on `User`) is already live, so
+  these are additive.

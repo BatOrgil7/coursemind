@@ -363,3 +363,66 @@ Notes:
 Next steps:
 - Add the same school preview during native mobile signup if mobile signup is added.
 - Consider allowing verified school admins to rename the auto-created school display name.
+
+### 2026-06-14 - Claude Code - Phase 4 Engagement: Upvoting + Leaderboard
+
+Summary:
+- Started Phase 4 (Engagement) with the two most data-ready, lowest-collision pieces.
+- Material upvoting: `material.upvote` toggles the current user's upvote, keeps the
+  denormalized `Material.upvoteCount` in sync with the `MaterialUpvote` join table inside
+  a transaction (the join table is the source of truth), blocks self-upvotes, and rewards
+  the UPLOADER with XP (`MATERIAL_UPVOTED`, 5) on the first upvote only - XP without
+  streak, since the uploader didn't act that day. `material.get` now returns `upvotedByMe`
+  and `isMine`. New web `UpvoteButton` wired into the material detail page header.
+- Leaderboard: new `leaderboardRouter.get` ranks by XP then streak, scoped to the
+  student's whole school (default) or a single enrolled course, always returns the
+  current user's own rank even when below the visible top 20, and includes a per-user
+  XP-by-activity breakdown read from `ActivityLog`. New `/leaderboard` web page (scope
+  picker, "you" highlight, rank medals, role badges, XP breakdown) + sidebar nav entry.
+- Updated `XP_RULES` (added `MATERIAL_UPVOTED`) and added `XP_RULE_LABELS` in core.
+- Fixed seed data consistency: the seed hardcoded `upvoteCount` (4/2) with no backing
+  `MaterialUpvote` rows, so the source-of-truth recompute would "correct" counts downward
+  on first real upvote. Seed now creates real upvote rows (a student never upvotes their
+  own upload) and recomputes `upvoteCount` from them.
+
+Files touched:
+- `packages/core/src/constants.ts`
+- `packages/api/src/routers/material.ts`
+- `packages/api/src/routers/leaderboard.ts` (new)
+- `packages/api/src/root.ts`
+- `packages/db/prisma/seed.ts`
+- `apps/web/components/UpvoteButton.tsx` (new)
+- `apps/web/app/(app)/materials/[materialId]/page.tsx`
+- `apps/web/app/(app)/leaderboard/page.tsx` (new)
+- `apps/web/app/(app)/layout.tsx`
+- `README.md`, `docs/ARCHITECTURE.md`, `docs/AI_HANDOFF.md`
+
+Checks run:
+- `npm run typecheck` (all four workspaces clean)
+- `npm run build` (clean; `/leaderboard` and `/materials/[materialId]` routes compiled).
+  Note: `next build` throws `EPERM .next/trace` if a dev server is holding `.next` - stop
+  the preview/dev server before building.
+- Browser QA as `alex@demo.edu`:
+  - Leaderboard: school scope ranks Maya/Alex/Sam by XP, "you" highlight + TA badge
+    correct; course scope ("CS201 members") filters; XP breakdown renders.
+  - Upvote toggle on Maya's notes: 2 -> 1 (off) -> 2 (on); uploader Maya XP 345 -> 350
+    (+5 on the on-transition only, un-upvote does not subtract); ActivityLog row written.
+  - Self-upvote guard: button disabled with "your upload" tooltip on Alex's own material.
+  - No console or server errors.
+
+Notes:
+- Dev DB cleanup during QA: the course had DUPLICATE seed materials because the seed
+  titles were changed from em-dash to hyphen during the rename, so older em-dash rows
+  lingered. I repointed the practice quiz to the canonical (hyphen) hash-notes material
+  and deleted the two legacy em-dash materials. The course now has exactly two materials,
+  both with `upvoteCount` consistent with their join rows. `npm run db:setup` gives a
+  clean slate either way.
+- No schema migration was needed - `MaterialUpvote`, `ActivityLog`, `User.xp/streakCount`
+  and `Material.upvoteCount` were all already in place.
+
+Next steps:
+- Surface upvote buttons in the course material list (currently read-only counts there)
+  and bring upvoting + leaderboard into the native mobile app.
+- Remaining Phase 4: inline material annotations, code sandbox, concept visualizer.
+- Optional: award the upvoter (not just uploader) a tiny XP, or add anti-farm guards if
+  upvote-driven XP is ever weighted more heavily.

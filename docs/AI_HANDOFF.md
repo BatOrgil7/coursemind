@@ -426,3 +426,53 @@ Next steps:
 - Remaining Phase 4: inline material annotations, code sandbox, concept visualizer.
 - Optional: award the upvoter (not just uploader) a tiny XP, or add anti-farm guards if
   upvote-driven XP is ever weighted more heavily.
+
+### 2026-06-14 - Claude Code - Phase 4: Inline Material Annotations
+
+Summary:
+- Added shared, class-visible annotations on materials. The `Annotation` table stores an
+  optional `quote` (a highlighted snippet of the material the note is anchored to) plus
+  the note body; flat (no threading). Anyone enrolled in the material's course reads/adds;
+  you can only delete your own notes (`annotation.delete` enforces FORBIDDEN otherwise).
+- New `annotationRouter` (listByMaterial / create / delete), registered in root.ts.
+- New web `AnnotationsPanel` on the material detail page: lists class notes, captures the
+  page text selection (`window.getSelection()`) via a "Quote selection" button to anchor a
+  note, posts, and deletes own notes. `onMouseDown preventDefault` on that button keeps
+  the selection from collapsing when it takes focus.
+
+Files touched:
+- `packages/db/prisma/schema.prisma` (Annotation model + back-relations on Material/User;
+  refreshed two stale Phase 4 TODO comments)
+- `packages/db/prisma/migrations/20260616160500_add_annotations/migration.sql` (new)
+- `packages/api/src/routers/annotation.ts` (new)
+- `packages/api/src/root.ts`
+- `apps/web/components/AnnotationsPanel.tsx` (new)
+- `apps/web/app/(app)/materials/[materialId]/page.tsx`
+- `README.md`, `docs/ARCHITECTURE.md`, `docs/AI_HANDOFF.md`
+
+Checks run:
+- `npm run typecheck` (all workspaces clean), `npm run build` (clean).
+- Browser QA as `alex@demo.edu` on the Hash Tables material:
+  - Selected text in the material -> "Quote selection" captured it into the composer ->
+    posted a note -> rendered with the quoted snippet, "you" tag, and Delete; composer
+    cleared.
+  - Inserted a note as Maya via DB, reloaded: Alex sees it (class-visible) with NO Delete
+    button and no "you" tag (ownership correct).
+  - Deleted Alex's own note -> removed; Maya's note stayed.
+  - No console or server errors.
+
+Notes:
+- MIGRATION GOTCHA (important for this environment): `npm run db:migrate`
+  (`prisma migrate dev`) HANGS - it needs an interactive TTY that the agent's background
+  shell doesn't provide, and it left no output and no migration folder. I killed it and
+  created the migration deterministically instead:
+  `prisma migrate diff --from-schema-datasource ... --to-schema-datamodel ... --script`
+  into a timestamped `migrations/<ts>_add_annotations/migration.sql`, then
+  `prisma migrate deploy` (non-interactive) + `prisma generate`. The applied SQL is the
+  standard additive `CREATE TABLE Annotation` + index - identical to what migrate dev
+  would have written. Use this diff+deploy path for future migrations here.
+- The dev DB now has a demo annotation from Maya on the Hash Tables material.
+
+Next steps:
+- Remaining Phase 4: code sandbox, concept visualizer.
+- Bring upvoting, leaderboard, and annotations into the native mobile app.

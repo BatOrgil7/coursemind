@@ -137,10 +137,15 @@ Full schema with comments: `packages/db/prisma/schema.prisma`.
   student's whole school or one enrolled course, always including the caller's own rank,
   with a per-user XP-by-activity breakdown read from `ActivityLog`. No new tables - it
   reads the XP/streak/activity data recorded since Phase 1.
+- **Inline annotations** (`annotation.*`): shared, class-visible notes on a material. The
+  `Annotation` table (added in migration `20260616160500_add_annotations`) stores an
+  optional `quote` (the highlighted snippet a note anchors to) plus the body. The web
+  panel captures the page text selection (`window.getSelection()`) to fill the quote.
+  Anyone enrolled reads/adds; you can only delete your own.
 
 ## Where remaining features hook in
 
 Search the repo for `TODO Phase`. Still open:
-- **Annotations / code sandbox / concept visualizer (P4)**: not yet built.
-- The spine (`MaterialUpvote`, `ActivityLog`, XP/streak on `User`) is already live, so
-  these are additive.
+- **Code sandbox / concept visualizer (P4)**: not yet built.
+- The spine (`MaterialUpvote`, `Annotation`, `ActivityLog`, XP/streak on `User`) is live,
+  so these are additive.

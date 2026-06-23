@@ -142,10 +142,15 @@ Full schema with comments: `packages/db/prisma/schema.prisma`.
   optional `quote` (the highlighted snippet a note anchors to) plus the body. The web
   panel captures the page text selection (`window.getSelection()`) to fill the quote.
   Anyone enrolled reads/adds; you can only delete your own.
+- **Code sandbox** (`/sandbox`, web-only): a JavaScript scratchpad. Code runs in a Web
+  Worker created from a Blob URL - no DOM/app access - with `console.*` captured and a
+  2s watchdog that `terminate()`s runaway loops so the tab never freezes. No server, no
+  API, no schema; works identically with or without an API key.
 
 ## Where remaining features hook in
 
 Search the repo for `TODO Phase`. Still open:
-- **Code sandbox / concept visualizer (P4)**: not yet built.
+- **Concept visualizer (P4)**: not yet built (would need AI, with a keyless fallback like
+  the study planner).
 - The spine (`MaterialUpvote`, `Annotation`, `ActivityLog`, XP/streak on `User`) is live,
-  so these are additive.
+  so remaining features are additive.

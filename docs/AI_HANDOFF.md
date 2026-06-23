@@ -476,3 +476,44 @@ Notes:
 Next steps:
 - Remaining Phase 4: code sandbox, concept visualizer.
 - Bring upvoting, leaderboard, and annotations into the native mobile app.
+
+### 2026-06-14 - Claude Code - Phase 4: Code Sandbox
+
+Summary:
+- Added a safe in-browser JavaScript scratchpad at `/sandbox`. Code runs in a Web Worker
+  created from a Blob URL (no DOM or app access); the worker overrides `console.*` and
+  streams output back, reports the value of the final expression, and a 2s watchdog
+  `terminate()`s the worker if it runs too long - so an infinite loop can't freeze the
+  tab. Ctrl/Cmd+Enter runs; code persists to localStorage. Zero server/API/schema
+  dependency - identical with or without an API key.
+- Added a Sandbox sidebar nav entry and a cross-link to it from the code-review aside.
+
+Files touched:
+- `apps/web/app/(app)/sandbox/page.tsx` (new)
+- `apps/web/app/(app)/layout.tsx` (nav)
+- `apps/web/app/(app)/code-review/page.tsx` (cross-link + Link import)
+- `README.md`, `docs/ARCHITECTURE.md`, `docs/AI_HANDOFF.md`
+
+Checks run:
+- `npm run typecheck` (all workspaces clean), `npm run build` (clean; `/sandbox` compiled).
+- Browser QA as `alex@demo.edu`:
+  - Run starter code -> `fib(10) = 55` plus the final-expression result `= [1, 4, 9, 16]`.
+  - Error case (`notDefined.foo()`) -> prior logs print, then `! notDefined is not defined`
+    in error styling.
+  - Infinite loop (`while (true) {}`) -> terminated after 2s with the watchdog message,
+    button returns to Run, and the main thread stayed responsive throughout (an eval ran
+    fine during/after), proving the worker isolation works.
+  - No console or server errors.
+
+Notes:
+- Web-only, JavaScript only (browser-native, no external runtime like Pyodide - keeps it
+  instant and dependency-free).
+- Browser QA gotcha in this environment: `preview_fill` / `preview_click` sometimes don't
+  trigger React's controlled-input onChange / form onSubmit. Reliable workarounds:
+  set inputs via the native value setter + dispatch an `input` event, submit a form via
+  `form.requestSubmit()`, and click buttons via the element's own `.click()` from an eval.
+- `next build` still needs the dev/preview server stopped first (EPERM on `.next/trace`).
+
+Next steps:
+- Remaining Phase 4: concept visualizer (AI-backed; give it a keyless fallback).
+- Bring upvoting, leaderboard, annotations, and the sandbox into the native mobile app.

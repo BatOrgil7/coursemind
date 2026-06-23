@@ -159,8 +159,8 @@ That's the only change - the schema was written to be portable.
   spaced repetition (SM-2 flashcards), weak-spot radar, AI study plans with a no-key
   deterministic fallback, plus a native-mobile Smart Study screen
 - [in progress] **Phase 4 - Engagement**: material upvoting (the class's quality signal,
-  rewards uploaders with XP), XP/streak leaderboards (school- or course-scoped), and
-  shared inline annotations on materials (highlight text to anchor a class-visible note)
-  are live; code sandbox and concept visualizer remain
+  rewards uploaders with XP), XP/streak leaderboards (school- or course-scoped), shared
+  inline annotations on materials (highlight text to anchor a class-visible note), and a
+  safe in-browser JavaScript code sandbox are live; concept visualizer remains
 
 Search the codebase for `TODO Phase` to see exactly where each feature hooks in.

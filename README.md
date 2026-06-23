@@ -137,14 +137,14 @@ Defined in `packages/core/src/prompts.ts`, enforced in `packages/api/src/routers
   goes beyond them.
 - The tier used is shown as a badge in the UI and recorded on `TutorSession.tierReached`.
 
-## Switching to PostgreSQL (production)
+## Deploying to the web (Vercel + Neon)
 
-1. In `packages/db/prisma/schema.prisma` change `provider = "sqlite"` -> `provider = "postgresql"`
-2. Set `DATABASE_URL` (in both `apps/web/.env.local` and `packages/db/.env`) to your Postgres
-   connection string, e.g. `postgresql://user:pass@host:5432/hyntor`
-3. Run `npm run db:migrate`
+The full step-by-step guide is in **[docs/DEPLOY.md](docs/DEPLOY.md)** — create a free Neon
+Postgres database, import the repo into Vercel, set three environment variables, and deploy.
 
-That's the only change - the schema was written to be portable.
+You don't edit the schema by hand: local dev stays on SQLite, and the production build
+generates the PostgreSQL schema automatically from `schema.prisma` (single source of truth).
+Every push to `main` redeploys.
 
 ## Phase status
 

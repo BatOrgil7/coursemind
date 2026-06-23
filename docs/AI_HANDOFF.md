@@ -517,3 +517,64 @@ Notes:
 Next steps:
 - Remaining Phase 4: concept visualizer (AI-backed; give it a keyless fallback).
 - Bring upvoting, leaderboard, annotations, and the sandbox into the native mobile app.
+
+### 2026-06-14 - Claude Code - Production deploy prep (Vercel + Neon)
+
+Summary:
+- Made the app deployable to Vercel with a Neon (serverless PostgreSQL) database, WITHOUT
+  disturbing local SQLite dev. Decision: keep `schema.prisma` on SQLite (single source of
+  truth, zero-install local dev untouched for everyone) and DERIVE the production Postgres
+  schema at build time.
+  - `scripts/gen-prod-schema.mjs` writes `prisma/schema.prod.prisma` from `schema.prisma`
+    by swapping only the datasource provider (sqlite -> postgresql). The generated file is
+    gitignored.
+  - db scripts: `generate:prod` (prisma generate against the prod schema), `push:prod`
+    (`prisma db push` to create/update Neon tables, no migration files needed).
+  - root scripts: `gen:prod-schema`, `db:push:prod`, and `vercel-build` =
+    gen-prod-schema -> generate:prod -> push:prod -> next build.
+  - `vercel.json` points Vercel at the monorepo root, framework nextjs, buildCommand
+    `npm run vercel-build`, outputDirectory `apps/web/.next`.
+- `auth.ts`: added `trustHost: true` so NextAuth works behind Vercel's proxy (avoids the
+  common first-deploy UntrustedHost error). Documented `AUTH_TRUST_HOST` too.
+- Upload route: returns a friendly 503 pointing to "Paste text" when `process.env.VERCEL`
+  is set, since serverless filesystems are ephemeral (file uploads need object storage -
+  a follow-up, not a launch blocker).
+- `.env.example` updated with prod guidance; `docs/DEPLOY.md` is a full beginner-friendly
+  Neon + Vercel walkthrough; README "Switching to PostgreSQL" replaced with a deploy
+  pointer.
+
+Files touched:
+- `scripts/gen-prod-schema.mjs` (new), `vercel.json` (new), `docs/DEPLOY.md` (new)
+- `package.json` (root scripts), `packages/db/package.json` (prod scripts)
+- `apps/web/auth.ts`, `apps/web/app/api/upload/route.ts`
+- `.gitignore`, `.env.example`, `README.md`, `docs/AI_HANDOFF.md`
+
+Checks run:
+- `npm run typecheck` (all workspaces clean), `npm run build` (SQLite/CI path, clean).
+- `npm run gen:prod-schema` -> wrote schema.prod.prisma.
+- `prisma migrate diff --from-empty --to-schema-datamodel schema.prod.prisma --script`
+  (offline) -> valid Postgres DDL for every table (TIMESTAMP(3), proper types). This is
+  how the prod schema was validated without a live Postgres.
+- `prisma generate --schema=schema.prod.prisma` with a dummy `postgresql://` URL ->
+  generated the client OK (confirms the Vercel generate step). Restored the SQLite client
+  afterwards with `npm run db:generate` so local dev isn't left on the Postgres client.
+
+Notes / decisions:
+- `prisma db push` (not migrate) for prod: no Postgres migration files to maintain, and the
+  SQLite migration history under `prisma/migrations/` is SQLite-flavored SQL that would NOT
+  apply on Postgres. db push syncs straight from the generated prod schema. For a future
+  DESTRUCTIVE schema change on a populated prod DB, db push will stop rather than drop data.
+- Production deliberately runs NO demo seed - `alex@demo.edu` etc. have a public password
+  and must not exist on a live site. Real users sign up.
+- Minor known divergence: Prisma `contains` is case-insensitive on SQLite but
+  case-SENSITIVE on Postgres, so course/material search becomes case-sensitive in prod.
+  Not a breakage; left as a post-launch polish item (can't add `mode: "insensitive"`
+  unconditionally - it's invalid on SQLite).
+- I CANNOT complete the actual go-live: it needs the user's Neon + Vercel accounts and
+  secrets. The repo is fully prepared; the user follows docs/DEPLOY.md. The first real
+  Postgres run happens during their first Vercel deploy (build runs `db push` to Neon).
+
+Next steps:
+- User: follow docs/DEPLOY.md (create Neon DB, import repo to Vercel, set DATABASE_URL +
+  AUTH_SECRET + AUTH_TRUST_HOST, deploy).
+- Later: object storage for real file uploads; concept visualizer; mobile Phase 4 parity.

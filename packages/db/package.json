@@ -6,8 +6,10 @@
   "types": "./src/index.ts",
   "scripts": {
     "generate": "prisma generate",
+    "generate:prod": "prisma generate --schema=prisma/schema.prod.prisma",
     "migrate": "prisma migrate dev",
     "deploy": "prisma migrate deploy",
+    "push:prod": "prisma db push --schema=prisma/schema.prod.prisma --skip-generate",
     "seed": "tsx prisma/seed.ts",
     "studio": "prisma studio",
     "typecheck": "tsc --noEmit"

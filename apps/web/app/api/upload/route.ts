@@ -4,7 +4,10 @@
 // this same endpoint with its Bearer token and identical behavior.
 //
 // Dev storage: files land in apps/web/uploads/ (gitignored).
-// TODO Phase 2+: swap to object storage (S3/R2) for production.
+// TODO: swap to object storage (S3/R2) for production file uploads.
+// On serverless hosts (Vercel) the filesystem is ephemeral/read-only, so
+// disk uploads can't persist - we detect that and steer the student to the
+// paste-text path instead of failing with a confusing disk error.
 import { NextResponse } from "next/server";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
@@ -34,6 +37,18 @@ export async function POST(req: Request) {
   const title = form.get("title");
   if (!(file instanceof File) || typeof courseId !== "string") {
     return NextResponse.json({ error: "Missing file or courseId." }, { status: 400 });
+  }
+  // Serverless filesystems are ephemeral - a saved file wouldn't survive the
+  // request. Until object storage is wired up, guide the student to paste the
+  // text instead (which works everywhere and is what the AI tutor reads).
+  if (process.env.VERCEL) {
+    return NextResponse.json(
+      {
+        error:
+          "File uploads aren't available on the hosted site yet. Use \"Paste text\" on the upload page instead - that's exactly what the AI tutor reads, and it works the same.",
+      },
+      { status: 503 }
+    );
   }
   if (file.size > MAX_FILE_BYTES) {
     return NextResponse.json(

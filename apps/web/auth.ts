@@ -7,6 +7,10 @@ import Credentials from "next-auth/providers/credentials";
 import { verifyCredentials } from "@coursemind/api";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Trust the host header behind a proxy/host (e.g. Vercel) so sign-in works
+  // in production without an UntrustedHost error. Safe here: the host is set
+  // by the platform, not user input.
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [

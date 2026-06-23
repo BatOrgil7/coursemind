@@ -2,6 +2,7 @@
 
 // Pre-submit code review: paste homework code, get pointed questions.
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, errorMessage } from "@/lib/trpc";
 import { PageHeader } from "@/components/ui";
@@ -98,6 +99,13 @@ export default function CodeReviewPage() {
             <p>It calls out edge cases, assumptions, and style risks.</p>
             <p>It asks the question that gets you to the next step instead of rewriting the answer.</p>
           </div>
+          <p className="mt-6 border-t border-slate-200 pt-4 text-sm font-medium text-slate-500">
+            Want to run it first?{" "}
+            <Link href="/sandbox" className="font-semibold text-brand-600 hover:text-brand-700">
+              Try the code sandbox
+            </Link>
+            .
+          </p>
         </aside>
       </div>
     </div>

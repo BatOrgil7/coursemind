@@ -4,7 +4,24 @@
 // it to NextAuth's session machinery.
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { verifyCredentials } from "@coursemind/api";
+import Google from "next-auth/providers/google";
+import {
+  findOrCreateOAuthUser,
+  isPersonalEmailDomain,
+  schoolDomainFromEmail,
+  verifyCredentials,
+} from "@coursemind/api";
+
+type GoogleProfile = {
+  email?: unknown;
+  email_verified?: unknown;
+};
+
+function googleEmail(userEmail: string | null | undefined, profile: unknown): string | null {
+  const profileEmail = (profile as GoogleProfile | undefined)?.email;
+  if (typeof userEmail === "string" && userEmail.trim()) return userEmail;
+  return typeof profileEmail === "string" && profileEmail.trim() ? profileEmail : null;
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Trust the host header behind a proxy/host (e.g. Vercel) so sign-in works
@@ -14,6 +31,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [
+    Google,
     Credentials({
       credentials: { email: {}, password: {} },
       authorize: async (credentials) => {
@@ -27,7 +45,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async signIn({ user, account, profile }) {
+      if (account?.provider !== "google") return true;
+
+      const email = googleEmail(user.email, profile);
+      const verified = (profile as GoogleProfile | undefined)?.email_verified;
+      const domain = email ? schoolDomainFromEmail(email) : null;
+
+      if (!email || verified === false) return "/login?error=google_email";
+      if (!domain || isPersonalEmailDomain(domain)) return "/login?error=school_email";
+
+      return true;
+    },
+    async jwt({ token, user, account }) {
+      if (account?.provider === "google") {
+        const email = user?.email ?? token.email;
+        if (typeof email === "string" && email.trim()) {
+          const localUser = await findOrCreateOAuthUser({
+            email,
+            name: user?.name ?? (typeof token.name === "string" ? token.name : null),
+            provider: "google",
+          });
+          token.uid = localUser.id;
+          token.email = localUser.email;
+          token.name = localUser.name;
+        }
+        return token;
+      }
+
       if (user?.id) token.uid = user.id;
       return token;
     },

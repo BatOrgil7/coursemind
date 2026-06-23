@@ -51,13 +51,15 @@ That's it for Neon. The tables get created automatically on your first deploy
    - **Framework Preset:** Next.js (auto-detected).
    - **Build/Install/Output commands:** already set by `vercel.json` — no need
      to change them.
-4. Expand **Environment Variables** and add these three:
+4. Expand **Environment Variables** and add these:
 
    | Name | Value |
    |---|---|
    | `DATABASE_URL` | the Neon connection string you copied in Step 1 |
    | `AUTH_SECRET` | a long random string (see below) |
    | `AUTH_TRUST_HOST` | `true` |
+   | `AUTH_GOOGLE_ID` | Google OAuth web client ID |
+   | `AUTH_GOOGLE_SECRET` | Google OAuth client secret |
 
    To generate a strong `AUTH_SECRET`, run this locally and copy the output:
    ```bash
@@ -72,12 +74,39 @@ When it finishes you'll get a public URL like `https://hyntor.vercel.app`.
 
 ---
 
-## Step 3 — Try it
+## Step 3 - Create Google sign-in credentials
+
+1. Go to https://console.cloud.google.com/apis/credentials.
+2. Create or select a project, then configure the **OAuth consent screen**.
+   Use `Hyntor` as the app name and add your deployed domain as an authorized
+   domain, for example `hyntor.vercel.app` or your custom domain.
+3. Go to **Credentials -> Create credentials -> OAuth client ID**.
+4. Choose **Web application**.
+5. Add your production URL under **Authorized JavaScript origins**:
+   ```
+   https://your-domain.com
+   ```
+6. Add this under **Authorized redirect URIs**:
+   ```
+   https://your-domain.com/api/auth/callback/google
+   ```
+7. Copy the generated client ID and client secret into Vercel as
+   `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`, then redeploy.
+
+For local testing, add these too:
+```
+http://localhost:3000
+http://localhost:3000/api/auth/callback/google
+```
+
+---
+
+## Step 4 - Try it
 
 1. Open your new URL and click **Create an account**.
-2. Sign up with an email, create a course, and add a material using
+2. Sign up with a school Google account or university email, create a course, and add a material using
    **Paste text** (see the file-upload note below).
-3. You're live. 🎉
+3. You're live.
 
 > **Demo accounts don't exist in production.** `alex@demo.edu` and friends are
 > local-only seed data with a publicly-known password — they're intentionally

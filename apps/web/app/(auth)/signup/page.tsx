@@ -17,6 +17,7 @@ export default function SignupPage() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   useEffect(() => {
     const trimmed = email.trim();
@@ -61,6 +62,17 @@ export default function SignupPage() {
     }
   }
 
+  async function handleGoogleSignIn() {
+    setGoogleBusy(true);
+    setError(null);
+    try {
+      await signIn("google", { callbackUrl: "/dashboard" });
+    } catch {
+      setError("Google sign-in is not configured yet.");
+      setGoogleBusy(false);
+    }
+  }
+
   return (
     <div>
       <p className="eyebrow">Start studying</p>
@@ -68,6 +80,22 @@ export default function SignupPage() {
       <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
         Use your university email so Hyntor can connect you with classmates, courses, and shared materials.
       </p>
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        disabled={busy || googleBusy}
+        className="btn-secondary mt-6 w-full"
+      >
+        <span className="grid h-5 w-5 place-items-center rounded-full bg-white font-display text-xs font-semibold text-ink ring-1 ring-slate-200">
+          G
+        </span>
+        {googleBusy ? "Opening Google..." : "Continue with Google"}
+      </button>
+      <div className="mt-5 flex items-center gap-3">
+        <div className="h-px flex-1 bg-slate-200" />
+        <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">or</span>
+        <div className="h-px flex-1 bg-slate-200" />
+      </div>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
           <label className="label" htmlFor="name">Full name</label>
@@ -139,7 +167,7 @@ export default function SignupPage() {
           />
         </div>
         {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{error}</p>}
-        <button type="submit" disabled={busy} className="btn-primary w-full">
+        <button type="submit" disabled={busy || googleBusy} className="btn-primary w-full">
           {busy ? "Creating account..." : "Create account"}
         </button>
       </form>

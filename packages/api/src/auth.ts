@@ -19,6 +19,8 @@ const FREE_MAIL_DOMAINS = new Set([
   "protonmail.com",
 ]);
 
+const OAUTH_ONLY_PASSWORD_HASH = "oauth:google";
+
 function getSecretKey(): Uint8Array {
   const secret = process.env.AUTH_SECRET;
   if (!secret) {
@@ -44,9 +46,21 @@ export function prettifyDomain(domain: string): string {
   return `${base.charAt(0).toUpperCase()}${base.slice(1)} (${domain})`;
 }
 
+function displayNameFromEmail(email: string): string {
+  const localPart = email.split("@")[0] ?? "";
+  const words = localPart
+    .split(/[._-]+/)
+    .map((word) => word.trim())
+    .filter(Boolean);
+
+  if (words.length === 0) return "Student";
+  return words.map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`).join(" ");
+}
+
 export async function verifyCredentials(email: string, password: string) {
   const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
   if (!user) return null;
+  if (user.passwordHash === OAUTH_ONLY_PASSWORD_HASH) return null;
   const ok = await bcrypt.compare(password, user.passwordHash);
   return ok ? user : null;
 }
@@ -85,6 +99,43 @@ export async function signupUser({ email, name, password }: SignupInput) {
   const passwordHash = await bcrypt.hash(password, 10);
   return prisma.user.create({
     data: { email: normalized, name: name.trim(), passwordHash, universityId: university.id },
+  });
+}
+
+export interface OAuthSignupInput {
+  email: string;
+  name?: string | null;
+  provider: "google";
+}
+
+export async function findOrCreateOAuthUser({ email, name }: OAuthSignupInput) {
+  const normalized = email.toLowerCase().trim();
+  const domain = schoolDomainFromEmail(normalized);
+  if (!domain) throw new Error("Google did not return a valid email address.");
+
+  if (isPersonalEmailDomain(domain)) {
+    throw new Error(
+      "Hyntor uses your university email to connect you with classmates. Continue with your school Google account."
+    );
+  }
+
+  const existing = await prisma.user.findUnique({ where: { email: normalized } });
+  if (existing) return existing;
+
+  const university = await prisma.university.upsert({
+    where: { emailDomain: domain },
+    update: {},
+    create: { name: prettifyDomain(domain), emailDomain: domain },
+  });
+
+  const cleanName = name?.trim() || displayNameFromEmail(normalized);
+  return prisma.user.create({
+    data: {
+      email: normalized,
+      name: cleanName,
+      passwordHash: OAUTH_ONLY_PASSWORD_HASH,
+      universityId: university.id,
+    },
   });
 }
 

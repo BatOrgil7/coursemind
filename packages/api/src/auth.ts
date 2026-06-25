@@ -3,9 +3,11 @@
 //  - Mobile: POST /api/mobile/login calls verifyCredentials() then
 //    signMobileToken(); every later request sends "Authorization: Bearer <jwt>"
 // One user store, one password check, two transport mechanisms.
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { prisma } from "@coursemind/db";
+import { EMAIL_CODE_LENGTH, EMAIL_CODE_TTL_MINUTES } from "@coursemind/core";
 
 const FREE_MAIL_DOMAINS = new Set([
   "gmail.com",
@@ -71,35 +73,84 @@ export interface SignupInput {
   password: string;
 }
 
+const PERSONAL_SPACE_NAME = "Independent learners";
+
+/**
+ * Resolve which University a signup belongs to.
+ * - School domains SHARE a university (that's the "school graph" - classmates
+ *   discover each other's courses and materials).
+ * - Personal / free-mail addresses each get their OWN isolated space, keyed by
+ *   the full email, so strangers don't share a course library just because
+ *   they both happen to use Gmail.
+ */
+async function resolveUniversityId(normalizedEmail: string, domain: string): Promise<string> {
+  const personal = isPersonalEmailDomain(domain);
+  const key = personal ? `personal:${normalizedEmail}` : domain;
+  const name = personal ? PERSONAL_SPACE_NAME : prettifyDomain(domain);
+  const university = await prisma.university.upsert({
+    where: { emailDomain: key },
+    update: {},
+    create: { name, emailDomain: key },
+  });
+  return university.id;
+}
+
 export async function signupUser({ email, name, password }: SignupInput) {
   const normalized = email.toLowerCase().trim();
   const domain = schoolDomainFromEmail(normalized);
   if (!domain) throw new Error("Please enter a valid email address.");
 
-  // University-email verification: personal-mail domains are rejected.
-  // First student from an unknown .edu-style domain auto-creates their
-  // university's space (self-serve growth - the space is named after the
-  // domain and can be renamed later by an instructor).
-  if (isPersonalEmailDomain(domain)) {
-    throw new Error(
-      "Hyntor uses your university email to connect you with your classmates. Please sign up with your school email address (for the demo, use any name @demo.edu)."
-    );
-  }
-
   const existing = await prisma.user.findUnique({ where: { email: normalized } });
-  if (existing) throw new Error("An account with this email already exists. Try logging in instead.");
-
-  let university = await prisma.university.findUnique({ where: { emailDomain: domain } });
-  if (!university) {
-    university = await prisma.university.create({
-      data: { name: prettifyDomain(domain), emailDomain: domain },
-    });
+  if (existing) {
+    // Signed up before but never verified? Let them through to re-request a
+    // code instead of hard-blocking on "already exists".
+    if (existing.pendingCodeHash && !existing.emailVerified) return existing;
+    throw new Error("An account with this email already exists. Try logging in instead.");
   }
 
+  const universityId = await resolveUniversityId(normalized, domain);
   const passwordHash = await bcrypt.hash(password, 10);
   return prisma.user.create({
-    data: { email: normalized, name: name.trim(), passwordHash, universityId: university.id },
+    data: { email: normalized, name: name.trim(), passwordHash, universityId },
   });
+}
+
+// ---------- Email verification (code-based) ----------
+
+function generateNumericCode(length: number): string {
+  const bytes = crypto.randomBytes(length);
+  let code = "";
+  for (let i = 0; i < length; i++) code += (bytes[i] % 10).toString();
+  return code;
+}
+
+/** Generate a fresh code, store its hash + expiry on the user, return the
+ *  plaintext code for the caller to email. */
+export async function issueEmailCode(userId: string): Promise<string> {
+  const code = generateNumericCode(EMAIL_CODE_LENGTH);
+  const pendingCodeHash = await bcrypt.hash(code, 10);
+  const pendingCodeExpiresAt = new Date(Date.now() + EMAIL_CODE_TTL_MINUTES * 60 * 1000);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { pendingCodeHash, pendingCodeExpiresAt },
+  });
+  return code;
+}
+
+/** Check a submitted code; on success mark the email verified and clear the
+ *  pending code. Returns false for wrong/expired/missing codes. */
+export async function checkEmailCode(email: string, code: string): Promise<boolean> {
+  const normalized = email.toLowerCase().trim();
+  const user = await prisma.user.findUnique({ where: { email: normalized } });
+  if (!user?.pendingCodeHash || !user.pendingCodeExpiresAt) return false;
+  if (user.pendingCodeExpiresAt.getTime() < Date.now()) return false;
+  const ok = await bcrypt.compare(code.trim(), user.pendingCodeHash);
+  if (!ok) return false;
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { emailVerified: new Date(), pendingCodeHash: null, pendingCodeExpiresAt: null },
+  });
+  return true;
 }
 
 export interface OAuthSignupInput {
@@ -113,28 +164,28 @@ export async function findOrCreateOAuthUser({ email, name }: OAuthSignupInput) {
   const domain = schoolDomainFromEmail(normalized);
   if (!domain) throw new Error("Google did not return a valid email address.");
 
-  if (isPersonalEmailDomain(domain)) {
-    throw new Error(
-      "Hyntor uses your university email to connect you with classmates. Continue with your school Google account."
-    );
+  const existing = await prisma.user.findUnique({ where: { email: normalized } });
+  if (existing) {
+    // Google has already verified this email, so a Google sign-in also clears
+    // any outstanding email-code gate from an earlier password signup.
+    if (!existing.emailVerified || existing.pendingCodeHash) {
+      await prisma.user.update({
+        where: { id: existing.id },
+        data: { emailVerified: existing.emailVerified ?? new Date(), pendingCodeHash: null, pendingCodeExpiresAt: null },
+      });
+    }
+    return existing;
   }
 
-  const existing = await prisma.user.findUnique({ where: { email: normalized } });
-  if (existing) return existing;
-
-  const university = await prisma.university.upsert({
-    where: { emailDomain: domain },
-    update: {},
-    create: { name: prettifyDomain(domain), emailDomain: domain },
-  });
-
+  const universityId = await resolveUniversityId(normalized, domain);
   const cleanName = name?.trim() || displayNameFromEmail(normalized);
   return prisma.user.create({
     data: {
       email: normalized,
       name: cleanName,
       passwordHash: OAUTH_ONLY_PASSWORD_HASH,
-      universityId: university.id,
+      universityId,
+      emailVerified: new Date(), // Google-verified
     },
   });
 }

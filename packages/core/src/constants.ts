@@ -90,6 +90,10 @@ export const XP_RULE_LABELS: Record<ActivityType, string> = {
   STREAK_DAY: "Daily streak days",
 };
 
+// Email verification (code-based signup). A 6-digit code, valid 15 minutes.
+export const EMAIL_CODE_LENGTH = 6;
+export const EMAIL_CODE_TTL_MINUTES = 15;
+
 // Anthropic model used for ALL AI features. Change in one place.
 export const AI_MODEL = "claude-sonnet-4-6";
 

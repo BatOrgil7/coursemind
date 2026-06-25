@@ -46,6 +46,13 @@ model User {
   lastActiveAt DateTime? // last day that counted toward the streak
   createdAt    DateTime  @default(now())
 
+  // Email verification (code-based). A user is "blocked until verified" only
+  // while pendingCodeHash is set, so pre-existing accounts and Google
+  // sign-ins (Google-verified) are grandfathered in without a backfill.
+  emailVerified         DateTime? // when the email was confirmed (or Google sign-in)
+  pendingCodeHash       String? // bcrypt hash of the outstanding 6-digit code
+  pendingCodeExpiresAt  DateTime? // when that code stops working
+
   university       University       @relation(fields: [universityId], references: [id])
   enrollments      Enrollment[]
   materials        Material[]

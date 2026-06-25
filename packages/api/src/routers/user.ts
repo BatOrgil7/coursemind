@@ -1,13 +1,17 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import {
+  checkEmailCode,
   isPersonalEmailDomain,
+  issueEmailCode,
   prettifyDomain,
   schoolDomainFromEmail,
   signupUser,
   verifyCredentials,
   signMobileToken,
 } from "../auth";
+import { sendVerificationEmail } from "../email";
 
 export const userRouter = router({
   schoolPreview: publicProcedure
@@ -34,7 +38,7 @@ export const userRouter = router({
           known: false,
           courseCount: 0,
           resourceCount: 0,
-          message: "Use your school email so Hyntor can match classmates, courses, and shared materials.",
+          message: "Personal email - you'll get your own private study space. Use a school email to join your campus and classmates.",
         };
       }
 
@@ -79,13 +83,42 @@ export const userRouter = router({
         password: z.string().min(8, "Password must be at least 8 characters."),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
+      // Create (or re-fetch an unverified) account, then email a code. The
+      // user must verify before they can log in.
       const user = await signupUser(input);
-      const university = await ctx.prisma.university.findUniqueOrThrow({
-        where: { id: user.universityId },
-        select: { id: true, name: true, emailDomain: true },
-      });
-      return { id: user.id, email: user.email, name: user.name, university };
+      const code = await issueEmailCode(user.id);
+      const { delivered } = await sendVerificationEmail(user.email, code);
+      // When no email provider is configured we return the code so the flow is
+      // still testable (dev only); once RESEND_API_KEY is set this is null.
+      return { email: user.email, emailSent: delivered, devCode: delivered ? null : code };
+    }),
+
+  /** Confirm the 6-digit code emailed at signup. */
+  verifyEmail: publicProcedure
+    .input(z.object({ email: z.string().email(), code: z.string().min(4).max(12) }))
+    .mutation(async ({ input }) => {
+      const ok = await checkEmailCode(input.email, input.code);
+      if (!ok) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "That code is incorrect or has expired. Request a new one and try again.",
+        });
+      }
+      return { ok: true };
+    }),
+
+  /** Email a fresh code to an unverified account. */
+  resendCode: publicProcedure
+    .input(z.object({ email: z.string().email() }))
+    .mutation(async ({ ctx, input }) => {
+      const normalized = input.email.toLowerCase().trim();
+      const user = await ctx.prisma.user.findUnique({ where: { email: normalized } });
+      // Don't reveal whether the account exists or is already verified.
+      if (!user || user.emailVerified) return { email: normalized, emailSent: false, devCode: null };
+      const code = await issueEmailCode(user.id);
+      const { delivered } = await sendVerificationEmail(normalized, code);
+      return { email: normalized, emailSent: delivered, devCode: delivered ? null : code };
     }),
 
   // Mobile login: returns a long-lived JWT the Expo app stores securely.
@@ -95,6 +128,9 @@ export const userRouter = router({
     .mutation(async ({ input }) => {
       const user = await verifyCredentials(input.email, input.password);
       if (!user) throw new Error("Invalid email or password.");
+      if (user.pendingCodeHash) {
+        throw new Error("Please verify your email first - check your inbox for the code.");
+      }
       const token = await signMobileToken(user.id);
       return { token, user: { id: user.id, email: user.email, name: user.name } };
     }),

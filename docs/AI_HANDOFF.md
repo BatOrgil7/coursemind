@@ -578,3 +578,62 @@ Next steps:
 - User: follow docs/DEPLOY.md (create Neon DB, import repo to Vercel, set DATABASE_URL +
   AUTH_SECRET + AUTH_TRUST_HOST, deploy).
 - Later: object storage for real file uploads; concept visualizer; mobile Phase 4 parity.
+
+### 2026-06-16 - Claude Code - Deployed to prod + personal-email signup, email verification
+
+Deployment: I drove the user's browser (Chrome MCP) and the app is LIVE at
+**https://hyntor.vercel.app** (Vercel project `hyntor`, team batorgilrb-7458s-projects).
+Neon Postgres `hyntor-db` is connected via the Vercel-Neon integration (DATABASE_URL is an
+integration var, not in the plain Project env list). Env set: AUTH_SECRET, AUTH_TRUST_HOST.
+The vercel-build pipeline worked end to end (gen prod schema -> generate client -> db push
+-> next build). Note: the Neon org is Vercel-managed, so new Neon projects must be created
+from Vercel's Storage tab, not the Neon console.
+
+Then, building on Codex's "Add Google authentication" (commit 25f3ce9), the user asked to
+(1) allow personal-email signup, (2) keep Google sign-in, (3) add email verification by code.
+
+Summary:
+- Personal emails now allowed everywhere. `packages/api/src/auth.ts`: removed the
+  isPersonalEmailDomain rejections in `signupUser` and `findOrCreateOAuthUser`; new
+  `resolveUniversityId` gives personal/free-mail users their OWN isolated University
+  (keyed `personal:<email>`, named "Independent learners") so Gmail strangers don't share
+  a course graph; school-domain users still group by domain.
+- Google sign-in: `apps/web/auth.ts` signIn callback no longer rejects personal domains
+  (keeps the Google email_verified check). Google users are set emailVerified (no code).
+- Email verification by 6-digit code (password signups):
+  - DB: `User.emailVerified`, `pendingCodeHash`, `pendingCodeExpiresAt`
+    (migration 20260616170000_add_email_verification). "Blocked until verified" keys on an
+    OUTSTANDING `pendingCodeHash`, so pre-existing accounts + Google users are grandfathered
+    in with NO backfill.
+  - `packages/api/src/email.ts`: Resend via fetch (no npm dep) when `RESEND_API_KEY` set;
+    otherwise logs the code and returns delivered:false (dev fallback).
+  - auth.ts helpers `issueEmailCode` / `checkEmailCode`; user router `signup` (issues code,
+    returns `{email, emailSent, devCode}`), `verifyEmail`, `resendCode`; credentials
+    authorize + mobileLogin reject users with an outstanding code.
+  - Web: new `/verify` page (code input, resend, dev-mode banner showing the code via
+    sessionStorage when email unconfigured); signup -> /verify (no auto-login); login shows
+    "Email verified!" on `?verified=1` + a "Verify your email" hint; copy relaxed from
+    "university email" to "school or personal email".
+
+Files touched:
+- `packages/db/prisma/schema.prisma` + `migrations/20260616170000_add_email_verification/`
+- `packages/core/src/constants.ts` (EMAIL_CODE_LENGTH, EMAIL_CODE_TTL_MINUTES)
+- `packages/api/src/email.ts` (new), `packages/api/src/auth.ts`,
+  `packages/api/src/routers/user.ts`
+- `apps/web/auth.ts`, `apps/web/app/(auth)/verify/page.tsx` (new),
+  `apps/web/app/(auth)/signup/page.tsx`, `apps/web/app/(auth)/login/page.tsx`
+- `.env.example` (RESEND_API_KEY/EMAIL_FROM), `docs/DEPLOY.md`, `docs/AI_HANDOFF.md`
+
+Checks run:
+- `npm run typecheck` (all workspaces clean), `npm run build` (clean; /verify compiled).
+- Migration applied locally via diff+deploy (migrate dev still hangs in the agent shell).
+- Browser QA (localhost): personal Gmail signup -> /verify with dev code 260215 -> verified
+  -> /login?verified=1 -> logged in ("Hey Test", space "Independent learners"). Unverified
+  second account -> login correctly BLOCKED ("Invalid email or password." + verify hint).
+  Cleaned up both test accounts from dev.db afterward.
+
+Open items for the USER (cannot be done without their accounts):
+- Google: create OAuth credentials and set AUTH_GOOGLE_ID/AUTH_GOOGLE_SECRET in Vercel
+  (redirect URI https://hyntor.vercel.app/api/auth/callback/google). See DEPLOY.md Step 3.
+- Email: add RESEND_API_KEY (+ verified domain via EMAIL_FROM to email arbitrary users);
+  until then verification runs in dev-mode (code shown on screen). See DEPLOY.md.

@@ -129,6 +129,27 @@ To enable them:
 
 ---
 
+## Email verification codes (recommended)
+
+Email/password signups must confirm a 6-digit code. To email those codes for
+real, add a free **Resend** account:
+
+1. Sign up at https://resend.com and create an **API key**.
+2. In Vercel add `RESEND_API_KEY` = your key (Production + Preview), then redeploy.
+3. To email *anyone* (not just your own address), verify a sending domain in
+   Resend and set `EMAIL_FROM="Hyntor <no-reply@yourdomain.com>"`. Until you do,
+   Resend only delivers to the address you signed up with.
+
+Without `RESEND_API_KEY`, signup still works — the code is shown on the verify
+screen in a clearly-marked "dev mode" banner (fine for testing, not for a real
+public launch). Google sign-in needs no code (Google already verifies the email).
+
+> Personal emails (Gmail, etc.) are allowed for both signup and Google sign-in.
+> School-email users are grouped with their campus; personal-email users get
+> their own private study space.
+
+---
+
 ## Known limitations on the hosted site
 
 - **File uploads are disabled in production.** Serverless hosts have a

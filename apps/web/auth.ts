@@ -5,12 +5,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import {
-  findOrCreateOAuthUser,
-  isPersonalEmailDomain,
-  schoolDomainFromEmail,
-  verifyCredentials,
-} from "@coursemind/api";
+import { findOrCreateOAuthUser, verifyCredentials } from "@coursemind/api";
 
 type GoogleProfile = {
   email?: unknown;
@@ -40,6 +35,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (typeof email !== "string" || typeof password !== "string") return null;
         const user = await verifyCredentials(email, password);
         if (!user) return null;
+        // An outstanding email code means they signed up but never verified -
+        // keep them out until they confirm (the UI sends them to /verify).
+        if (user.pendingCodeHash) return null;
         return { id: user.id, email: user.email, name: user.name };
       },
     }),
@@ -48,12 +46,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user, account, profile }) {
       if (account?.provider !== "google") return true;
 
+      // Google sign-in works for ANY email (personal or school). We only
+      // require that Google itself confirmed the address.
       const email = googleEmail(user.email, profile);
       const verified = (profile as GoogleProfile | undefined)?.email_verified;
-      const domain = email ? schoolDomainFromEmail(email) : null;
-
       if (!email || verified === false) return "/login?error=google_email";
-      if (!domain || isPersonalEmailDomain(domain)) return "/login?error=school_email";
 
       return true;
     },

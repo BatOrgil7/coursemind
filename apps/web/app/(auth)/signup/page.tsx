@@ -51,11 +51,14 @@ export default function SignupPage() {
     setBusy(true);
     setError(null);
     try {
-      await api.user.signup.mutate({ name, email, password });
-      const result = await signIn("credentials", { redirect: false, email, password });
-      if (result?.error) throw new Error("Account created, but auto-login failed. Please log in.");
-      router.push("/dashboard");
-      router.refresh();
+      const result = await api.user.signup.mutate({ name, email, password });
+      // No email provider yet? Stash the dev code so /verify can show it.
+      if (result.devCode) {
+        window.sessionStorage.setItem("hyntor.devCode", result.devCode);
+      } else {
+        window.sessionStorage.removeItem("hyntor.devCode");
+      }
+      router.push(`/verify?email=${encodeURIComponent(result.email)}`);
     } catch (err) {
       setError(errorMessage(err));
       setBusy(false);
@@ -78,7 +81,8 @@ export default function SignupPage() {
       <p className="eyebrow">Start studying</p>
       <h1 className="mt-2 font-display text-2xl font-semibold text-ink">Create your account</h1>
       <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
-        Use your university email so Hyntor can connect you with classmates, courses, and shared materials.
+        Use your school email to connect with classmates and shared materials, or a personal email
+        for your own private study space.
       </p>
       <button
         type="button"
@@ -109,13 +113,13 @@ export default function SignupPage() {
           />
         </div>
         <div>
-          <label className="label" htmlFor="email">University email</label>
+          <label className="label" htmlFor="email">Email</label>
           <input
             id="email"
             type="email"
             required
             className="input"
-            placeholder="you@university.edu"
+            placeholder="you@school.edu or you@gmail.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -123,7 +127,7 @@ export default function SignupPage() {
             <div
               className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
                 schoolPreview?.status === "personal_email"
-                  ? "border-rose-200 bg-rose-50 text-rose-700"
+                  ? "border-slate-200 bg-slate-50 text-slate-600"
                   : "border-brand-100 bg-brand-50 text-brand-800"
               }`}
             >

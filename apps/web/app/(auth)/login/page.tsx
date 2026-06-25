@@ -10,14 +10,17 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
 
   useEffect(() => {
-    const authError = new URLSearchParams(window.location.search).get("error");
-    if (authError === "school_email") {
-      setError("Use your school Google account, not a personal Gmail account.");
-    } else if (authError === "google_email") {
+    const params = new URLSearchParams(window.location.search);
+    const authError = params.get("error");
+    if (params.get("verified")) {
+      setNotice("Email verified! Log in to continue.");
+    }
+    if (authError === "google_email") {
       setError("Google did not confirm a verified email address for this account.");
     } else if (authError) {
       setError("Google sign-in could not finish. Try again.");
@@ -53,7 +56,10 @@ export default function LoginPage() {
     <div>
       <p className="eyebrow">Welcome back</p>
       <h1 className="mt-2 font-display text-2xl font-semibold text-ink">Log in to Hyntor</h1>
-      <p className="mt-2 text-sm font-medium text-slate-500">Use your university email to continue.</p>
+      <p className="mt-2 text-sm font-medium text-slate-500">Continue with Google or your email.</p>
+      {notice && (
+        <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">{notice}</p>
+      )}
       <button
         type="button"
         onClick={handleGoogleSignIn}
@@ -72,13 +78,13 @@ export default function LoginPage() {
       </div>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label className="label" htmlFor="email">University email</label>
+          <label className="label" htmlFor="email">Email</label>
           <input
             id="email"
             type="email"
             required
             className="input"
-            placeholder="you@university.edu"
+            placeholder="you@school.edu or you@gmail.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -103,6 +109,12 @@ export default function LoginPage() {
         New here?{" "}
         <Link href="/signup" className="font-semibold text-brand-600 hover:text-brand-700">
           Create an account
+        </Link>
+      </p>
+      <p className="mt-2 text-center text-xs font-medium text-slate-400">
+        Signed up but didn&apos;t get in?{" "}
+        <Link href="/verify" className="font-semibold text-brand-600 hover:text-brand-700">
+          Verify your email
         </Link>
       </p>
     </div>

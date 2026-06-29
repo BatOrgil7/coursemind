@@ -152,6 +152,54 @@ export const userRouter = router({
     };
   }),
 
+  /** Full profile payload for the /profile page: account + activity stats. */
+  profile: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.prisma.user.findUniqueOrThrow({
+      where: { id: ctx.userId },
+      include: {
+        university: true,
+        _count: {
+          select: { enrollments: true, materials: true, quizAttempts: true, tutorSessions: true },
+        },
+      },
+    });
+    // Personal/free-mail users live in an isolated space keyed "personal:<email>".
+    const isPersonalSpace = user.university.emailDomain.startsWith("personal:");
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      xp: user.xp,
+      streakCount: user.streakCount,
+      createdAt: user.createdAt,
+      emailVerified: user.emailVerified !== null,
+      signInMethod: user.passwordHash.startsWith("oauth:") ? ("google" as const) : ("password" as const),
+      space: {
+        name: isPersonalSpace ? "Personal study space" : user.university.name,
+        isPersonalSpace,
+      },
+      stats: {
+        courses: user._count.enrollments,
+        materialsShared: user._count.materials,
+        quizzesTaken: user._count.quizAttempts,
+        tutorSessions: user._count.tutorSessions,
+      },
+    };
+  }),
+
+  /** Update the current user's display name. */
+  updateProfile: protectedProcedure
+    .input(z.object({ name: z.string().min(1, "Please enter your name.").max(100) }))
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.prisma.user.update({
+        where: { id: ctx.userId },
+        data: { name: input.name.trim() },
+        select: { id: true, name: true },
+      });
+      return user;
+    }),
+
   schoolHub: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.prisma.user.findUniqueOrThrow({
       where: { id: ctx.userId },

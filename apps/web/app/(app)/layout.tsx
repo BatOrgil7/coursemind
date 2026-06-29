@@ -17,6 +17,12 @@ const NAV = [
   { href: "/leaderboard", label: "Leaderboard", mark: "LB" },
 ];
 
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  return (parts[0][0] + (parts[1]?.[0] ?? "")).toUpperCase();
+}
+
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
@@ -56,10 +62,19 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               {me.xp} XP
             </span>
           </div>
-          <div className="px-2">
-            <p className="truncate text-sm font-semibold">{me.name}</p>
-            <p className="truncate text-xs text-slate-500">{me.university.name}</p>
-          </div>
+          <Link
+            href="/profile"
+            className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition hover:bg-slate-100"
+            title="View your profile"
+          >
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand-600 text-[11px] font-semibold text-white">
+              {initials(me.name)}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold text-ink">{me.name}</span>
+              <span className="block truncate text-xs text-slate-500">{me.university.name}</span>
+            </span>
+          </Link>
           <form
             className="sm:justify-self-end lg:block"
             action={async () => {

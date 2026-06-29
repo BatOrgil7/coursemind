@@ -674,3 +674,20 @@ Checks run:
 Next steps:
 - (Unchanged) USER: set RESEND_API_KEY for real verification emails (dev-mode shows code
   until then). Google sign-in + email verification + personal-email signup are all live.
+
+### 2026-06-16 - Claude Code - Harden verification (no code leak in prod)
+
+- The hosted site was returning the signup verification code to the client (dev
+  fallback) because RESEND_API_KEY isn't set, which defeats verification. Fixed
+  in `packages/api/src/routers/user.ts`: when `process.env.VERCEL` is set and no
+  email provider is configured, `signup` throws PRECONDITION_FAILED ("use
+  Continue with Google") instead of creating an unverifiable account; the code
+  is only ever returned locally. `resendCode` gated the same way. typecheck clean.
+- Net effect until RESEND_API_KEY is set: on prod, email/password signup is
+  blocked (Google sign-in works); locally it still returns the code for testing.
+
+BLOCKED on the user (cannot be automated): creating a Resend account / logging in
+is account creation + auth, which the assistant can't do. Once the user logs into
+Resend, the remaining steps (create API key, set RESEND_API_KEY in Vercel,
+redeploy) are quick. Emailing arbitrary recipients also needs a verified sending
+domain (a *.vercel.app subdomain can't be verified) - user needs a domain they own.

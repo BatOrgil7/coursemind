@@ -11,7 +11,11 @@ import {
   verifyCredentials,
   signMobileToken,
 } from "../auth";
-import { sendVerificationEmail } from "../email";
+import { isEmailConfigured, sendVerificationEmail } from "../email";
+
+// "Are we on the real hosted site?" Vercel sets this on every deployment.
+// Used to keep the dev convenience (returning the code) OUT of production.
+const IS_HOSTED = Boolean(process.env.VERCEL);
 
 export const userRouter = router({
   schoolPreview: publicProcedure
@@ -84,14 +88,25 @@ export const userRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      // On the hosted site we must be able to actually deliver the code. If no
+      // email provider is configured, block email/password signup (steer to
+      // Google) rather than create an account that can never be verified - and
+      // never leak the code to the client in production.
+      if (IS_HOSTED && !isEmailConfigured()) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: 'Email sign-up isn\'t available yet - please use "Continue with Google" for now.',
+        });
+      }
       // Create (or re-fetch an unverified) account, then email a code. The
       // user must verify before they can log in.
       const user = await signupUser(input);
       const code = await issueEmailCode(user.id);
       const { delivered } = await sendVerificationEmail(user.email, code);
-      // When no email provider is configured we return the code so the flow is
-      // still testable (dev only); once RESEND_API_KEY is set this is null.
-      return { email: user.email, emailSent: delivered, devCode: delivered ? null : code };
+      // Dev-only convenience: when there's no email provider AND we're not on
+      // the hosted site, return the code so the flow stays testable locally.
+      const devCode = delivered || IS_HOSTED ? null : code;
+      return { email: user.email, emailSent: delivered, devCode };
     }),
 
   /** Confirm the 6-digit code emailed at signup. */
@@ -118,7 +133,8 @@ export const userRouter = router({
       if (!user || user.emailVerified) return { email: normalized, emailSent: false, devCode: null };
       const code = await issueEmailCode(user.id);
       const { delivered } = await sendVerificationEmail(normalized, code);
-      return { email: normalized, emailSent: delivered, devCode: delivered ? null : code };
+      const devCode = delivered || IS_HOSTED ? null : code;
+      return { email: normalized, emailSent: delivered, devCode };
     }),
 
   // Mobile login: returns a long-lived JWT the Expo app stores securely.

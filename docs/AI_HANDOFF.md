@@ -637,3 +637,40 @@ Open items for the USER (cannot be done without their accounts):
   (redirect URI https://hyntor.vercel.app/api/auth/callback/google). See DEPLOY.md Step 3.
 - Email: add RESEND_API_KEY (+ verified domain via EMAIL_FROM to email arbitrary users);
   until then verification runs in dev-mode (code shown on screen). See DEPLOY.md.
+
+### 2026-06-16 - Claude Code - User profile + landing page redesign
+
+Also: completed the Google sign-in setup via browser - created the OAuth client in Google
+Cloud (project "hyntor"), published the consent screen to production (External, basic
+email/profile scopes so no verification needed), and set AUTH_GOOGLE_ID/AUTH_GOOGLE_SECRET
+in Vercel + redeployed. Redirect URI: https://hyntor.vercel.app/api/auth/callback/google.
+Google sign-in is now live.
+
+Summary:
+- User profile: new `user.profile` query (name, email, role, xp, streak, createdAt,
+  emailVerified, signInMethod google|password, study-space name + isPersonalSpace, and
+  activity stats: courses/materialsShared/quizzesTaken/tutorSessions) and `user.updateProfile`
+  (display name). New `/profile` page (initials avatar, inline name edit, stats grid,
+  account details). The sidebar user block is now a link to /profile with an avatar.
+- Landing page redesign (apps/web/app/page.tsx): polished gradient hero with product preview
+  (tutor chat + tier badge), honest trust strip, "How it works" 3 steps, hint-tier section,
+  feature grid, a dark "responsible AI" band, and a footer. REMOVED the publicly-advertised
+  demo credentials (alex@demo.edu / coursemind) - those accounts don't exist in production
+  and looked unprofessional. No fabricated stats/testimonials (kept it truthful).
+
+Files touched:
+- `packages/api/src/routers/user.ts` (profile, updateProfile)
+- `apps/web/app/(app)/profile/page.tsx` (new)
+- `apps/web/app/(app)/layout.tsx` (sidebar profile link + avatar)
+- `apps/web/app/page.tsx` (landing redesign)
+- `docs/AI_HANDOFF.md`
+
+Checks run:
+- `npm run typecheck` (all workspaces clean), `npm run build` (clean; /profile compiled).
+- Browser QA (localhost): landing page renders all sections, no demo creds, no console
+  errors. Profile page shows correct stats for alex@demo.edu (215 XP, 5d streak, 2 courses,
+  etc.); inline name edit round-trips; sidebar avatar links to /profile.
+
+Next steps:
+- (Unchanged) USER: set RESEND_API_KEY for real verification emails (dev-mode shows code
+  until then). Google sign-in + email verification + personal-email signup are all live.

@@ -5,7 +5,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import { findOrCreateOAuthUser, verifyCredentials } from "@coursemind/api";
+import { findOrCreateOAuthUser, isEmailConfigured, verifyCredentials } from "@coursemind/api";
 
 type GoogleProfile = {
   email?: unknown;
@@ -35,9 +35,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (typeof email !== "string" || typeof password !== "string") return null;
         const user = await verifyCredentials(email, password);
         if (!user) return null;
-        // An outstanding email code means they signed up but never verified -
-        // keep them out until they confirm (the UI sends them to /verify).
-        if (user.pendingCodeHash) return null;
+        // Only enforce email verification when a provider is configured. With
+        // none, verification is paused and an outstanding code doesn't block.
+        if (isEmailConfigured() && user.pendingCodeHash) return null;
         return { id: user.id, email: user.email, name: user.name };
       },
     }),

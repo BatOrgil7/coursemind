@@ -52,7 +52,18 @@ export default function SignupPage() {
     setError(null);
     try {
       const result = await api.user.signup.mutate({ name, email, password });
-      // No email provider yet? Stash the dev code so /verify can show it.
+      if (!result.verificationRequired) {
+        // Email verification is paused (no provider configured): log straight in.
+        const signInResult = await signIn("credentials", { redirect: false, email, password });
+        if (signInResult?.error) {
+          router.push("/login");
+          return;
+        }
+        router.push("/dashboard");
+        router.refresh();
+        return;
+      }
+      // Verification on: stash any dev code and continue to the verify screen.
       if (result.devCode) {
         window.sessionStorage.setItem("hyntor.devCode", result.devCode);
       } else {

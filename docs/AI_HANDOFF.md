@@ -691,3 +691,25 @@ is account creation + auth, which the assistant can't do. Once the user logs int
 Resend, the remaining steps (create API key, set RESEND_API_KEY in Vercel,
 redeploy) are quick. Emailing arbitrary recipients also needs a verified sending
 domain (a *.vercel.app subdomain can't be verified) - user needs a domain they own.
+
+### 2026-06-16 - Claude Code - Pause email verification (provider-gated)
+
+User asked to stop email verification for now. Made it provider-gated instead of
+ripping it out (non-destructive, auto-resumes):
+- Verification is enforced ONLY when an email provider is configured
+  (`isEmailConfigured()` = RESEND_API_KEY set).
+- No provider (current state): `user.signup` creates a ready-to-use account
+  (emailVerified set, no code, no /verify) and returns `verificationRequired:false`;
+  the signup page logs straight in. Credentials authorize + mobileLogin no longer
+  block on a pending code. Removed the prod "email signup unavailable" throw.
+- Provider set later: signup emails a code and requires /verify again - zero code
+  changes needed to resume.
+
+Files: `packages/api/src/index.ts` (export isEmailConfigured),
+`packages/api/src/routers/user.ts`, `apps/web/auth.ts`,
+`apps/web/app/(auth)/signup/page.tsx`.
+
+Checks: `npm run typecheck` + `npm run build` clean. Browser: fresh email signup
+(pause.test@gmail.com) went straight to /dashboard, account created with
+emailVerified set + no pending code; no console errors; test account cleaned up.
+The /verify page + resendCode remain in place (dormant until a provider is set).

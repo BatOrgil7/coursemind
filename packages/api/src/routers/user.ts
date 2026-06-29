@@ -87,26 +87,26 @@ export const userRouter = router({
         password: z.string().min(8, "Password must be at least 8 characters."),
       })
     )
-    .mutation(async ({ input }) => {
-      // On the hosted site we must be able to actually deliver the code. If no
-      // email provider is configured, block email/password signup (steer to
-      // Google) rather than create an account that can never be verified - and
-      // never leak the code to the client in production.
-      if (IS_HOSTED && !isEmailConfigured()) {
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message: 'Email sign-up isn\'t available yet - please use "Continue with Google" for now.',
-        });
-      }
-      // Create (or re-fetch an unverified) account, then email a code. The
-      // user must verify before they can log in.
+    .mutation(async ({ ctx, input }) => {
       const user = await signupUser(input);
+
+      // Email verification is PAUSED unless an email provider is configured.
+      // With no provider, the account is ready to use immediately - and
+      // verification turns back on automatically once RESEND_API_KEY is set.
+      if (!isEmailConfigured()) {
+        await ctx.prisma.user.update({
+          where: { id: user.id },
+          data: { emailVerified: new Date(), pendingCodeHash: null, pendingCodeExpiresAt: null },
+        });
+        return { email: user.email, verificationRequired: false as const, emailSent: false, devCode: null };
+      }
+
+      // Provider configured: email a 6-digit code; the user verifies before login.
       const code = await issueEmailCode(user.id);
       const { delivered } = await sendVerificationEmail(user.email, code);
-      // Dev-only convenience: when there's no email provider AND we're not on
-      // the hosted site, return the code so the flow stays testable locally.
+      // Dev-only convenience: when not on the hosted site, surface the code.
       const devCode = delivered || IS_HOSTED ? null : code;
-      return { email: user.email, emailSent: delivered, devCode };
+      return { email: user.email, verificationRequired: true as const, emailSent: delivered, devCode };
     }),
 
   /** Confirm the 6-digit code emailed at signup. */
@@ -144,7 +144,8 @@ export const userRouter = router({
     .mutation(async ({ input }) => {
       const user = await verifyCredentials(input.email, input.password);
       if (!user) throw new Error("Invalid email or password.");
-      if (user.pendingCodeHash) {
+      // Only enforce verification when an email provider is configured.
+      if (isEmailConfigured() && user.pendingCodeHash) {
         throw new Error("Please verify your email first - check your inbox for the code.");
       }
       const token = await signMobileToken(user.id);

@@ -11,3 +11,4 @@ export {
 } from "./auth";
 export { createMaterialFromFile } from "./routers/material";
 export { isAiConfigured } from "./ai";
+export { isEmailConfigured } from "./email";

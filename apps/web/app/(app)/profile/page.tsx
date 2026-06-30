@@ -135,6 +135,11 @@ export default function ProfilePage() {
             <span className="rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700 ring-1 ring-brand-100">
               {p.space.name}
             </span>
+            {p.plan === "PRO" ? (
+              <span className="rounded-full bg-brand-600 px-2.5 py-1 text-[11px] font-semibold text-white">Pro ✦</span>
+            ) : (
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">Free</span>
+            )}
             {p.emailVerified && (
               <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-100">
                 Email verified
@@ -158,6 +163,15 @@ export default function ProfilePage() {
       {/* Account details */}
       <h2 className="mb-3 mt-8 font-display text-lg font-semibold text-ink">Account</h2>
       <div className="surface-panel divide-y divide-slate-100/80 overflow-hidden">
+        <div className="flex items-center justify-between gap-4 px-5 py-3.5">
+          <span className="text-sm font-medium text-slate-500">Plan</span>
+          <span className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-ink">{p.plan === "PRO" ? "Pro ✦" : "Free"}</span>
+            <Link href="/upgrade" className="text-sm font-semibold text-brand-600 hover:text-brand-700">
+              {p.plan === "PRO" ? "Manage" : "Upgrade"}
+            </Link>
+          </span>
+        </div>
         <Row label="Sign-in method" value={p.signInMethod === "google" ? "Google" : "Email & password"} />
         <Row label="Study space" value={p.space.name} />
         <Row label="Member since" value={new Date(p.createdAt).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })} />

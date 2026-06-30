@@ -62,6 +62,18 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               {me.xp} XP
             </span>
           </div>
+          {me.plan === "PRO" ? (
+            <span className="inline-flex items-center justify-center rounded-md bg-brand-600 px-2 py-1 text-xs font-semibold text-white">
+              Pro ✦
+            </span>
+          ) : (
+            <Link
+              href="/upgrade"
+              className="inline-flex items-center justify-center rounded-md border border-brand-200 bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-700 transition hover:bg-brand-100"
+            >
+              Upgrade to Pro ✦
+            </Link>
+          )}
           <Link
             href="/profile"
             className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition hover:bg-slate-100"

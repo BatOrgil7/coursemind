@@ -19,6 +19,9 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
         }`}
         action={
           <div className="flex flex-wrap gap-3">
+            <Link href={`/courses/${course.id}/chat`} className="btn-secondary">
+              Group chat
+            </Link>
             <Link href={`/courses/${course.id}/workspaces`} className="btn-secondary">
               Workspaces
             </Link>

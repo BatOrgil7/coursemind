@@ -5,6 +5,10 @@
 export const USER_ROLES = ["STUDENT", "TA", "INSTRUCTOR"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
+// Subscription plans. PRO unlocks the AI features (the group-chat tutor, etc.).
+export const USER_PLANS = ["FREE", "PRO"] as const;
+export type UserPlan = (typeof USER_PLANS)[number];
+
 export const MATERIAL_TYPES = ["PDF", "PPTX", "DOCX", "NOTES", "SYLLABUS", "TEXT", "OTHER"] as const;
 export type MaterialType = (typeof MATERIAL_TYPES)[number];
 

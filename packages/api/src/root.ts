@@ -12,6 +12,7 @@ import { studyRouter } from "./routers/study";
 import { flashcardRouter } from "./routers/flashcard";
 import { leaderboardRouter } from "./routers/leaderboard";
 import { annotationRouter } from "./routers/annotation";
+import { courseChatRouter } from "./routers/courseChat";
 
 export const appRouter = router({
   user: userRouter,
@@ -25,6 +26,7 @@ export const appRouter = router({
   flashcard: flashcardRouter,
   leaderboard: leaderboardRouter,
   annotation: annotationRouter,
+  courseChat: courseChatRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -163,10 +163,24 @@ export const userRouter = router({
       email: user.email,
       name: user.name,
       role: user.role,
+      plan: user.plan,
       xp: user.xp,
       streakCount: user.streakCount,
       university: { id: user.university.id, name: user.university.name, emailDomain: user.university.emailDomain },
     };
+  }),
+
+  /** Placeholder "upgrade to Pro" - flips the plan flag. Real billing (Stripe)
+   *  hooks in here later; for now it just unlocks the AI features. */
+  upgradeToPro: protectedProcedure.mutation(async ({ ctx }) => {
+    await ctx.prisma.user.update({ where: { id: ctx.userId }, data: { plan: "PRO" } });
+    return { plan: "PRO" as const };
+  }),
+
+  /** Cancel back to the free plan (placeholder, mirrors upgradeToPro). */
+  downgradeToFree: protectedProcedure.mutation(async ({ ctx }) => {
+    await ctx.prisma.user.update({ where: { id: ctx.userId }, data: { plan: "FREE" } });
+    return { plan: "FREE" as const };
   }),
 
   /** Full profile payload for the /profile page: account + activity stats. */
@@ -187,6 +201,7 @@ export const userRouter = router({
       name: user.name,
       email: user.email,
       role: user.role,
+      plan: user.plan,
       xp: user.xp,
       streakCount: user.streakCount,
       createdAt: user.createdAt,

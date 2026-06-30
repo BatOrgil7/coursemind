@@ -713,3 +713,33 @@ Checks: `npm run typecheck` + `npm run build` clean. Browser: fresh email signup
 (pause.test@gmail.com) went straight to /dashboard, account created with
 emailVerified set + no pending code; no console errors; test account cleaned up.
 The /verify page + resendCode remain in place (dormant until a provider is set).
+
+### 2026-06-16 - Claude Code - Course group chat (free) + Pro plan with AI-in-chat (paid)
+
+Per the user's product framing: free = share materials + chat as a class; paid (Pro) =
+AI that reads the materials + the group's questions. Answers: "Both" (course-wide chat +
+keep study groups) and "Plan + Upgrade placeholder" (no real billing yet).
+
+- Schema (migration 20260616180000_course_chat_and_plan): ChatMessage now belongs to a
+  workspace OR a course (workspaceId + courseId both nullable), authorId nullable (null =
+  AI message) + `tier` column. User gains `plan` (FREE|PRO, default FREE).
+- core: USER_PLANS constant. Reused buildDiscussionTutorPrompt for the chat AI.
+- API: new `courseChat` router - list + send (any enrolled student, polling), and `askAi`
+  (PRO-gated: reads recent chat + course materials via gatherGrounding, posts one grounded
+  hint-tiered AI reply; returns {upgradeRequired:true} for FREE, AI-not-configured message
+  if no key). `user.me`/`profile` return plan; `user.upgradeToPro` / `downgradeToFree`
+  placeholders (flip the flag - Stripe hooks in here later). Fixed workspace.chatList for
+  the now-nullable author.
+- Web: `/courses/[id]/chat` live group chat with "Ask AI" (Pro; free users get an upgrade
+  nudge). `/upgrade` pricing page (Free vs Pro $6/mo, instant placeholder upgrade/downgrade).
+  Course page "Group chat" link; profile shows plan + Manage/Upgrade; sidebar shows a
+  Pro badge or an "Upgrade to Pro" link.
+
+Checks: typecheck + build clean. Browser QA (alex@demo.edu): sent a course-chat message
+(posts + clears); Ask AI as FREE -> upgrade upsell; /upgrade -> "You're on Pro"; back on
+chat the button ungates to "Ask AI" and (no local API key) shows the friendly
+"AI not configured" notice = the Pro gate passes. Reset alex to FREE afterward.
+
+Notes: AI replies in chat need ANTHROPIC_API_KEY (same as all AI features) - Pro gating +
+plumbing verified, the model call reuses the proven discussion-tutor path. Existing
+per-course discussion boards + study-group (workspace) chats are unchanged and still there.

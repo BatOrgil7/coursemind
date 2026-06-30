@@ -40,6 +40,7 @@ model User {
   name         String
   passwordHash String
   role         String    @default("STUDENT") // STUDENT | TA | INSTRUCTOR
+  plan         String    @default("FREE") // FREE | PRO (PRO unlocks AI features)
   universityId String
   xp           Int       @default(0)
   streakCount  Int       @default(0)
@@ -91,6 +92,7 @@ model Course {
   tutorSessions TutorSession[]
   workspaces    Workspace[]
   threads       DiscussionThread[]
+  chatMessages  ChatMessage[]
   studyPlans    StudyPlan[]
   flashcards    Flashcard[]
 }
@@ -298,17 +300,24 @@ model DiscussionPost {
   @@index([threadId])
 }
 
+// Group chat. A message belongs to EITHER a study-group workspace OR a whole
+// course (course-wide group chat). authorId is null for AI messages (the Pro
+// "Ask AI in chat" feature), in which case `tier` records the hint tier.
 model ChatMessage {
   id          String   @id @default(cuid())
-  workspaceId String
-  authorId    String
+  workspaceId String? // set for a study-group chat
+  courseId    String? // set for the course-wide chat
+  authorId    String? // null = AI (Pro feature); see `tier`
   body        String
+  tier        Int? // hint tier for AI messages
   createdAt   DateTime @default(now())
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  author    User      @relation(fields: [authorId], references: [id])
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  course    Course?    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  author    User?      @relation(fields: [authorId], references: [id])
 
   @@index([workspaceId])
+  @@index([courseId])
 }
 
 // ------------------------------------------------------------

@@ -240,8 +240,8 @@ export const workspaceRouter = router({
       return messages.reverse().map((m) => ({
         id: m.id,
         body: m.body,
-        authorName: m.author.name,
-        mine: m.author.id === ctx.userId,
+        authorName: m.author?.name ?? "Unknown",
+        mine: m.author?.id === ctx.userId,
         createdAt: m.createdAt,
       }));
     }),
